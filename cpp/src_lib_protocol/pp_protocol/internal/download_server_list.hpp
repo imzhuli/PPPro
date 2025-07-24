@@ -1,0 +1,328 @@
+#pragma once
+#include "../base.hpp"
+
+/** !!!! IMPORTANT:
+ *
+ *  When download client reconnected to the server_list service,
+ *  the FIRST request VERSION, should always be 0, in case server restarts or reset version numver
+ *
+ * */
+
+struct xPP_DownloadAuthCacheServerList : xBinaryMessage {
+    void     SerializeMembers() override { W(Version); }
+    void     DeserializeMembers() override { R(Version); }
+    uint32_t Version;
+};
+
+struct xPP_DownloadAuthCacheServerListResp : xBinaryMessage {
+
+    void SerializeMembers() override {
+        W(Version);
+        uint32_t Count = ServerInfoList.size();
+        W(Count);
+        for (auto & I : ServerInfoList) {
+            W(I.ServerId);
+            W(I.Address);
+        }
+    }
+
+    void DeserializeMembers() override {
+        R(Version);
+
+        uint32_t Count = 0;
+        R(Count);
+
+        if (Count >= MAX_AUTH_CACHE_SERVER_COUNT) {
+            GetReader()->SetError();
+            return;
+        }
+        ServerInfoList.resize(Count);
+        for (auto & I : ServerInfoList) {
+            R(I.ServerId);
+            R(I.Address);
+        }
+    }
+
+    uint32_t                 Version;
+    std::vector<xServerInfo> ServerInfoList;
+    //
+};
+
+struct xPP_DownloadAuditDeviceServerList : xBinaryMessage {
+    void     SerializeMembers() override { W(Version); }
+    void     DeserializeMembers() override { R(Version); }
+    uint32_t Version;
+};
+
+struct xPP_DownloadAuditDeviceServerListResp : xBinaryMessage {
+
+    void SerializeMembers() override {
+        W(Version);
+        uint32_t Count = ServerInfoList.size();
+        W(Count);
+        for (auto & I : ServerInfoList) {
+            W(I.ServerId);
+            W(I.Address);
+        }
+    }
+
+    void DeserializeMembers() override {
+        R(Version);
+
+        uint32_t Count = 0;
+        R(Count);
+
+        if (Count >= MAX_DEVICE_AUDIT_SERVER_COUNT) {
+            GetReader()->SetError();
+            return;
+        }
+        ServerInfoList.resize(Count);
+        for (auto & I : ServerInfoList) {
+            R(I.ServerId);
+            R(I.Address);
+        }
+    }
+
+    uint32_t                 Version;
+    std::vector<xServerInfo> ServerInfoList;
+    //
+};
+
+struct xPP_DownloadAuditAccountServerList : xBinaryMessage {
+    void     SerializeMembers() override { W(Version); }
+    void     DeserializeMembers() override { R(Version); }
+    uint32_t Version;
+};
+
+struct xPP_DownloadAuditAccountServerListResp : xBinaryMessage {
+
+    void SerializeMembers() override {
+        W(Version);
+        uint32_t Count = ServerInfoList.size();
+        W(Count);
+        for (auto & I : ServerInfoList) {
+            W(I.ServerId);
+            W(I.Address);
+        }
+    }
+
+    void DeserializeMembers() override {
+        R(Version);
+
+        uint32_t Count = 0;
+        R(Count);
+
+        if (Count >= MAX_ACCOUNT_AUDIT_SERVER_COUNT) {
+            GetReader()->SetError();
+            return;
+        }
+        ServerInfoList.resize(Count);
+        for (auto & I : ServerInfoList) {
+            R(I.ServerId);
+            R(I.Address);
+        }
+    }
+
+    uint32_t                 Version;
+    std::vector<xServerInfo> ServerInfoList;
+    //
+};
+
+//// 3
+
+struct xPP_DownloadDeviceStateRelayServerList : xBinaryMessage {
+    void     SerializeMembers() override { W(Version); }
+    void     DeserializeMembers() override { R(Version); }
+    uint32_t Version;
+};
+
+struct xPP_DownloadDeviceStateRelayServerListResp : xBinaryMessage {
+
+    void SerializeMembers() override {
+        W(Version);
+        uint32_t Count = ServerInfoList.size();
+        W(Count);
+        for (auto & I : ServerInfoList) {
+            W(I.ServerId);
+            W(I.ProducerAddress);
+            W(I.ObserverAddress);
+        }
+    }
+
+    void DeserializeMembers() override {
+        R(Version);
+
+        uint32_t Count = 0;
+        R(Count);
+
+        if (Count >= MAX_ACCOUNT_AUDIT_SERVER_COUNT) {
+            GetReader()->SetError();
+            return;
+        }
+        ServerInfoList.resize(Count);
+        for (auto & I : ServerInfoList) {
+            R(I.ServerId);
+            R(I.ProducerAddress);
+            R(I.ObserverAddress);
+        }
+    }
+
+    uint32_t                                 Version;
+    std::vector<xDeviceStateRelayServerInfo> ServerInfoList;
+    //
+};
+
+// 4
+
+struct xPP_DownloadBackendServerList : xBinaryMessage {
+    void     SerializeMembers() override { W(Version); }
+    void     DeserializeMembers() override { R(Version); }
+    uint32_t Version;
+};
+
+struct xPP_DownloadBackendServerListResp : xBinaryMessage {
+
+    void SerializeMembers() override {
+        auto Count = (uint32_t)ServerAddressList.size();
+        W(Version);
+        W(Count);
+        for (auto & A : ServerAddressList) {
+            W(A);
+        }
+    }
+
+    void DeserializeMembers() override {
+        auto Count = (uint32_t)0;
+        R(Version);
+        R(Count);
+
+        if (Count >= MAX_BACKEND_SERVER_COUNT) {
+            GetReader()->SetError();
+            return;
+        }
+        ServerAddressList.resize(Count);
+        for (auto & A : ServerAddressList) {
+            R(A);
+        }
+    }
+
+    uint32_t                 Version;
+    std::vector<xNetAddress> ServerAddressList;
+    //
+};
+
+struct xPP_DownloadRelayInfoDispatcherServer : xBinaryMessage {
+
+    void SerializeMembers() override { W(Magic); }
+
+    void DeserializeMembers() override {
+        uint32_t Check = 0;
+        R(Check);
+        if (Check != Magic) {
+            GetReader()->SetError();
+        }
+    }
+
+    static constexpr const uint32_t Magic = 0xCD;
+};
+
+struct xPP_DownloadRelayInfoDispatcherServerResp : xBinaryMessage {
+
+    void SerializeMembers() override { W(ServerInfo.ServerId, ServerInfo.ProducerAddress, ServerInfo.ObserverAddress); }
+    void DeserializeMembers() override { R(ServerInfo.ServerId, ServerInfo.ProducerAddress, ServerInfo.ObserverAddress); }
+
+    xRelayInfoDispatcherServerInfo ServerInfo;
+    //
+};
+
+struct xPP_RelayServerHeartBeat : xBinaryMessage {
+
+    void SerializeMembers() override {
+        assert(ServerInfo.ServerId && ServerInfo.StartupTimestampMS);
+
+        W(ServerInfo.ServerId);
+        W(ServerInfo.StartupTimestampMS);
+        W(ServerInfo.ExportProxyAddress);
+        W(ServerInfo.ServerType);
+        W(ServerInfo.Flags);
+        W(ServerInfo.FlagsEx);
+        W(ServerInfo.ForcedPoolId);
+        switch (ServerInfo.ServerType) {
+            case eRelayServerType::DEVICE:
+                W(ServerInfo.ExportDeviceCtrlAddress);
+                W(ServerInfo.ExportDeviceDataAddress);
+                break;
+            default:
+                break;
+        }
+    }
+
+    void DeserializeMembers() override {
+        R(ServerInfo.ServerId);
+        R(ServerInfo.StartupTimestampMS);
+        R(ServerInfo.ExportProxyAddress);
+        R(ServerInfo.ServerType);
+        R(ServerInfo.Flags);
+        R(ServerInfo.FlagsEx);
+        R(ServerInfo.ForcedPoolId);
+        switch (ServerInfo.ServerType) {
+            case eRelayServerType::DEVICE:
+                R(ServerInfo.ExportDeviceCtrlAddress);
+                R(ServerInfo.ExportDeviceDataAddress);
+                break;
+            default:
+                break;
+        }
+    }
+
+    xRelayServerInfoBase ServerInfo = {};
+};
+
+struct xPP_RegisterRelayInfoObserver : xBinaryMessage {
+
+    void SerializeMembers() override { W(ChallengeString); }
+    void DeserializeMembers() override { R(ChallengeString); }
+
+    std::string ChallengeString;
+};
+
+struct xPP_BroadcastRelayInfo : xBinaryMessage {
+
+    void SerializeMembers() override {
+        assert(ServerInfo.ServerId && ServerInfo.StartupTimestampMS);
+
+        W(ServerInfo.ServerId);
+        W(ServerInfo.StartupTimestampMS);
+        W(ServerInfo.ExportProxyAddress);
+        W(ServerInfo.ServerType);
+        W(ServerInfo.ForcedPoolId);
+
+        switch (ServerInfo.ServerType) {
+            case eRelayServerType::DEVICE:
+                W(ServerInfo.ExportDeviceCtrlAddress);
+                W(ServerInfo.ExportDeviceDataAddress);
+                break;
+            default:
+                break;
+        }
+    }
+
+    void DeserializeMembers() override {
+        R(ServerInfo.ServerId);
+        R(ServerInfo.StartupTimestampMS);
+        R(ServerInfo.ExportProxyAddress);
+        R(ServerInfo.ServerType);
+        R(ServerInfo.ForcedPoolId);
+
+        switch (ServerInfo.ServerType) {
+            case eRelayServerType::DEVICE:
+                R(ServerInfo.ExportDeviceCtrlAddress);
+                R(ServerInfo.ExportDeviceDataAddress);
+                break;
+            default:
+                break;
+        }
+    }
+
+    xRelayServerInfoBase ServerInfo = {};
+};
