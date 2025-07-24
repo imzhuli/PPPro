@@ -11,7 +11,8 @@ public:
     bool OnServerPacket(xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) override;
     void OnServerClose() override { Reset(AuthCacheServerListVersion); }
 
-    void SetUpdateAuthCacheServerListCallback(auto && CB) { this->UpdateAuthCacheServerListCallback = std::forward<decltype(CB)>(CB); }
+    using xUpdateAuthCacheServerListCallback = std::function<void(const std::vector<xServerInfo> &)>;
+    void SetUpdateAuthCacheServerListCallback(const xUpdateAuthCacheServerListCallback & CB) { UpdateAuthCacheServerListCallback = CB; }
 
 private:
     bool OnAuthCacheServerList(xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize);
@@ -21,7 +22,7 @@ private:
     xTicker  Ticker;
     uint64_t LastUpdateTimestampMS = 0;
 
-    uint32_t                                              AuthCacheServerListVersion = 0;
-    std::vector<xServerInfo>                              AuthCacheSortedServerInfoList;
-    std::function<void(const std::vector<xServerInfo> &)> UpdateAuthCacheServerListCallback;
+    uint32_t                           AuthCacheServerListVersion = 0;
+    std::vector<xServerInfo>           AuthCacheSortedServerInfoList;
+    xUpdateAuthCacheServerListCallback UpdateAuthCacheServerListCallback;
 };

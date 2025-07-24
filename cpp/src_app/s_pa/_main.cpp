@@ -15,7 +15,7 @@ int main(int argc, char ** argv) {
     X_GUARD(AuthCacheServerListDownloader, ServiceIoContext, ConfigServerListDownloadAddress);
     X_GUARD(TcpServer, ServiceIoContext, ConfigTcpBindAddress, &ClientConnectionManager);
 
-    AuthCacheServerListDownloader.SetUpdateServerListCallback([](const std::vector<xServerInfo> & List) {
+    AuthCacheServerListDownloader.SetUpdateAuthCacheServerListCallback([](const std::vector<xServerInfo> & List) {
         for (auto & I : List) {
             Logger->I("ServerId=%" PRIi64 ", Address=%s", I.ServerId, I.Address.ToString().c_str());
         }

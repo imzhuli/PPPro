@@ -2,47 +2,6 @@
 
 #include "../lib_server_util/all.hpp"
 
-void xPA_AuthCacheServerListDownloader::OnTick(uint64_t NowMS) {
-    if (NowMS - LastUpdateTimestampMS < UpdateTimeoutMS) {
-        return;
-    }
-    if (IsOpen()) {
-        PostDownloadRequest();
-        LastUpdateTimestampMS = NowMS;
-        return;
-    }
-}
-
-bool xPA_AuthCacheServerListDownloader::OnServerPacket(xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) {
-    if (CommandId != Cmd_DownloadAuthCacheServerListResp) {
-        return false;
-    }
-
-    auto R = xPP_DownloadAuthCacheServerListResp();
-    if (!R.Deserialize(PayloadPtr, PayloadSize)) {
-        return false;
-    }
-    if (ServerListVersion == R.Version) {
-        return true;
-    }
-    SortedServerInfoList = std::move(R.ServerInfoList);
-    std::sort(SortedServerInfoList.begin(), SortedServerInfoList.end(), [](xServerInfo & lhs, xServerInfo & rhs) { return lhs.ServerId < rhs.ServerId; });
-    ServerListVersion = R.Version;
-
-    if (UpdateServerListCallback) {
-        UpdateServerListCallback(SortedServerInfoList);
-    }
-    return true;
-}
-
-void xPA_AuthCacheServerListDownloader::PostDownloadRequest() {
-    auto R    = xPP_DownloadAuthCacheServerList();
-    R.Version = ServerListVersion;
-    PostMessage(Cmd_DownloadAuthCacheServerList, 0, R);
-}
-
-/////////////////////////////////
-
 bool xPA_AuthCacheLocalServer::Init(xIoContext * ICP) {
     assert(ICP);
     if (!ClientHashPool.Init(ICP)) {

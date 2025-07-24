@@ -61,6 +61,7 @@ set(target_list
 	r_device_audit_to_backend
 
 	s_pa
+	s_audit_account
 	s_auth_cache
 	s_config_center
 	s_device_audit_collector
@@ -71,9 +72,6 @@ set(target_list
 	s_server_id_center
 	s_server_list
 
-
-	t_auth_cache_client
-	t_id_client
 	t_server_list_downloader
 
 	)
@@ -86,6 +84,7 @@ endforeach()
 
 set(LIBRDKAFKA_LIBRARIES librdkafka++.a librdkafka-static.a libssl.a libcrypto.a)
 target_link_libraries(r_device_audit_to_backend PRIVATE ${LIBRDKAFKA_LIBRARIES})
+target_link_libraries(s_audit_account PRIVATE ${LIBRDKAFKA_LIBRARIES})
 
 install(TARGETS
 	${target_list}
