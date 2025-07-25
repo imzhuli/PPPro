@@ -45,7 +45,7 @@ std::string ToString(const xAuditAccountInfoNode & Info) {
     return OS.str();
 }
 
-static void PostAuditAccoungUsage(const xAuditAccountInfoNode & Info) {
+static void PostAuditAccoungUsage(xAuditAccountInfoNode & Info) {
     DEBUG_LOG("ReportAccountInfo: %s", ToString(Info).c_str());
 
     auto R             = xAD_BK_ReportUsageByAuditList();
@@ -53,10 +53,10 @@ static void PostAuditAccoungUsage(const xAuditAccountInfoNode & Info) {
 
     auto A                            = xAD_BK_UsageByAuditId();
     A.AuditId                         = Info.AuditId;
-    A.TotalTcpConnectionSinceLastPost = Info.TotalTcpCount;
-    A.TotalUdpChannelSinceLastPost    = Info.TotalUdpCount;
-    A.TotalUploadSizeSinceLastPost    = Info.TotalUploadSize;
-    A.TotalDownloadSizeSinceLastPost  = Info.TotalDownloadSize;
+    A.TotalTcpConnectionSinceLastPost = Steal(Info.TotalTcpCount);
+    A.TotalUdpChannelSinceLastPost    = Steal(Info.TotalUdpCount);
+    A.TotalUploadSizeSinceLastPost    = Steal(Info.TotalUploadSize);
+    A.TotalDownloadSizeSinceLastPost  = Steal(Info.TotalDownloadSize);
     R.AuditList.push_back(A);
 
     ubyte Buffer[MaxPacketSize];

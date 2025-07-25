@@ -98,6 +98,7 @@ void xPA_ClientConnectionManager::DoDeleteConnection(xPA_ClientConnection * CP) 
         AI.AuditId           = CP->Audit.AuditId;
         AI.TotalUploadSize   = CP->Audit.UploadSize;
         AI.TotalDownloadSize = CP->Audit.DownloadSize;
+        AI.TotalTcpCount     = 1;
         AuditAccountLocalServer.CollectAuditAccountInfo(AI);
     }
 
