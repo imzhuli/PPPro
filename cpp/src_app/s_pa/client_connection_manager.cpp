@@ -1,6 +1,7 @@
 #include "./client_connection_manager.hpp"
 
 #include "../lib_server_util/service_common.hpp"
+#include "_global.hpp"
 
 bool xPA_ClientConnectionManager::Init(xIoContext * ICP) {
     assert(ICP);
@@ -90,6 +91,16 @@ void xPA_ClientConnectionManager::DoCreateConnection(xSocket && NativeHandle) {
 
 void xPA_ClientConnectionManager::DoDeleteConnection(xPA_ClientConnection * CP) {
     Logger->I("Delete connection: id=%" PRIu64 "", CP->ConnectionId);
+
+    if (CP->Audit.AuditId) {  // do collect audit
+        DEBUG_LOG("AuditId=%" PRIx64 "", CP->Audit.AuditId);
+        auto AI              = xAuditAccountInfo();
+        AI.AuditId           = CP->Audit.AuditId;
+        AI.TotalUploadSize   = CP->Audit.UploadSize;
+        AI.TotalDownloadSize = CP->Audit.DownloadSize;
+        AuditAccountLocalServer.CollectAuditAccountInfo(AI);
+    }
+
     assert(ConnectionIdPool.Check(CP->ConnectionId) && ConnectionIdPool[CP->ConnectionId] == CP);
     assert(CP->IsOpen());
 
@@ -106,13 +117,13 @@ void xPA_ClientConnectionManager::OnNewConnection(xTcpServer * TcpServerPtr, xSo
 }
 
 void xPA_ClientConnectionManager::OnPeerClose(xTcpConnection * TcpConnectionPtr) {
-    auto CP = static_cast<xPA_ClientConnection *>(TcpConnectionPtr);
+    auto CP = UpCast(TcpConnectionPtr);
     KillConnection(CP);
 }
 
 size_t xPA_ClientConnectionManager::OnData(xTcpConnection * TcpConnectionPtr, ubyte * DataPtr, size_t DataSize) {
     DEBUG_LOG("OnData: \n%s", HexShow(DataPtr, DataSize).c_str());
-    auto Client = static_cast<xPA_ClientConnection *>(TcpConnectionPtr);
+    auto Client = UpCast(TcpConnectionPtr);
 
     size_t TotalConsumed = 0;
     while (true) {
@@ -126,12 +137,20 @@ size_t xPA_ClientConnectionManager::OnData(xTcpConnection * TcpConnectionPtr, ub
             return TotalConsumed;
         }
 
-        DataPtr       += Consumed;
-        DataSize      -= Consumed;
-        TotalConsumed += Consumed;
+        Client->Audit.UploadSize += Consumed;
+        DataPtr                  += Consumed;
+        DataSize                 -= Consumed;
+        TotalConsumed            += Consumed;
     }
 }
 
 void xPA_ClientConnectionManager::OnAuthResult(uint64_t RequestContextId, const xClientAuthResult & AuthResult) {
-    DEBUG_LOG("");
+    auto Conn = GetConnectionById(RequestContextId);
+    if (!Conn) {
+        DEBUG_LOG("missing connection info");
+        return;
+    }
+    Conn->Audit.AuditId = AuthResult.AuditId;
+    DEBUG_LOG("update audit result: ConnectionId=%" PRIx64 ", AuditId=%" PRIx64 "", RequestContextId, AuthResult.AuditId);
+    return;
 }

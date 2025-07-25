@@ -37,8 +37,6 @@
 
 //////////
 
-auto IC                          = xIoContext();
-auto ICG                         = xResourceGuard(IC);
 auto ServerIdClient              = xServerIdClient();
 auto RegisterServerClient        = xRegisterServerClient();
 auto BackendServerListDownloader = xAC_BackendServerListDownloader();
@@ -67,7 +65,7 @@ static void AC_RegisterServer(xMessagePoster * Poster, uint64_t LocalServerId) {
 
 int main(int argc, char ** argv) {
     auto Env = xRuntimeEnvGuard(argc, argv);
-    auto CL  = xConfigLoader(RuntimeEnv.DefaultConfigFilePath);
+    auto CL  = RuntimeEnv.LoadConfig();
     CL.Require(BindAddress, "BindAddress");
     CL.Require(ServerIdCenterAddress, "ServerIdCenterAddress");
     CL.Require(ServerListRegisterAddress, "ServerListRegisterAddress");
@@ -76,10 +74,11 @@ int main(int argc, char ** argv) {
     CL.Require(BackendServerAppKey, "BackendServerAppKey");
     CL.Require(BackendServerAppSecret, "BackendServerAppSecret");
 
-    auto SICG  = xResourceGuard(ServerIdClient, &IC, ServerIdCenterAddress, RuntimeEnv.DefaultLocalServerIdFilePath);
-    auto RSCG  = xResourceGuard(RegisterServerClient, &IC, ServerListRegisterAddress);
-    auto BSLDG = xResourceGuard(BackendServerListDownloader, &IC, ServerListDownloadAddress);
-    auto ASG   = xResourceGuard(AuthService, &IC, BindAddress);
+    X_GUARD(ServerIdClient, ServiceIoContext, ServerIdCenterAddress, RuntimeEnv.DefaultLocalServerIdFilePath);
+    X_GUARD(RegisterServerClient, ServiceIoContext, ServerListRegisterAddress);
+    X_GUARD(BackendServerListDownloader, ServiceIoContext, ServerListDownloadAddress);
+    X_GUARD(AuthService, ServiceIoContext, BindAddress);
+
     AuthService.UpdateBackendAuthInfo(BackendServerAppKey, BackendServerAppSecret);
 
     BackendServerListDownloader.SetUpdateCallback([](uint32_t V, auto & FL, auto & AL, auto & RL) {
@@ -101,19 +100,13 @@ int main(int argc, char ** argv) {
 
     RegisterServerClient.SetServerIdPoster(&AC_RegisterServer);
 
-    RuntimeAssert(SICG);
-    RuntimeAssert(RSCG);
-    RuntimeAssert(BSLDG);
-
     ServerIdClient.SetCallback([](uint64_t LocalServerId) {
         DumpLocalServerId(RuntimeEnv.DefaultLocalServerIdFilePath, LocalServerId);
         RegisterServerClient.SetLocalServerId(LocalServerId);
     });
 
     while (true) {
-        ServiceTicker.Update();
-        IC.LoopOnce();
-        TickAll(ServiceTicker(), ServerIdClient, RegisterServerClient, BackendServerListDownloader, AuthService);
+        ServiceUpdateOnce(ServerIdClient, RegisterServerClient, BackendServerListDownloader, AuthService);
     }
 
     return 0;

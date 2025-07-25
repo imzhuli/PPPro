@@ -12,25 +12,69 @@ TODO
 
 class xKfkDeliveryReportCb : public RdKafka::DeliveryReportCb {
 public:
+    static constexpr const uint64_t AuditTimeoutMS = 10 * 60'000;
+
+    struct xAudit {
+        uint64_t AuditLastOffset            = 0;
+        uint64_t AuditLastSegAverageLatency = 0;  // micro->milli
+    };
+
     void dr_cb(RdKafka::Message & message) {
-        cout << "CallbackThread: " << std::this_thread::get_id() << endl;
+        auto G = xel::xSpinlockGuard(AuditLock);
         if (message.err()) {
             ++TotalFailure;
-            std::cerr << "消息发送失败: " << message.errstr() << std::endl;
         } else {
             ++TotalSuccess;
-            std::cout << "消息发送成功，偏移量: " << message.offset() << ", 延迟: " << message.latency() << std::endl;
+            ++LastSegMessageCount;
+            LastSegTotalLatency  += message.latency();
+            Audit.AuditLastOffset = message.offset();
         }
     }
 
     void Reset() {
+        auto G = xel::xSpinlockGuard(AuditLock);
         xel::Reset(TotalSuccess);
         xel::Reset(TotalFailure);
+        xel::Reset(Audit.AuditLastOffset);
+        xel::Reset(Audit.AuditLastSegAverageLatency);
+        xel::Reset(LastSegMessageCount);
+        xel::Reset(LastSegTotalLatency);
+    }
+
+    void Tick(uint64_t NowMS) {
+        Ticker.Update(NowMS);
+        if (NowMS - LastAuditTimestampMS < AuditTimeoutMS) {
+            return;
+        }
+
+        auto G = xel::xSpinlockGuard(AuditLock);
+        if (!LastSegMessageCount) {
+            Audit.AuditLastSegAverageLatency = 0;
+        } else {
+            Audit.AuditLastSegAverageLatency = LastSegTotalLatency / LastSegMessageCount / 1000;  // micro -> milli
+        }
+        xel::Reset(LastSegMessageCount);
+        xel::Reset(LastSegTotalLatency);
+        LastAuditTimestampMS = Ticker();
+    }
+
+    xAudit GetAudit() const {
+        auto G = xel::xSpinlockGuard(AuditLock);
+        return Audit;
     }
 
 private:
     size_t TotalSuccess = 0;
     size_t TotalFailure = 0;
+
+    // audit
+    xTicker Ticker;
+    xAudit  Audit = {};
+
+    xel::xSpinlock AuditLock            = {};
+    uint64_t       LastAuditTimestampMS = 0;
+    uint64_t       LastSegMessageCount  = 0;
+    uint64_t       LastSegTotalLatency  = 0;
 };
 static xKfkDeliveryReportCb KfkCB;
 

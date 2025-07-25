@@ -10,14 +10,22 @@ int main(int argc, char ** argv) {
     CL.Require(ConfigTcpBindAddress, "TcpBindAddress");
     CL.Require(ConfigServerListDownloadAddress, "ServerListDownloadAddress");
 
+    X_GUARD(AuditAccountLocalServer, ServiceIoContext);
     X_GUARD(AuthCacheLocalServer, ServiceIoContext);
     X_GUARD(ClientConnectionManager, ServiceIoContext);
+    X_GUARD(AuditAccountServerListDownloader, ServiceIoContext, ConfigServerListDownloadAddress);
     X_GUARD(AuthCacheServerListDownloader, ServiceIoContext, ConfigServerListDownloadAddress);
     X_GUARD(TcpServer, ServiceIoContext, ConfigTcpBindAddress, &ClientConnectionManager);
 
+    AuditAccountServerListDownloader.SetUpdateAuditAccountServerListCallback([](const std::vector<xServerInfo> & List) {
+        for (auto & I : List) {
+            Logger->I("AA_ServerId=%" PRIi64 ", Address=%s", I.ServerId, I.Address.ToString().c_str());
+        }
+        AuditAccountLocalServer.UpdateServerList(List);
+    });
     AuthCacheServerListDownloader.SetUpdateAuthCacheServerListCallback([](const std::vector<xServerInfo> & List) {
         for (auto & I : List) {
-            Logger->I("ServerId=%" PRIi64 ", Address=%s", I.ServerId, I.Address.ToString().c_str());
+            Logger->I("AC_ServerId=%" PRIi64 ", Address=%s", I.ServerId, I.Address.ToString().c_str());
         }
         AuthCacheLocalServer.UpdateServerList(List);
     });
@@ -26,7 +34,13 @@ int main(int argc, char ** argv) {
     });
 
     while (true) {
-        ServiceUpdateOnce(AuthCacheServerListDownloader, ClientConnectionManager, AuthCacheLocalServer);
+        ServiceUpdateOnce(
+            AuditAccountServerListDownloader,  //
+            AuthCacheServerListDownloader,     //
+            ClientConnectionManager,           //
+            AuthCacheLocalServer,              //
+            AuditAccountLocalServer            //
+        );
     }
 
     return 0;

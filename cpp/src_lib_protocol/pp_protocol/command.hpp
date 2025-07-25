@@ -38,12 +38,12 @@ static constexpr const xPacketCommandId Cmd_PostRelayServerAudit = Cmd_Managemen
 // version 2024 from here
 
 // backend base:
-static constexpr const xPacketCommandId Cmd_BackendBase             = 0x04'000;
-static constexpr const xPacketCommandId Cmd_AuditTerminalInfo       = Cmd_BackendBase + 0x01;  // 旧版, 弃用
-static constexpr const xPacketCommandId Cmd_AuditTerminalInfoResp   = Cmd_BackendBase + 0x02;  // 一般不处理返回
-static constexpr const xPacketCommandId Cmd_AuditUsageByAuditId     = Cmd_BackendBase + 0x03;  // 旧版, 弃用
-static constexpr const xPacketCommandId Cmd_AuditUsageByAuditIdResp = Cmd_BackendBase + 0x04;  // 一般不处理返回
+static constexpr const xPacketCommandId Cmd_BackendBase           = 0x04'000;
+static constexpr const xPacketCommandId Cmd_AuditTerminalInfo     = Cmd_BackendBase + 0x01;  // 旧版, 弃用
+static constexpr const xPacketCommandId Cmd_AuditTerminalInfoResp = Cmd_BackendBase + 0x02;  // 一般不处理返回
 
+static constexpr const xPacketCommandId Cmd_AuditUsageByAuditId         = Cmd_BackendBase + 0x03;  //
+static constexpr const xPacketCommandId Cmd_AuditUsageByAuditIdResp     = Cmd_BackendBase + 0x04;  // 一般不处理返回
 static constexpr const xPacketCommandId Cmd_AuditTerminalInfo2          = Cmd_BackendBase + 0x05;  // 2025-03-09 新增, 无返回
 static constexpr const xPacketCommandId Cmd_DeviceRelayServerInfo2      = Cmd_BackendBase + 0x06;  // 2025-03-09 新增, 无返回
 static constexpr const xPacketCommandId Cmd_DeviceRelayServerInfoSingle = Cmd_BackendBase + 0x07;  // 2025-05-28 新增, 无返回
@@ -89,6 +89,9 @@ static constexpr const xPacketCommandId Cmd_DownloadRelayInfoDispatcherServerRes
 static constexpr const xPacketCommandId Cmd_RelayServerHeartBeat      = Cmd_ServerManagementBase + 0x401;
 static constexpr const xPacketCommandId Cmd_RegisterRelayInfoObserver = Cmd_ServerManagementBase + 0x402;
 static constexpr const xPacketCommandId Cmd_BroadcastRelayInfo        = Cmd_ServerManagementBase + 0x403;
+
+static constexpr const xPacketCommandId Cmd_AuditAccountUsage  = Cmd_ServerManagementBase + 0x501;
+static constexpr const xPacketCommandId Cmd_AuditAccountTarget = Cmd_ServerManagementBase + 0x502;
 
 // pa-relay:
 static constexpr const xPacketCommandId Cmd_PA_RL_Base                  = 0x06'000;

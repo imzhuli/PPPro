@@ -7,6 +7,8 @@ using std::type_info;
 
 class xPA_ClientConnection;
 class xPA_ClientConnectionManager;
+class xPA_ClientConnection;
+extern xPA_ClientConnection * UpCast(xTcpConnection * CP);
 
 struct xPA_ClientStateHandler {
     virtual void   OnEntry(xPA_ClientConnection * Client) { /* DEBUG_LOG("StateEntry: %s", typeid(*this).name()); */ }
@@ -50,14 +52,27 @@ struct xPA_ClientConnectionAudit {
 };
 
 class xPA_ClientConnection final
-    : public xTcpConnection
+    : private xTcpConnection
     , public xPA_ClientConnectionIdleNode
     , public xPA_ClientConnectionKillNode {
 public:
+    friend xPA_ClientConnection * UpCast(xTcpConnection * CP);
+
+    using xTcpConnection::Clean;
+    using xTcpConnection::Init;
+
+    using xTcpConnection::GetRemoteAddress;
+    using xTcpConnection::IsOpen;
+
     xPA_ClientConnectionManager * Owner        = nullptr;
     xIndexId                      ConnectionId = {};
     xPA_ClientStateContext        StateContext;
     xPA_ClientConnectionAudit     Audit = {};
+
+    void PostData(const void * DataPtr, size_t DataSize) {
+        Audit.DownloadSize += DataSize;
+        xTcpConnection::PostData(DataPtr, DataSize);
+    }
 };
 inline auto GetClientStateHandler(xPA_ClientConnection * CP) {
     return CP->StateContext.CurrentHandler;

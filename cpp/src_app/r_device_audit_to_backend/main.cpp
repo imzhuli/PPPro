@@ -61,9 +61,8 @@ static void PostDeviceInfo(const xODI_DeviceInfo * DP, bool Online) {
 
     Req.LocalAuditTimestampMS = NowMS;
 
-    ReqDI.Version    = DP->Version;
-    ReqDI.DeviceUuid = DP->DeviceUuid;
-    // ReqDI.RelayServerUuid    = DP->RelayServerUuid;
+    ReqDI.Version            = DP->Version;
+    ReqDI.DeviceUuid         = DP->DeviceUuid;
     ReqDI.PrimaryIpv4Address = DP->PrimaryIpv4Address;
     ReqDI.PrimaryIpv6Address = DP->PrimaryIpv6Address;
 

@@ -13,6 +13,10 @@ DECLARE_STATE_HANDLE(xPA_ClientStateHandler_Http_Challenge, HttpChallengeStateHa
 
 //////////////////
 
+xPA_ClientConnection * UpCast(xTcpConnection * CP) {
+    return static_cast<xPA_ClientConnection *>(CP);
+}
+
 void ScheduleClientStateChange(xPA_ClientConnection * Client, xPA_ClientStateHandler * NextStateHandler) {
     assert(!Client->StateContext.NextHandler);
     Client->StateContext.NextHandler = NextStateHandler;
