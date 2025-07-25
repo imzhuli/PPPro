@@ -68,9 +68,9 @@ struct xPP_RegisterDeviceStateRelayServer : xBinaryMessage {
         R(ObserverAddress);
     }
 
-    uint64_t    ServerId;
-    xNetAddress Address;
-    xNetAddress ObserverAddress;
+    uint64_t    ServerId        = {};
+    xNetAddress Address         = {};
+    xNetAddress ObserverAddress = {};
 
     //
 };
@@ -81,6 +81,25 @@ struct xPP_RegisterRelayInfoDispatcherServer : xBinaryMessage {
     void DeserializeMembers() override { R(ServerInfo.ServerId, ServerInfo.ProducerAddress, ServerInfo.ObserverAddress); }
 
     xRelayInfoDispatcherServerInfo ServerInfo;
+    //
+};
+
+struct xPP_RegisterDeviceSelectorDispatcher : xBinaryMessage {
+
+    void SerializeMembers() override {
+        W(ServerId);
+        W(AddressForClient);
+        W(AddressForServer);
+    }
+    void DeserializeMembers() override {
+        R(ServerId);
+        R(AddressForClient);
+        R(AddressForServer);
+    }
+
+    uint64_t    ServerId         = {};
+    xNetAddress AddressForClient = {};
+    xNetAddress AddressForServer = {};
     //
 };
 

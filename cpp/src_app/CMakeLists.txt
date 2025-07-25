@@ -64,9 +64,9 @@ set(target_list
 	s_audit_account
 	s_auth_cache
 	s_config_center
-	s_device_audit_collector
 	s_device_relay
 	s_device_selector
+	s_device_selector_dispatcher
 	s_device_state_relay
 	s_relay_info_dispatcher
 	s_server_id_center
