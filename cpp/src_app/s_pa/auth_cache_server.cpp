@@ -35,7 +35,7 @@ void xPA_AuthCacheLocalServer::PostAuthRequest(uint64_t RequestContextId, const 
     auto Req     = xPP_QueryAuthCache();
     Req.UserPass = AuthKey;
 
-    ClientHashPool.PostMessage(Hash, Cmd_AuthService_QueryAuthCache, RequestContextId, Req);
+    ClientHashPool.PostMessageByHash(Hash, Cmd_AuthService_QueryAuthCache, RequestContextId, Req);
 }
 
 bool xPA_AuthCacheLocalServer::OnServerPacket(xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) {

@@ -38,7 +38,7 @@ void xPA_AuditAccountLocalServer::CollectAuditAccountInfo(const xAuditAccountInf
     R.TcpIncreament          = Info.TotalTcpCount;
     R.UdpIncreament          = Info.TotalUdpCount;
     R.DeviceChangeIncreament = 0;
-    ClientHashPool.PostMessage(Info.AuditId, Cmd_AuditAccountUsage, 0, R);
+    ClientHashPool.PostMessageByHash(Info.AuditId, Cmd_AuditAccountUsage, 0, R);
 }
 
 bool xPA_AuditAccountLocalServer::OnServerPacket(xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) {

@@ -252,7 +252,8 @@ struct xAuditAccountInfo {
 };
 
 struct xMessagePoster {
-    virtual void PostMessage(xPacketCommandId CmdId, xPacketRequestId RequestId, xBinaryMessage & Message) = 0;
+    virtual uint64_t GetInternalId() const { return 0; }
+    virtual void     PostMessage(xPacketCommandId CmdId, xPacketRequestId RequestId, xBinaryMessage & Message) = 0;
 };
 
 // clang-format off

@@ -12,8 +12,9 @@ int main(int argc, char ** argv) {
     CL.Require(ServerListRegisterAddress, "ServerListRegisterAddress");
     CL.Require(ServerListDownloadAddress, "ServerListDownloadAddress");
 
-    X_GUARD(DeviceSelectorService, ServiceIoContext, BindAddress, MAX_DEVICE_RELAY_SERVER_SUPPORTED, true);
+    X_GUARD(DeviceSelectorService, ServiceIoContext);
     X_GUARD(DSRDownloader, ServiceIoContext, ServerListDownloadAddress);
+    X_GUARD(DSDDownloader, ServiceIoContext, ServerListDownloadAddress);
     X_GUARD(DeviceObserver, ServiceIoContext);
 
     DSRDownloader.SetOnUpdateDeviceStateRelayServerListCallback([](uint32_t Version, const std::vector<xDeviceStateRelayServerInfo> & DSRInfo) {
@@ -22,6 +23,9 @@ int main(int argc, char ** argv) {
             OSL.push_back(S.ObserverAddress);
         }
         DeviceObserver.UpdateServerList(OSL);
+    });
+    DSDDownloader.SetOnUpdateDeviceSelectorDispatcherServerListCallback([](uint32_t Version, const std::vector<xDeviceSelectorDispatcherInfo> & ServerList) {
+        DeviceSelectorService.UpdateDispatcherList(ServerList);
     });
     DeviceObserver.SetOnPacketCallback([](xMessagePoster * Source, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) -> bool {
         switch (CommandId) {
@@ -58,7 +62,7 @@ int main(int argc, char ** argv) {
 
     auto AuditTimestampMS = ServiceTicker();
     while (true) {
-        ServiceUpdateOnce(DeviceSelectorService, DSRDownloader, DeviceObserver, DeviceContextManager);
+        ServiceUpdateOnce(DeviceSelectorService, DSRDownloader, DSDDownloader, DeviceObserver, DeviceContextManager);
 
         LocalAudit.DurationMS = ServiceTicker() - AuditTimestampMS;
         if (LocalAudit.DurationMS >= 60'000) {

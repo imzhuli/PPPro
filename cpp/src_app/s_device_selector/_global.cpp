@@ -6,10 +6,11 @@ xNetAddress BindAddress;
 xNetAddress ServerListRegisterAddress;
 xNetAddress ServerListDownloadAddress;
 
-xDS_DeviceContextManager              DeviceContextManager;
-xDS_DeviceSelectorService             DeviceSelectorService;
-xDeviceStateRelayServerListDownloader DSRDownloader;
-xClientPoolWrapper                    DeviceObserver;
+xDS_DeviceContextManager                      DeviceContextManager;
+xDS_DeviceSelectorServiceProvider             DeviceSelectorService;
+xDeviceStateRelayServerListDownloader         DSRDownloader;
+xDeviceSelectorDispatcherServerListDownloader DSDDownloader;
+xClientPoolWrapper                            DeviceObserver;
 
 xDS_LocalAudit LocalAudit;
 

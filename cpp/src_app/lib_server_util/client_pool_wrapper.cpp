@@ -4,6 +4,7 @@ void xClientPoolWrapper::Clean() {
     xClientPool::Clean();
     Reset(SortedServerList);
     Reset(OnUpdateServerListCallback);
+    Reset(OnConnectedCallback);
     Reset(OnPacketCallback);
 }
 
@@ -81,7 +82,11 @@ void xClientPoolWrapper::UpdateServerList(const std::vector<xNetAddress> & Serve
     }
 }
 
-void xClientPoolWrapper::PostMessage(uint64_t Hash, xPacketCommandId CmdId, xPacketRequestId RequestId, xBinaryMessage & Message) {
+void xClientPoolWrapper::PostMessageByConnectionId(uint64_t ConnectionId, xPacketCommandId CmdId, xPacketRequestId RequestId, xBinaryMessage & Message) {
+    xClientPool::PostMessage(ConnectionId, CmdId, RequestId, Message);
+}
+
+void xClientPoolWrapper::PostMessageByHash(uint64_t Hash, xPacketCommandId CmdId, xPacketRequestId RequestId, xBinaryMessage & Message) {
     if (SortedServerList.empty()) {
         return;
     }
@@ -92,6 +97,16 @@ void xClientPoolWrapper::PostMessage(uint64_t Hash, xPacketCommandId CmdId, xPac
 
 void xClientPoolWrapper::PostMessage(xPacketCommandId CmdId, xPacketRequestId RequestId, xBinaryMessage & Message) {
     xClientPool::PostMessage(CmdId, RequestId, Message);
+}
+
+void xClientPoolWrapper::OnServerConnected(xClientConnection & CC) {
+    if (OnConnectedCallback) {
+        auto Poster = xCPW_MessagePoster{
+            this,
+            &CC,
+        };
+        OnConnectedCallback(&Poster);
+    }
 }
 
 bool xClientPoolWrapper::OnServerPacket(xClientConnection & CC, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) {
