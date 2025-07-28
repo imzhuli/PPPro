@@ -62,30 +62,45 @@ public:
     void RemoveAuthCacheServerInfo(uint64_t ServerId);
     auto GetAuthCacheServerInfo(uint64_t ServerId) -> const xSL_AuthCacheServerInfo *;
     auto GetAuthCacheServerInfoList() const -> const std::vector<xSL_AuthCacheServerInfo> & { return VersionedAuthCacheServerInfoList; }
-    auto GetAuthCacheServerInfoListVersion() const -> uint32_t { return AuthCacheServerInfoListVersion; }
+    auto GetAuthCacheServerInfoListVersion() const { return AuthCacheServerInfoListVersion; }
+    auto GetAuthCacheServerInfoListVersionTimestampMS() const { return AuthCacheServerInfoListVersionTimestampMS; }
 
     bool AddAuditDeviceServerInfo(uint64_t ServerId, xNetAddress ServerAddress);
     void RemoveAuditDeviceServerInfo(uint64_t ServerId);
     auto GetAuditDeviceServerInfo(uint64_t ServerId) -> const xSL_AuditDeviceServerInfo *;
     auto GetAuditDeviceServerInfoList() const -> const std::vector<xSL_AuditDeviceServerInfo> & { return VersionedAuditDeviceServerInfoList; }
-    auto GetAuditDeviceServerInfoListVersion() const -> uint32_t { return AuditDeviceServerInfoListVersion; }
+    auto GetAuditDeviceServerInfoListVersion() const { return AuditDeviceServerInfoListVersion; }
+    auto GetAuditDeviceServerInfoListVersionTimestampMS() const { return AuditDeviceServerInfoListVersionTimestampMS; }
 
     bool AddAuditAccountServerInfo(uint64_t ServerId, xNetAddress ServerAddress);
     void RemoveAuditAccountServerInfo(uint64_t ServerId);
     auto GetAuditAccountServerInfo(uint64_t ServerId) -> const xSL_AuditAccountServerInfo *;
     auto GetAuditAccountServerInfoList() const -> const std::vector<xSL_AuditAccountServerInfo> & { return VersionedAuditAccountServerInfoList; }
-    auto GetAuditAccountServerInfoListVersion() const -> uint32_t { return AuditAccountServerInfoListVersion; }
+    auto GetAuditAccountServerInfoListVersion() const { return AuditAccountServerInfoListVersion; }
+    auto GetAuditAccountServerInfoListVersionTimestampMS() const { return AuditAccountServerInfoListVersionTimestampMS; }
 
+    // DSR
     bool AddDeviceStateRelayServerInfo(uint64_t ServerId, xNetAddress ServerAddress, xNetAddress ObserverAddress);
     void RemoveDeviceStateRelayServerInfo(uint64_t ServerId);
     auto GetDeviceStateRelayServerInfo(uint64_t ServerId) -> const xSL_DeviceStateRelayServerInfo *;
     auto GetDeviceStateRelayServerInfoList() const -> const std::vector<xSL_DeviceStateRelayServerInfo> & { return VersionedDeviceStateRelayServerInfoList; }
-    auto GetDeviceStateRelayServerInfoListVersion() const -> uint32_t { return DeviceStateRelayServerInfoListVersion; }
+    auto GetDeviceStateRelayServerInfoListVersion() const { return DeviceStateRelayServerInfoListVersion; }
+    auto GetDeviceStateRelayServerInfoListVersionTimestampMS() const { return DeviceStateRelayServerInfoListVersionTimestampMS; }
 
+    // DSD
+    bool AddDeviceSelectorDispatcherInfo(const xDeviceSelectorDispatcherInfo & ServerInfo);
+    void RemoveDeviceSelectorDispatcherInfo(uint64_t ServerId);
+    auto GetDeviceSelectorDispatcherInfo(uint64_t ServerId) -> const xDeviceSelectorDispatcherInfo *;
+    auto GetDeviceSelectorDispatcherInfoList() const -> const std::vector<xDeviceSelectorDispatcherInfo> & { return VersionedDeviceSelectorDispatcherInfoList; }
+    auto GetDeviceSelectorDispatcherInfoListVersion() const { return DeviceSelectorDispatcherInfoListVersion; }
+    auto GetDeviceSelectorDispatcherInfoListVersionTimestampMS() const { return DeviceSelectorDispatcherInfoListVersionTimestampMS; }
+
+    // BS
     void SetBackendServerListFile(const std::filesystem::path & FilePath) { this->BackendServerListFilePath = FilePath; }
     bool ReloadBackendServerList();  // return value: true new version of server list
     auto GetBackendServerList() const -> const std::vector<xNetAddress> & { return BackendServerList; }
-    auto GetBackendServerListVersion() const -> uint32_t { return BackendServerListVersion; }
+    auto GetBackendServerListVersion() const { return BackendServerListVersion; }
+    auto GetBackendServerListVersionTimestampMS() const { return BackendServerListVersionTimestampMS; }
 
     bool SetRelayInfoDispatcherServerInfo(const xRelayInfoDispatcherServerInfo & ServerInfo);
     auto GetRelayInfoDispatcherServerInfo() const -> const xRelayInfoDispatcherServerInfo * { return &RelayInfoDispatcherServerInfo; }
@@ -120,6 +135,12 @@ private:
     uint64_t                                    DeviceStateRelayServerInfoListVersionTimestampMS = {};
     std::vector<xSL_DeviceStateRelayServerInfo> DeviceStateRelayServerInfoList;
     std::vector<xSL_DeviceStateRelayServerInfo> VersionedDeviceStateRelayServerInfoList;
+
+    uint32_t                                   DeviceSelectorDispatcherInfoListVersion            = 0;
+    bool                                       DeviceSelectorDispatcherInfoListDirty              = false;
+    uint64_t                                   DeviceSelectorDispatcherInfoListVersionTimestampMS = {};
+    std::vector<xDeviceSelectorDispatcherInfo> DeviceSelectorDispatcherInfoList;
+    std::vector<xDeviceSelectorDispatcherInfo> VersionedDeviceSelectorDispatcherInfoList;
 
     uint32_t                 BackendServerListVersion            = 0;
     uint64_t                 BackendServerListVersionTimestampMS = 0;

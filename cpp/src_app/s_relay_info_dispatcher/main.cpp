@@ -51,18 +51,18 @@ public:
 
         auto & P = Connection.UserContext.P;
         if (P) {
-            Logger->E("duplicate server registration");
+            DEBUG_LOG("duplicate server registration");
             return false;
         }
 
         if (CommandId != Cmd_RelayServerHeartBeat) {
-            Logger->E("invalid command id");
+            DEBUG_LOG("invalid command id");
             return false;
         }
 
         auto R = xPP_RelayServerHeartBeat();
         if (!R.Deserialize(PayloadPtr, PayloadSize)) {
-            Logger->E("invalid protocol base");
+            DEBUG_LOG("invalid protocol base");
             return false;
         }
 

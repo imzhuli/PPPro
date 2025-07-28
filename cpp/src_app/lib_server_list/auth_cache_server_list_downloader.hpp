@@ -9,7 +9,7 @@ public:
     void OnTick(uint64_t NowMS) override;
     void OnServerConnected() override;
     bool OnServerPacket(xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) override;
-    void OnServerClose() override { Reset(AuthCacheServerListVersion); }
+    void OnServerClose() override { Reset(AuthCacheServerListVersionTimestampMS); }
 
     using xUpdateAuthCacheServerListCallback = std::function<void(const std::vector<xServerInfo> &)>;
     void SetUpdateAuthCacheServerListCallback(const xUpdateAuthCacheServerListCallback & CB) { UpdateAuthCacheServerListCallback = CB; }
@@ -22,7 +22,7 @@ private:
     xTicker  Ticker;
     uint64_t LastUpdateTimestampMS = 0;
 
-    uint32_t                           AuthCacheServerListVersion = 0;
+    uint64_t                           AuthCacheServerListVersionTimestampMS = 0;
     std::vector<xServerInfo>           AuthCacheSortedServerInfoList;
     xUpdateAuthCacheServerListCallback UpdateAuthCacheServerListCallback;
 };

@@ -1,5 +1,6 @@
 #include "../lib_server_list/audit_account_server_list_downloader.hpp"
 #include "../lib_server_list/auth_cache_server_list_downloader.hpp"
+#include "../lib_server_list/device_selector_dispatcher_list_downloader.hpp"
 #include "../lib_server_list/device_state_relay_server_list_downloader.hpp"
 #include "../lib_server_list/relay_info_dispatcher_server_info_downloader.hpp"
 #include "../lib_server_util/all.hpp"
@@ -9,6 +10,7 @@ static auto AADownloader              = xAuditAccountServerListDownloader();
 static auto ACDownloader              = xAuthCacheServerListDownloader();
 static auto DSRDownloader             = xDeviceStateRelayServerListDownloader();
 static auto RIDDownloader             = xRelayInfoDispatcherServerInfoDownloader();
+static auto DSDDownloader             = xDeviceSelectorDispatcherServerListDownloader();
 
 int main(int argc, char ** argv) {
 
@@ -16,6 +18,7 @@ int main(int argc, char ** argv) {
     auto CL  = xConfigLoader(RuntimeEnv.DefaultConfigFilePath);
 
     CL.Require(ServerListDownloadAddress, "ServerListDownloadAddress");
+    Logger->D("DownloadAddress: %s", ServerListDownloadAddress.ToString().c_str());
 
     X_GUARD(AADownloader, ServiceIoContext, ServerListDownloadAddress);
     AADownloader.SetUpdateAuditAccountServerListCallback([](const std::vector<xServerInfo> & ServerList) {
@@ -25,7 +28,7 @@ int main(int argc, char ** argv) {
             OS << "ServerId: " << S.ServerId << endl;
             OS << "ServerAddress: " << S.Address.ToString() << endl;
         }
-        DEBUG_LOG("%s", OS.str().c_str());
+        Logger->D("%s", OS.str().c_str());
     });
 
     X_GUARD(ACDownloader, ServiceIoContext, ServerListDownloadAddress);
@@ -36,7 +39,7 @@ int main(int argc, char ** argv) {
             OS << "ServerId: " << S.ServerId << endl;
             OS << "ServerAddress: " << S.Address.ToString() << endl;
         }
-        DEBUG_LOG("%s", OS.str().c_str());
+        Logger->D("%s", OS.str().c_str());
     });
 
     X_GUARD(DSRDownloader, ServiceIoContext, ServerListDownloadAddress);
@@ -47,7 +50,7 @@ int main(int argc, char ** argv) {
             OS << "ServerId: " << S.ServerId << endl;
             OS << "ServerAddress: P:" << S.ProducerAddress.ToString() << ", O: " << S.ObserverAddress.ToString() << endl;
         }
-        DEBUG_LOG("%s", OS.str().c_str());
+        Logger->D("%s", OS.str().c_str());
     });
 
     X_GUARD(RIDDownloader, ServiceIoContext, ServerListDownloadAddress);
@@ -56,10 +59,21 @@ int main(int argc, char ** argv) {
         OS << "updated relay info dispatcher server: " << endl;
         OS << "ServerId: " << S.ServerId << endl;
         OS << "ServerAddress: P:" << S.ProducerAddress.ToString() << ", O: " << S.ObserverAddress.ToString() << endl;
-        DEBUG_LOG("%s", OS.str().c_str());
+        Logger->D("%s", OS.str().c_str());
+    });
+
+    X_GUARD(DSDDownloader, ServiceIoContext, ServerListDownloadAddress);
+    DSDDownloader.SetUpdateDeviceSelectorDispatcherServerListCallback([](const std::vector<xDeviceSelectorDispatcherInfo> & SL) {
+        auto OS = std::ostringstream();
+        OS << "updated device selector dispatcher server: " << endl;
+        for (auto & S : SL) {
+            OS << "ServerId: " << S.ServerId << endl;
+            OS << "ServerAddress: P:" << S.ExportAddressForClient.ToString() << ", O: " << S.ExportAddressForServiceProvider.ToString() << endl;
+        }
+        Logger->D("%s", OS.str().c_str());
     });
 
     while (ServiceRunState) {
-        ServiceUpdateOnce(AADownloader, ACDownloader, DSRDownloader, RIDDownloader);
+        ServiceUpdateOnce(AADownloader, ACDownloader, DSRDownloader, RIDDownloader, DSDDownloader);
     }
 }

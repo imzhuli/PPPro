@@ -125,29 +125,31 @@ using xServerRuntimeKey = uint64_t;  // 由配置中心分配的动态服务器I
 
 // min static constants
 
-static constexpr const size_t   DEFAULT_MAX_SERVER_CONNECTIONS      = 4096;
-static constexpr const uint32_t MAX_DEVICE_RELAY_SERVER_SUPPORTED   = 4096;  // IdManagerMini::MaxObjectId
-static constexpr const uint32_t MAX_AUTH_CACHE_SERVER_COUNT         = 75;
-static constexpr const uint32_t MAX_DEVICE_STATE_RELAY_SERVER_COUNT = 75;
-static constexpr const uint32_t MAX_DEVICE_AUDIT_SERVER_COUNT       = 75;
-static constexpr const uint32_t MAX_ACCOUNT_AUDIT_SERVER_COUNT      = 75;
-static constexpr const uint32_t MAX_BACKEND_SERVER_COUNT            = 75;
+static constexpr const size_t   DEFAULT_MAX_SERVER_CONNECTIONS       = 4096;
+static constexpr const uint32_t MAX_DEVICE_RELAY_SERVER_SUPPORTED    = 4096;  // IdManagerMini::MaxObjectId
+static constexpr const uint32_t MAX_AUTH_CACHE_SERVER_COUNT          = 75;
+static constexpr const uint32_t MAX_DEVICE_STATE_RELAY_SERVER_COUNT  = 75;
+static constexpr const uint32_t MAX_AUDIT_DEVICE_SERVER_COUNT        = 75;
+static constexpr const uint32_t MAX_AUDIT_ACCOUNT_SERVER_COUNT       = 75;
+static constexpr const uint32_t MAX_DEVICE_SELECTOR_DISPATCHER_COUNT = 75;
+static constexpr const uint32_t MAX_BACKEND_SERVER_COUNT             = 75;
 
 enum struct eServerType : uint32_t {
     UNSPECIFIED = 0x00,
 
     // main service
-    CONFIG_CENTER         = 0x01,  // CC
-    DEVICE_RELAY          = 0x02,  // DR
-    DEVICE_STATE_RELAY    = 0x03,  // DSR
-    DEVICE_SELECTOR       = 0x04,  // DS
-    THIRD_RELAY           = 0x05,  // TR
-    STATIC_RELAY_TERMINAL = 0x06,  // SRT
-    RELAY_INFO_DISPATCHER = 0x07,  // RID
-    PROXY_ACCESS          = 0x08,  // PA
-    AUTH_CACHE            = 0x09,  // AC
-    AUDIT_DEVICE_CACHE    = 0x0A,  // ADC
-    AUDIT_ACCOUNT_CACHE   = 0x0B,  // AAC
+    CONFIG_CENTER              = 0x01,  // CC
+    DEVICE_RELAY               = 0x02,  // DR
+    DEVICE_STATE_RELAY         = 0x03,  // DSR
+    DEVICE_SELECTOR            = 0x04,  // DS
+    DEVICE_SELECTOR_DISPATCHER = 0x05,  // DSD
+    THIRD_RELAY                = 0x06,  // TR
+    STATIC_RELAY_TERMINAL      = 0x07,  // SRT
+    RELAY_INFO_DISPATCHER      = 0x08,  // RID
+    PROXY_ACCESS               = 0x09,  // PA
+    AUTH_CACHE                 = 0x0A,  // AC
+    AUDIT_DEVICE_CACHE         = 0x0B,  // ADC
+    AUDIT_ACCOUNT_CACHE        = 0x0C,  // AAC
 
 };
 
@@ -221,6 +223,13 @@ struct xRelayServerInfoBase {
     xNetAddress ExportStaticUdpAddress;
 
     std::string ToString() const;
+};
+
+struct xDeviceSelectorDispatcherInfo {
+    uint64_t    ServerId = {};
+    uint64_t    StartupTimestampMS;
+    xNetAddress ExportAddressForClient          = {};
+    xNetAddress ExportAddressForServiceProvider = {};
 };
 
 struct xClientAuthResult {

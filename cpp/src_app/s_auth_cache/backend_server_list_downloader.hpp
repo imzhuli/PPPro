@@ -8,8 +8,7 @@ public:
     using xClient::Init;
     void Clean() {
         Reset(BackendServerList);
-        Reset(BackendServerListVersion);
-        Reset(BackendServerUpdateTimestampMS);
+        Reset(BackendServerListVersionTimestampMS);
         xClient::Clean();
     }
     using xClient::Tick;
@@ -28,8 +27,7 @@ protected:
     bool OnDownloadBackendServerListResp(ubyte * PayloadPtr, size_t PayloadSize);
 
 private:
-    uint64_t                 BackendServerUpdateTimestampMS = 0;
-    uint32_t                 BackendServerListVersion       = 0;
+    uint64_t                 BackendServerListVersionTimestampMS = 0;
     std::vector<xNetAddress> BackendServerList;
     xUpdateCallback          UpdateCallback;
 };

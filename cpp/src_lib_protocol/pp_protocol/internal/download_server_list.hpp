@@ -9,15 +9,16 @@
  * */
 
 struct xPP_DownloadAuthCacheServerList : xBinaryMessage {
-    void     SerializeMembers() override { W(Version); }
-    void     DeserializeMembers() override { R(Version); }
-    uint32_t Version;
+    void     SerializeMembers() override { W(VersionTimestampMS); }
+    void     DeserializeMembers() override { R(VersionTimestampMS); }
+    uint64_t VersionTimestampMS;
 };
 
 struct xPP_DownloadAuthCacheServerListResp : xBinaryMessage {
 
     void SerializeMembers() override {
-        W(Version);
+        W(VersionTimestampMS);
+
         uint32_t Count = ServerInfoList.size();
         W(Count);
         for (auto & I : ServerInfoList) {
@@ -27,7 +28,7 @@ struct xPP_DownloadAuthCacheServerListResp : xBinaryMessage {
     }
 
     void DeserializeMembers() override {
-        R(Version);
+        R(VersionTimestampMS);
 
         uint32_t Count = 0;
         R(Count);
@@ -43,21 +44,22 @@ struct xPP_DownloadAuthCacheServerListResp : xBinaryMessage {
         }
     }
 
-    uint32_t                 Version;
+    uint64_t                 VersionTimestampMS;
     std::vector<xServerInfo> ServerInfoList;
     //
 };
 
 struct xPP_DownloadAuditDeviceServerList : xBinaryMessage {
-    void     SerializeMembers() override { W(Version); }
-    void     DeserializeMembers() override { R(Version); }
-    uint32_t Version;
+    void     SerializeMembers() override { W(VersionTimestampMS); }
+    void     DeserializeMembers() override { R(VersionTimestampMS); }
+    uint64_t VersionTimestampMS;
 };
 
 struct xPP_DownloadAuditDeviceServerListResp : xBinaryMessage {
 
     void SerializeMembers() override {
-        W(Version);
+        W(VersionTimestampMS);
+
         uint32_t Count = ServerInfoList.size();
         W(Count);
         for (auto & I : ServerInfoList) {
@@ -67,12 +69,12 @@ struct xPP_DownloadAuditDeviceServerListResp : xBinaryMessage {
     }
 
     void DeserializeMembers() override {
-        R(Version);
+        R(VersionTimestampMS);
 
         uint32_t Count = 0;
         R(Count);
 
-        if (Count >= MAX_DEVICE_AUDIT_SERVER_COUNT) {
+        if (Count >= MAX_AUDIT_DEVICE_SERVER_COUNT) {
             GetReader()->SetError();
             return;
         }
@@ -83,21 +85,21 @@ struct xPP_DownloadAuditDeviceServerListResp : xBinaryMessage {
         }
     }
 
-    uint32_t                 Version;
+    uint64_t                 VersionTimestampMS;
     std::vector<xServerInfo> ServerInfoList;
     //
 };
 
 struct xPP_DownloadAuditAccountServerList : xBinaryMessage {
-    void     SerializeMembers() override { W(Version); }
-    void     DeserializeMembers() override { R(Version); }
-    uint32_t Version;
+    void     SerializeMembers() override { W(VersionTimestampMS); }
+    void     DeserializeMembers() override { R(VersionTimestampMS); }
+    uint64_t VersionTimestampMS;
 };
 
 struct xPP_DownloadAuditAccountServerListResp : xBinaryMessage {
 
     void SerializeMembers() override {
-        W(Version);
+        W(VersionTimestampMS);
         uint32_t Count = ServerInfoList.size();
         W(Count);
         for (auto & I : ServerInfoList) {
@@ -107,12 +109,12 @@ struct xPP_DownloadAuditAccountServerListResp : xBinaryMessage {
     }
 
     void DeserializeMembers() override {
-        R(Version);
+        R(VersionTimestampMS);
 
         uint32_t Count = 0;
         R(Count);
 
-        if (Count >= MAX_ACCOUNT_AUDIT_SERVER_COUNT) {
+        if (Count >= MAX_AUDIT_ACCOUNT_SERVER_COUNT) {
             GetReader()->SetError();
             return;
         }
@@ -123,7 +125,7 @@ struct xPP_DownloadAuditAccountServerListResp : xBinaryMessage {
         }
     }
 
-    uint32_t                 Version;
+    uint64_t                 VersionTimestampMS;
     std::vector<xServerInfo> ServerInfoList;
     //
 };
@@ -131,15 +133,15 @@ struct xPP_DownloadAuditAccountServerListResp : xBinaryMessage {
 //// 3
 
 struct xPP_DownloadDeviceStateRelayServerList : xBinaryMessage {
-    void     SerializeMembers() override { W(Version); }
-    void     DeserializeMembers() override { R(Version); }
-    uint32_t Version;
+    void     SerializeMembers() override { W(VersionTimestampMS); }
+    void     DeserializeMembers() override { R(VersionTimestampMS); }
+    uint64_t VersionTimestampMS;
 };
 
 struct xPP_DownloadDeviceStateRelayServerListResp : xBinaryMessage {
 
     void SerializeMembers() override {
-        W(Version);
+        W(VersionTimestampMS);
         uint32_t Count = ServerInfoList.size();
         W(Count);
         for (auto & I : ServerInfoList) {
@@ -150,12 +152,12 @@ struct xPP_DownloadDeviceStateRelayServerListResp : xBinaryMessage {
     }
 
     void DeserializeMembers() override {
-        R(Version);
+        R(VersionTimestampMS);
 
         uint32_t Count = 0;
         R(Count);
 
-        if (Count >= MAX_ACCOUNT_AUDIT_SERVER_COUNT) {
+        if (Count >= MAX_DEVICE_STATE_RELAY_SERVER_COUNT) {
             GetReader()->SetError();
             return;
         }
@@ -167,7 +169,7 @@ struct xPP_DownloadDeviceStateRelayServerListResp : xBinaryMessage {
         }
     }
 
-    uint32_t                                 Version;
+    uint64_t                                 VersionTimestampMS;
     std::vector<xDeviceStateRelayServerInfo> ServerInfoList;
     //
 };
@@ -175,16 +177,16 @@ struct xPP_DownloadDeviceStateRelayServerListResp : xBinaryMessage {
 // 4
 
 struct xPP_DownloadBackendServerList : xBinaryMessage {
-    void     SerializeMembers() override { W(Version); }
-    void     DeserializeMembers() override { R(Version); }
-    uint32_t Version;
+    void     SerializeMembers() override { W(VersionTimestampMS); }
+    void     DeserializeMembers() override { R(VersionTimestampMS); }
+    uint64_t VersionTimestampMS;
 };
 
 struct xPP_DownloadBackendServerListResp : xBinaryMessage {
 
     void SerializeMembers() override {
         auto Count = (uint32_t)ServerAddressList.size();
-        W(Version);
+        W(VersionTimestampMS);
         W(Count);
         for (auto & A : ServerAddressList) {
             W(A);
@@ -193,7 +195,7 @@ struct xPP_DownloadBackendServerListResp : xBinaryMessage {
 
     void DeserializeMembers() override {
         auto Count = (uint32_t)0;
-        R(Version);
+        R(VersionTimestampMS);
         R(Count);
 
         if (Count >= MAX_BACKEND_SERVER_COUNT) {
@@ -206,7 +208,7 @@ struct xPP_DownloadBackendServerListResp : xBinaryMessage {
         }
     }
 
-    uint32_t                 Version;
+    uint64_t                 VersionTimestampMS;
     std::vector<xNetAddress> ServerAddressList;
     //
 };
@@ -325,4 +327,47 @@ struct xPP_BroadcastRelayInfo : xBinaryMessage {
     }
 
     xRelayServerInfoBase ServerInfo = {};
+};
+
+struct xPP_DownloadDeviceSelectorDispatcherList : xBinaryMessage {
+    void     SerializeMembers() override { W(VersionTimestampMS); }
+    void     DeserializeMembers() override { R(VersionTimestampMS); }
+    uint64_t VersionTimestampMS;
+};
+
+struct xPP_DownloadDeviceSelectorDispatcherListResp : xBinaryMessage {
+
+    void SerializeMembers() override {
+        W(VersionTimestampMS);
+
+        uint32_t Count = ServerInfoList.size();
+        W(Count);
+
+        for (auto & I : ServerInfoList) {
+            W(I.ServerId);
+            W(I.ExportAddressForClient);
+            W(I.ExportAddressForServiceProvider);
+        }
+    }
+
+    void DeserializeMembers() override {
+        R(VersionTimestampMS);
+
+        uint32_t Count = 0;
+        R(Count);
+
+        if (Count >= MAX_DEVICE_SELECTOR_DISPATCHER_COUNT) {
+            GetReader()->SetError();
+            return;
+        }
+        ServerInfoList.resize(Count);
+        for (auto & I : ServerInfoList) {
+            R(I.ServerId);
+            R(I.ExportAddressForClient);
+            R(I.ExportAddressForServiceProvider);
+        }
+    }
+
+    uint64_t                                   VersionTimestampMS;
+    std::vector<xDeviceSelectorDispatcherInfo> ServerInfoList;
 };

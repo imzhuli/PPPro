@@ -2,7 +2,7 @@
 
 #include "../lib_server_util/all.hpp"
 
-static constexpr const uint64_t UPGRADE_VERSION_TIMEOUT_MS           = 15'000;
+static constexpr const uint64_t UPGRADE_VERSION_TIMEOUT_MS           = 5'000;
 static constexpr const uint64_t RELOAD_BACKEND_SERVER_LIST_TIMEOUTMS = 1 * 60'000;
 
 void xSL_InternalServerListManager::OnTick(uint64_t NowMS) {
@@ -47,6 +47,16 @@ void xSL_InternalServerListManager::OnTick(uint64_t NowMS) {
         Reset(DeviceStateRelayServerInfoListDirty);
     }
 
+    if (DeviceSelectorDispatcherInfoListDirty && (NowMS - DeviceSelectorDispatcherInfoListVersionTimestampMS) > UPGRADE_VERSION_TIMEOUT_MS) {
+        Logger->I("Update VersionedDeviceSelectorDispatcherInfoList");
+        if (!++DeviceSelectorDispatcherInfoListVersion) {
+            ++DeviceSelectorDispatcherInfoListVersion;
+        }
+        VersionedDeviceSelectorDispatcherInfoList          = DeviceSelectorDispatcherInfoList;
+        DeviceSelectorDispatcherInfoListVersionTimestampMS = NowMS;
+        Reset(DeviceSelectorDispatcherInfoListDirty);
+    }
+
     if ((NowMS - BackendServerListVersionTimestampMS) >= RELOAD_BACKEND_SERVER_LIST_TIMEOUTMS) {
         BackendServerListVersionTimestampMS = NowMS;
 
@@ -77,7 +87,7 @@ bool xSL_InternalServerListManager::AddAuthCacheServerInfo(uint64_t ServerId, xN
     if (Found) {
         return false;
     }
-    It = AuthCacheServerInfoList.emplace(
+    AuthCacheServerInfoList.emplace(
         It,
         xSL_AuthCacheServerInfo{
             .ServerId      = ServerId,
@@ -86,7 +96,7 @@ bool xSL_InternalServerListManager::AddAuthCacheServerInfo(uint64_t ServerId, xN
     );
     AuthCacheServerInfoListVersionTimestampMS = Ticker();
     AuthCacheServerInfoListDirty              = true;
-    return &(*It);
+    return true;
 }
 
 void xSL_InternalServerListManager::RemoveAuthCacheServerInfo(uint64_t ServerId) {
@@ -115,7 +125,7 @@ auto xSL_InternalServerListManager::GetAuthCacheServerInfo(uint64_t ServerId) ->
 /////////////////////////////////////////////////
 
 bool xSL_InternalServerListManager::AddAuditDeviceServerInfo(uint64_t ServerId, xNetAddress ServerAddress) {
-    if (AuditDeviceServerInfoList.size() >= MAX_DEVICE_AUDIT_SERVER_COUNT) {
+    if (AuditDeviceServerInfoList.size() >= MAX_AUDIT_DEVICE_SERVER_COUNT) {
         return false;
     }
 
@@ -124,7 +134,7 @@ bool xSL_InternalServerListManager::AddAuditDeviceServerInfo(uint64_t ServerId, 
     if (Found) {
         return false;
     }
-    It = AuditDeviceServerInfoList.emplace(
+    AuditDeviceServerInfoList.emplace(
         It,
         xSL_AuditDeviceServerInfo{
             .ServerId      = ServerId,
@@ -162,7 +172,7 @@ auto xSL_InternalServerListManager::GetAuditDeviceServerInfo(uint64_t ServerId) 
 //////////////////////////
 
 bool xSL_InternalServerListManager::AddAuditAccountServerInfo(uint64_t ServerId, xNetAddress ServerAddress) {
-    if (AuditAccountServerInfoList.size() >= MAX_ACCOUNT_AUDIT_SERVER_COUNT) {
+    if (AuditAccountServerInfoList.size() >= MAX_AUDIT_ACCOUNT_SERVER_COUNT) {
         return false;
     }
 
@@ -171,7 +181,7 @@ bool xSL_InternalServerListManager::AddAuditAccountServerInfo(uint64_t ServerId,
     if (Found) {
         return false;
     }
-    It = AuditAccountServerInfoList.emplace(
+    AuditAccountServerInfoList.emplace(
         It,
         xSL_AuditAccountServerInfo{
             .ServerId      = ServerId,
@@ -221,7 +231,7 @@ bool xSL_InternalServerListManager::AddDeviceStateRelayServerInfo(uint64_t Serve
     New.ServerAddress   = ServerAddress;
     New.ObserverAddress = ObserverAddress;
 
-    It                                               = DeviceStateRelayServerInfoList.insert(It, New);
+    DeviceStateRelayServerInfoList.insert(It, New);
     DeviceStateRelayServerInfoListVersionTimestampMS = Ticker();
     DeviceStateRelayServerInfoListDirty              = true;
     return true;
@@ -249,6 +259,54 @@ auto xSL_InternalServerListManager::GetDeviceStateRelayServerInfo(uint64_t Serve
     }
     return &(*It);
 }
+
+// DSD
+
+bool xSL_InternalServerListManager::AddDeviceSelectorDispatcherInfo(const xDeviceSelectorDispatcherInfo & ServerInfo) {
+    if (DeviceSelectorDispatcherInfoList.size() >= MAX_DEVICE_SELECTOR_DISPATCHER_COUNT) {
+        return false;
+    }
+
+    auto It    = std::lower_bound(DeviceSelectorDispatcherInfoList.begin(), DeviceSelectorDispatcherInfoList.end(), ServerInfo.ServerId, [](const auto & R, uint64_t Id) {
+        return R.ServerId < Id;
+    });
+    auto Found = (It != DeviceSelectorDispatcherInfoList.end()) && (It->ServerId == ServerInfo.ServerId);
+    if (Found) {
+        return false;
+    }
+    DeviceSelectorDispatcherInfoList.emplace(It, ServerInfo);
+    DeviceSelectorDispatcherInfoListVersionTimestampMS = Ticker();
+    DeviceSelectorDispatcherInfoListDirty              = true;
+    return true;
+}
+
+void xSL_InternalServerListManager::RemoveDeviceSelectorDispatcherInfo(uint64_t ServerId) {
+
+    auto It =
+        std::lower_bound(DeviceSelectorDispatcherInfoList.begin(), DeviceSelectorDispatcherInfoList.end(), ServerId, [](const auto & R, uint64_t Id) { return R.ServerId < Id; });
+    if (It == DeviceSelectorDispatcherInfoList.end()) {
+        return;
+    }
+    if (It->ServerId != ServerId) {
+        return;
+    }
+    DeviceSelectorDispatcherInfoList.erase(It);
+    DeviceSelectorDispatcherInfoListDirty = true;
+}
+
+auto xSL_InternalServerListManager::GetDeviceSelectorDispatcherInfo(uint64_t ServerId) -> const xDeviceSelectorDispatcherInfo * {
+    auto It =
+        std::lower_bound(DeviceSelectorDispatcherInfoList.begin(), DeviceSelectorDispatcherInfoList.end(), ServerId, [](const auto & R, uint64_t Id) { return R.ServerId < Id; });
+    if (It == DeviceSelectorDispatcherInfoList.end()) {
+        return nullptr;
+    }
+    if (It->ServerId != ServerId) {
+        return nullptr;
+    }
+    return &(*It);
+}
+
+//
 
 bool xSL_InternalServerListManager::ReloadBackendServerList() {
     if (BackendServerListFilePath.empty()) {

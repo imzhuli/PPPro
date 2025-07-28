@@ -1,8 +1,8 @@
 #include "./backend_server_list_downloader.hpp"
 
 void xAC_BackendServerListDownloader::OnTick(uint64_t NowMS) {
-    if (NowMS - BackendServerUpdateTimestampMS >= UPDATE_SERVER_LIST_TIMEOUT_MS) {
-        BackendServerUpdateTimestampMS = NowMS;
+    if (NowMS - BackendServerListVersionTimestampMS >= UPDATE_SERVER_LIST_TIMEOUT_MS) {
+        BackendServerListVersionTimestampMS = NowMS;
         PostUpdateServerListRequest();
     }
 }
@@ -11,8 +11,8 @@ void xAC_BackendServerListDownloader::PostUpdateServerListRequest() {
     if (!IsOpen()) {
         return;
     }
-    auto R    = xPP_DownloadBackendServerList();
-    R.Version = BackendServerListVersion;
+    auto R               = xPP_DownloadBackendServerList();
+    R.VersionTimestampMS = BackendServerListVersionTimestampMS;
     PostMessage(Cmd_DownloadBackendServerList, 0, R);
 }
 
@@ -32,7 +32,7 @@ bool xAC_BackendServerListDownloader::OnServerPacket(xPacketCommandId CommandId,
 }
 
 void xAC_BackendServerListDownloader::OnServerClose() {
-    Reset(BackendServerListVersion);
+    Reset(BackendServerListVersionTimestampMS);
 }
 
 bool xAC_BackendServerListDownloader::OnDownloadBackendServerListResp(ubyte * PayloadPtr, size_t PayloadSize) {
@@ -42,13 +42,13 @@ bool xAC_BackendServerListDownloader::OnDownloadBackendServerListResp(ubyte * Pa
         Logger->E("Invalid protocol");
         return false;
     }
-    if (R.Version == BackendServerListVersion) {
+    if (R.VersionTimestampMS == BackendServerListVersionTimestampMS) {
         return true;
     }
 
-    auto OldList             = std::move(BackendServerList);
-    BackendServerList        = std::move(R.ServerAddressList);
-    BackendServerListVersion = R.Version;
+    auto OldList                        = std::move(BackendServerList);
+    BackendServerList                   = std::move(R.ServerAddressList);
+    BackendServerListVersionTimestampMS = R.VersionTimestampMS;
 
     if (!UpdateCallback) {
         return true;
@@ -82,7 +82,7 @@ bool xAC_BackendServerListDownloader::OnDownloadBackendServerListResp(ubyte * Pa
         Rem.push_back(OldList[IOld]);
     }
 
-    UpdateCallback(BackendServerListVersion, BackendServerList, Add, Rem);
+    UpdateCallback(BackendServerListVersionTimestampMS, BackendServerList, Add, Rem);
     return true;
     //
 }

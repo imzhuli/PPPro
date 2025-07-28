@@ -40,13 +40,13 @@ bool xAuthCacheServerListDownloader::OnAuthCacheServerList(xPacketRequestId Requ
     if (!R.Deserialize(PayloadPtr, PayloadSize)) {
         return false;
     }
-    if (AuthCacheServerListVersion == R.Version) {
+    if (AuthCacheServerListVersionTimestampMS == R.VersionTimestampMS) {
         return true;
     }
 
     AuthCacheSortedServerInfoList = std::move(R.ServerInfoList);
     std::sort(AuthCacheSortedServerInfoList.begin(), AuthCacheSortedServerInfoList.end(), [](auto & lhs, auto & rhs) { return lhs.ServerId < rhs.ServerId; });
-    AuthCacheServerListVersion = R.Version;
+    AuthCacheServerListVersionTimestampMS = R.VersionTimestampMS;
 
     if (UpdateAuthCacheServerListCallback) {
         UpdateAuthCacheServerListCallback(AuthCacheSortedServerInfoList);
@@ -55,7 +55,7 @@ bool xAuthCacheServerListDownloader::OnAuthCacheServerList(xPacketRequestId Requ
 }
 
 void xAuthCacheServerListDownloader::PostAuthCacheServerListRequest() {
-    auto R    = xPP_DownloadAuthCacheServerList();
-    R.Version = AuthCacheServerListVersion;
+    auto R               = xPP_DownloadAuthCacheServerList();
+    R.VersionTimestampMS = AuthCacheServerListVersionTimestampMS;
     PostMessage(Cmd_DownloadAuthCacheServerList, 0, R);
 }

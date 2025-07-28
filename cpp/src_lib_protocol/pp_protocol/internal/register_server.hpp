@@ -87,19 +87,17 @@ struct xPP_RegisterRelayInfoDispatcherServer : xBinaryMessage {
 struct xPP_RegisterDeviceSelectorDispatcher : xBinaryMessage {
 
     void SerializeMembers() override {
-        W(ServerId);
-        W(AddressForClient);
-        W(AddressForServer);
+        W(ServerInfo.ServerId);
+        W(ServerInfo.ExportAddressForClient);
+        W(ServerInfo.ExportAddressForServiceProvider);
     }
     void DeserializeMembers() override {
-        R(ServerId);
-        R(AddressForClient);
-        R(AddressForServer);
+        R(ServerInfo.ServerId);
+        R(ServerInfo.ExportAddressForClient);
+        R(ServerInfo.ExportAddressForServiceProvider);
     }
 
-    uint64_t    ServerId         = {};
-    xNetAddress AddressForClient = {};
-    xNetAddress AddressForServer = {};
+    xDeviceSelectorDispatcherInfo ServerInfo;
     //
 };
 

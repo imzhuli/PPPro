@@ -4,10 +4,11 @@ static auto ServerIdClient       = xServerIdClient();
 static auto RegisterServerClient = xRegisterServerClient();
 
 static void DSD_RegisterServer(xMessagePoster * Poster, uint64_t LocalServerId) {
-    auto Req             = xPP_RegisterDeviceSelectorDispatcher();
-    Req.ServerId         = LocalServerId;
-    Req.AddressForClient = ExportBindAddressForClient;
-    Req.AddressForServer = ExportBindAddressForServer;
+    auto   Req                                 = xPP_RegisterDeviceSelectorDispatcher();
+    auto & ServerInfo                          = Req.ServerInfo;
+    ServerInfo.ServerId                        = LocalServerId;
+    ServerInfo.ExportAddressForClient          = ExportBindAddressForClient;
+    ServerInfo.ExportAddressForServiceProvider = ExportBindAddressForServer;
     Poster->PostMessage(Cmd_RegisterDeviceSelectorDispatcherServer, 0, Req);
 }
 

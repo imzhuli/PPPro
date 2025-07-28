@@ -9,7 +9,7 @@ public:
     void OnTick(uint64_t NowMS) override;
     void OnServerConnected() override;
     bool OnServerPacket(xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) override;
-    void OnServerClose() override { Reset(DeviceStateRelayServerListVersion); }
+    void OnServerClose() override { Reset(DeviceStateRelayServerListVersionTimestampMS); }
 
     using xUpdateDeviceStateRelayServerListCallback = std::function<void(const std::vector<xDeviceStateRelayServerInfo> &)>;
     void SetUpdateDeviceStateRelayServerListCallback(const xUpdateDeviceStateRelayServerListCallback & CB) { this->UpdateDeviceStateRelayServerListCallback = CB; }
@@ -22,7 +22,7 @@ private:
     xTicker  Ticker;
     uint64_t LastUpdateTimestampMS = 0;
 
-    uint32_t                                  DeviceStateRelayServerListVersion = 0;
+    uint64_t                                  DeviceStateRelayServerListVersionTimestampMS = 0;
     std::vector<xDeviceStateRelayServerInfo>  DeviceStateRelaySortedServerInfoList;
     xUpdateDeviceStateRelayServerListCallback UpdateDeviceStateRelayServerListCallback;
 };
