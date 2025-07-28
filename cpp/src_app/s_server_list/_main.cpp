@@ -274,28 +274,28 @@ struct xDownloadServerService : xService {
             Logger->E("Invalid protocol");
             return false;
         }
-        auto & M                  = RegisterServerService.GetServerListManager();
-        auto   VersionTimestampMS = M.GetAuthCacheServerInfoListVersionTimestampMS();
+        auto & M       = RegisterServerService.GetServerListManager();
+        auto   Version = M.GetAuthCacheServerInfoListVersion();
 
-        if (R.VersionTimestampMS == VersionTimestampMS) {
-            auto Resp               = xPP_DownloadAuthCacheServerListResp();
-            Resp.VersionTimestampMS = VersionTimestampMS;
+        if (R.Version == Version) {
+            auto Resp    = xPP_DownloadAuthCacheServerListResp();
+            Resp.Version = Version;
             PostMessage(Connection, Cmd_DownloadAuthCacheServerListResp, 0, Resp);
             return true;
         }
 
-        if (VersionTimestampMS != AuthCacheServerListVersionTimestampMS) {
-            auto List               = M.GetAuthCacheServerInfoList();
-            auto Resp               = xPP_DownloadAuthCacheServerListResp();
-            Resp.VersionTimestampMS = VersionTimestampMS;
+        if (Version != AuthCacheServerListVersion) {
+            auto List    = M.GetAuthCacheServerInfoList();
+            auto Resp    = xPP_DownloadAuthCacheServerListResp();
+            Resp.Version = Version;
             for (auto & S : List) {
                 Resp.ServerInfoList.push_back({
                     .ServerId = S.ServerId,
                     .Address  = S.ServerAddress,
                 });
             }
-            AuthCacheServerListResponseSize       = WriteMessage(AuthCacheServerListResponse, Cmd_DownloadAuthCacheServerListResp, 0, Resp);
-            AuthCacheServerListVersionTimestampMS = VersionTimestampMS;
+            AuthCacheServerListResponseSize = WriteMessage(AuthCacheServerListResponse, Cmd_DownloadAuthCacheServerListResp, 0, Resp);
+            AuthCacheServerListVersion      = Version;
         }
         PostData(Connection, AuthCacheServerListResponse, AuthCacheServerListResponseSize);
         return true;
@@ -307,28 +307,28 @@ struct xDownloadServerService : xService {
         if (!R.Deserialize(PayloadPtr, PayloadSize)) {
             return false;
         }
-        auto & M                  = RegisterServerService.GetServerListManager();
-        auto   VersionTimestampMS = M.GetAuditDeviceServerInfoListVersionTimestampMS();
+        auto & M       = RegisterServerService.GetServerListManager();
+        auto   Version = M.GetAuditDeviceServerInfoListVersion();
 
-        if (R.VersionTimestampMS == VersionTimestampMS) {
-            auto Resp               = xPP_DownloadAuditDeviceServerListResp();
-            Resp.VersionTimestampMS = VersionTimestampMS;
+        if (R.Version == Version) {
+            auto Resp    = xPP_DownloadAuditDeviceServerListResp();
+            Resp.Version = Version;
             PostMessage(Connection, Cmd_DownloadAuditDeviceServerListResp, 0, Resp);
             return true;
         }
 
-        if (VersionTimestampMS != AuditDeviceServerListVersionTimestampMS) {
-            auto List               = M.GetAuditDeviceServerInfoList();
-            auto Resp               = xPP_DownloadAuditDeviceServerListResp();
-            Resp.VersionTimestampMS = VersionTimestampMS;
+        if (Version != AuditDeviceServerListVersion) {
+            auto List    = M.GetAuditDeviceServerInfoList();
+            auto Resp    = xPP_DownloadAuditDeviceServerListResp();
+            Resp.Version = Version;
             for (auto & S : List) {
                 Resp.ServerInfoList.push_back({
                     .ServerId = S.ServerId,
                     .Address  = S.ServerAddress,
                 });
             }
-            AuditDeviceServerListResponseSize       = WriteMessage(AuditDeviceServerListResponse, Cmd_DownloadAuditDeviceServerListResp, 0, Resp);
-            AuditDeviceServerListVersionTimestampMS = VersionTimestampMS;
+            AuditDeviceServerListResponseSize = WriteMessage(AuditDeviceServerListResponse, Cmd_DownloadAuditDeviceServerListResp, 0, Resp);
+            AuditDeviceServerListVersion      = Version;
         }
         PostData(Connection, AuditDeviceServerListResponse, AuditDeviceServerListResponseSize);
         return true;
@@ -340,28 +340,28 @@ struct xDownloadServerService : xService {
         if (!R.Deserialize(PayloadPtr, PayloadSize)) {
             return false;
         }
-        auto & M                  = RegisterServerService.GetServerListManager();
-        auto   VersionTimestampMS = M.GetAuditAccountServerInfoListVersionTimestampMS();
+        auto & M       = RegisterServerService.GetServerListManager();
+        auto   Version = M.GetAuditAccountServerInfoListVersion();
 
-        if (R.VersionTimestampMS == VersionTimestampMS) {
-            auto Resp               = xPP_DownloadAuditAccountServerListResp();
-            Resp.VersionTimestampMS = VersionTimestampMS;
+        if (R.Version == Version) {
+            auto Resp    = xPP_DownloadAuditAccountServerListResp();
+            Resp.Version = Version;
             PostMessage(Connection, Cmd_DownloadAuditAccountServerListResp, 0, Resp);
             return true;
         }
 
-        if (VersionTimestampMS != AuditAccountServerListVersionTimestampMS) {
-            auto List               = M.GetAuditAccountServerInfoList();
-            auto Resp               = xPP_DownloadAuditAccountServerListResp();
-            Resp.VersionTimestampMS = VersionTimestampMS;
+        if (Version != AuditAccountServerListVersion) {
+            auto List    = M.GetAuditAccountServerInfoList();
+            auto Resp    = xPP_DownloadAuditAccountServerListResp();
+            Resp.Version = Version;
             for (auto & S : List) {
                 Resp.ServerInfoList.push_back({
                     .ServerId = S.ServerId,
                     .Address  = S.ServerAddress,
                 });
             }
-            AuditAccountServerListResponseSize       = WriteMessage(AuditAccountServerListResponse, Cmd_DownloadAuditAccountServerListResp, 0, Resp);
-            AuditAccountServerListVersionTimestampMS = VersionTimestampMS;
+            AuditAccountServerListResponseSize = WriteMessage(AuditAccountServerListResponse, Cmd_DownloadAuditAccountServerListResp, 0, Resp);
+            AuditAccountServerListVersion      = Version;
         }
         PostData(Connection, AuditAccountServerListResponse, AuditAccountServerListResponseSize);
         return true;
@@ -372,20 +372,20 @@ struct xDownloadServerService : xService {
         if (!R.Deserialize(PayloadPtr, PayloadSize)) {
             return false;
         }
-        auto & M                  = RegisterServerService.GetServerListManager();
-        auto   VersionTimestampMS = M.GetDeviceStateRelayServerInfoListVersion();
+        auto & M       = RegisterServerService.GetServerListManager();
+        auto   Version = M.GetDeviceStateRelayServerInfoListVersion();
 
-        if (R.VersionTimestampMS == VersionTimestampMS) {
-            auto Resp               = xPP_DownloadDeviceStateRelayServerListResp();
-            Resp.VersionTimestampMS = VersionTimestampMS;
+        if (R.Version == Version) {
+            auto Resp    = xPP_DownloadDeviceStateRelayServerListResp();
+            Resp.Version = Version;
             PostMessage(Connection, Cmd_DownloadDeviceStateRelayServerListResp, 0, Resp);
             return true;
         }
 
-        if (VersionTimestampMS != DeviceStateRelayServerListVersionTimestampMS) {
-            auto List               = M.GetDeviceStateRelayServerInfoList();
-            auto Resp               = xPP_DownloadDeviceStateRelayServerListResp();
-            Resp.VersionTimestampMS = VersionTimestampMS;
+        if (Version != DeviceStateRelayServerListVersion) {
+            auto List    = M.GetDeviceStateRelayServerInfoList();
+            auto Resp    = xPP_DownloadDeviceStateRelayServerListResp();
+            Resp.Version = Version;
             for (auto & S : List) {
                 Resp.ServerInfoList.push_back({
                     .ServerId        = S.ServerId,
@@ -393,8 +393,8 @@ struct xDownloadServerService : xService {
                     .ObserverAddress = S.ObserverAddress,
                 });
             }
-            DeviceStateRelayServerListResponseSize       = WriteMessage(DeviceStateRelayServerListResponse, Cmd_DownloadDeviceStateRelayServerListResp, 0, Resp);
-            DeviceStateRelayServerListVersionTimestampMS = VersionTimestampMS;
+            DeviceStateRelayServerListResponseSize = WriteMessage(DeviceStateRelayServerListResponse, Cmd_DownloadDeviceStateRelayServerListResp, 0, Resp);
+            DeviceStateRelayServerListVersion      = Version;
         }
         PostData(Connection, DeviceStateRelayServerListResponse, DeviceStateRelayServerListResponseSize);
         return true;
@@ -406,23 +406,23 @@ struct xDownloadServerService : xService {
             Logger->E("Invalid protocol");
             return false;
         }
-        auto & M                  = RegisterServerService.GetServerListManager();
-        auto   VersionTimestampMS = M.GetBackendServerListVersionTimestampMS();
+        auto & M       = RegisterServerService.GetServerListManager();
+        auto   Version = M.GetBackendServerListVersion();
 
-        if (R.VersionTimestampMS == VersionTimestampMS) {
-            auto Resp               = xPP_DownloadBackendServerListResp();
-            Resp.VersionTimestampMS = VersionTimestampMS;
+        if (R.Version == Version) {
+            auto Resp    = xPP_DownloadBackendServerListResp();
+            Resp.Version = Version;
             PostMessage(Connection, Cmd_DownloadBackendServerListResp, 0, Resp);
             return true;
         }
 
-        if (VersionTimestampMS != BackendServerListVersionTimestampMS) {
-            auto List                           = M.GetBackendServerList();
-            auto Resp                           = xPP_DownloadBackendServerListResp();
-            Resp.VersionTimestampMS             = VersionTimestampMS;
-            Resp.ServerAddressList              = M.GetBackendServerList();
-            BackendServerListResponseSize       = WriteMessage(BackendServerListResponse, Cmd_DownloadBackendServerListResp, 0, Resp);
-            BackendServerListVersionTimestampMS = VersionTimestampMS;
+        if (Version != BackendServerListVersion) {
+            auto List                     = M.GetBackendServerList();
+            auto Resp                     = xPP_DownloadBackendServerListResp();
+            Resp.Version                  = Version;
+            Resp.ServerAddressList        = M.GetBackendServerList();
+            BackendServerListResponseSize = WriteMessage(BackendServerListResponse, Cmd_DownloadBackendServerListResp, 0, Resp);
+            BackendServerListVersion      = Version;
         }
         PostData(Connection, BackendServerListResponse, BackendServerListResponseSize);
         return true;
@@ -451,20 +451,20 @@ struct xDownloadServerService : xService {
             Logger->E("Invalid protocol");
             return false;
         }
-        auto & M                  = RegisterServerService.GetServerListManager();
-        auto   VersionTimestampMS = M.GetDeviceSelectorDispatcherInfoListVersionTimestampMS();
+        auto & M       = RegisterServerService.GetServerListManager();
+        auto   Version = M.GetDeviceSelectorDispatcherInfoListVersion();
 
-        if (R.VersionTimestampMS == VersionTimestampMS) {
-            auto Resp               = xPP_DownloadDeviceSelectorDispatcherListResp();
-            Resp.VersionTimestampMS = VersionTimestampMS;
+        if (R.Version == Version) {
+            auto Resp    = xPP_DownloadDeviceSelectorDispatcherListResp();
+            Resp.Version = Version;
             PostMessage(Connection, Cmd_DownloadDeviceSelectorDispatcherServerListResp, 0, Resp);
             return true;
         }
 
-        if (VersionTimestampMS != DeviceSelectorDispatcherListVersionTimestampMS) {
-            auto List               = M.GetDeviceSelectorDispatcherInfoList();
-            auto Resp               = xPP_DownloadDeviceSelectorDispatcherListResp();
-            Resp.VersionTimestampMS = VersionTimestampMS;
+        if (Version != DeviceSelectorDispatcherListVersion) {
+            auto List    = M.GetDeviceSelectorDispatcherInfoList();
+            auto Resp    = xPP_DownloadDeviceSelectorDispatcherListResp();
+            Resp.Version = Version;
             for (auto & S : List) {
                 Resp.ServerInfoList.push_back({
                     .ServerId                        = S.ServerId,
@@ -472,35 +472,35 @@ struct xDownloadServerService : xService {
                     .ExportAddressForServiceProvider = S.ExportAddressForServiceProvider,
                 });
             }
-            DeviceSelectorDispatcherListResponseSize       = WriteMessage(DeviceSelectorDispatcherListResponse, Cmd_DownloadDeviceSelectorDispatcherServerListResp, 0, Resp);
-            DeviceSelectorDispatcherListVersionTimestampMS = VersionTimestampMS;
+            DeviceSelectorDispatcherListResponseSize = WriteMessage(DeviceSelectorDispatcherListResponse, Cmd_DownloadDeviceSelectorDispatcherServerListResp, 0, Resp);
+            DeviceSelectorDispatcherListVersion      = Version;
         }
         PostData(Connection, DeviceSelectorDispatcherListResponse, DeviceSelectorDispatcherListResponseSize);
         return true;
     }
 
 private:
-    uint64_t AuthCacheServerListVersionTimestampMS = 0;
+    uint64_t AuthCacheServerListVersion = 0;
     ubyte    AuthCacheServerListResponse[MaxPacketSize];
     size_t   AuthCacheServerListResponseSize = {};
 
-    uint64_t AuditDeviceServerListVersionTimestampMS = 0;
+    uint64_t AuditDeviceServerListVersion = 0;
     ubyte    AuditDeviceServerListResponse[MaxPacketSize];
     size_t   AuditDeviceServerListResponseSize = {};
 
-    uint64_t AuditAccountServerListVersionTimestampMS = 0;
+    uint64_t AuditAccountServerListVersion = 0;
     ubyte    AuditAccountServerListResponse[MaxPacketSize];
     size_t   AuditAccountServerListResponseSize = {};
 
-    uint64_t DeviceStateRelayServerListVersionTimestampMS = 0;
+    uint64_t DeviceStateRelayServerListVersion = 0;
     ubyte    DeviceStateRelayServerListResponse[MaxPacketSize];
     size_t   DeviceStateRelayServerListResponseSize = {};
 
-    uint64_t BackendServerListVersionTimestampMS = 0;
+    uint64_t BackendServerListVersion = 0;
     ubyte    BackendServerListResponse[MaxPacketSize];
     size_t   BackendServerListResponseSize = {};
 
-    uint64_t DeviceSelectorDispatcherListVersionTimestampMS = 0;
+    uint64_t DeviceSelectorDispatcherListVersion = 0;
     ubyte    DeviceSelectorDispatcherListResponse[MaxPacketSize];
     size_t   DeviceSelectorDispatcherListResponseSize = {};
 };

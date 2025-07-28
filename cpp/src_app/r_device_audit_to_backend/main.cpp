@@ -164,7 +164,7 @@ int main(int argc, char ** argv) {
 
     X_GUARD(DeviceObserver, ServiceIoContext);
     X_GUARD(DSRDownloader, ServiceIoContext, ServerListDownloadAddress);
-    DSRDownloader.SetUpdateDeviceStateRelayServerListCallback([](const std::vector<xDeviceStateRelayServerInfo> & NewServerList) {
+    DSRDownloader.SetOnUpdateDeviceStateRelayServerListCallback([](uint32_t Version, const std::vector<xDeviceStateRelayServerInfo> & NewServerList) {
         auto SL = std::vector<xNetAddress>();
         for (auto & I : NewServerList) {
             SL.push_back(I.ObserverAddress);

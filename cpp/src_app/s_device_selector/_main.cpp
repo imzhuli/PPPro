@@ -16,7 +16,7 @@ int main(int argc, char ** argv) {
     X_GUARD(DSRDownloader, ServiceIoContext, ServerListDownloadAddress);
     X_GUARD(DeviceObserver, ServiceIoContext);
 
-    DSRDownloader.SetUpdateDeviceStateRelayServerListCallback([](const std::vector<xDeviceStateRelayServerInfo> & DSRInfo) {
+    DSRDownloader.SetOnUpdateDeviceStateRelayServerListCallback([](uint32_t Version, const std::vector<xDeviceStateRelayServerInfo> & DSRInfo) {
         auto OSL = std::vector<xNetAddress>();
         for (auto & S : DSRInfo) {
             OSL.push_back(S.ObserverAddress);

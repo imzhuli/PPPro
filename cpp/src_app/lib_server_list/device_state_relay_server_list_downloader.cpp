@@ -40,23 +40,23 @@ bool xDeviceStateRelayServerListDownloader::OnDeviceStateRelayServerList(xPacket
     if (!R.Deserialize(PayloadPtr, PayloadSize)) {
         return false;
     }
-    if (DeviceStateRelayServerListVersionTimestampMS == R.VersionTimestampMS) {
+    if (DeviceStateRelayServerListVersion == R.Version) {
         return true;
     }
     auto & NewServerList = R.ServerInfoList;
     std::sort(NewServerList.begin(), NewServerList.end(), [](auto & lhs, auto & rhs) { return lhs.ServerId < rhs.ServerId; });
 
-    DeviceStateRelaySortedServerInfoList         = std::move(R.ServerInfoList);
-    DeviceStateRelayServerListVersionTimestampMS = R.VersionTimestampMS;
+    DeviceStateRelaySortedServerInfoList = std::move(R.ServerInfoList);
+    DeviceStateRelayServerListVersion    = R.Version;
 
     if (UpdateDeviceStateRelayServerListCallback) {
-        UpdateDeviceStateRelayServerListCallback(DeviceStateRelaySortedServerInfoList);
+        UpdateDeviceStateRelayServerListCallback(DeviceStateRelayServerListVersion, DeviceStateRelaySortedServerInfoList);
     }
     return true;
 }
 
 void xDeviceStateRelayServerListDownloader::PostDownloadDeviceStateRelayServerListRequest() {
-    auto R               = xPP_DownloadDeviceStateRelayServerList();
-    R.VersionTimestampMS = DeviceStateRelayServerListVersionTimestampMS;
+    auto R    = xPP_DownloadDeviceStateRelayServerList();
+    R.Version = DeviceStateRelayServerListVersion;
     PostMessage(Cmd_DownloadDeviceStateRelayServerList, 0, R);
 }

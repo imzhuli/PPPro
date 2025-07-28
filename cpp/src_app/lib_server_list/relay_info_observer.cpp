@@ -10,7 +10,7 @@ bool xRelayInfoObserver::Init(xIoContext * ICP, const xNetAddress & ServerListDo
         RelayInfoDispatcherClient.Clean();
         return false;
     }
-    DispatcherServerInfoDownloader.SetUpdateRelayInfoDispatcherServerInfoCallback([this](const xRelayInfoDispatcherServerInfo & Info) {
+    DispatcherServerInfoDownloader.SetOnUpdateRelayInfoDispatcherServerInfoCallback([this](const xRelayInfoDispatcherServerInfo & Info) {
         RelayInfoDispatcherClient.UpdateTarget(Info.ObserverAddress);
     });
     RelayInfoDispatcherClient.SetOnConnectedCallback([this]() { RelayInfoDispatcherClient.PostMessage(Cmd_RegisterRelayInfoObserver, 0, XR(xPP_RegisterRelayInfoObserver())); });

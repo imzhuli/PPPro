@@ -40,7 +40,7 @@ bool xDeviceSelectorDispatcherServerListDownloader::OnDeviceSelectorDispatcherSe
     if (!R.Deserialize(PayloadPtr, PayloadSize)) {
         return false;
     }
-    if (DeviceSelectorDispatcherServerListVersionTimestampMS == R.VersionTimestampMS) {
+    if (DeviceSelectorDispatcherServerListVersion == R.Version) {
         return true;
     }
 
@@ -48,16 +48,16 @@ bool xDeviceSelectorDispatcherServerListDownloader::OnDeviceSelectorDispatcherSe
     std::sort(DeviceSelectorDispatcherSortedServerInfoList.begin(), DeviceSelectorDispatcherSortedServerInfoList.end(), [](auto & lhs, auto & rhs) {
         return lhs.ServerId < rhs.ServerId;
     });
-    DeviceSelectorDispatcherServerListVersionTimestampMS = R.VersionTimestampMS;
+    DeviceSelectorDispatcherServerListVersion = R.Version;
 
     if (UpdateDeviceSelectorDispatcherServerListCallback) {
-        UpdateDeviceSelectorDispatcherServerListCallback(DeviceSelectorDispatcherSortedServerInfoList);
+        UpdateDeviceSelectorDispatcherServerListCallback(DeviceSelectorDispatcherServerListVersion, DeviceSelectorDispatcherSortedServerInfoList);
     }
     return true;
 }
 
 void xDeviceSelectorDispatcherServerListDownloader::PostDeviceSelectorDispatcherServerListRequest() {
-    auto R               = xPP_DownloadDeviceSelectorDispatcherList();
-    R.VersionTimestampMS = DeviceSelectorDispatcherServerListVersionTimestampMS;
+    auto R    = xPP_DownloadDeviceSelectorDispatcherList();
+    R.Version = DeviceSelectorDispatcherServerListVersion;
     PostMessage(Cmd_DownloadDeviceSelectorDispatcherServerList, 0, R);
 }

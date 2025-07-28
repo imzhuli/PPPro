@@ -13,7 +13,7 @@ public:
     bool OnServerPacket(xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) override;
     void OnServerClose() override { Reset(ServerInfo); }
 
-    void SetUpdateRelayInfoDispatcherServerInfoCallback(const xUpdateRelayInfoDispatcherServerInfoCallback & CB) { this->UpdateRelayInfoDispatcherServerInfoCallback = CB; }
+    void SetOnUpdateRelayInfoDispatcherServerInfoCallback(const xUpdateRelayInfoDispatcherServerInfoCallback & CB) { this->UpdateRelayInfoDispatcherServerInfoCallback = CB; }
 
 private:
     bool OnDownloadRelayInfoDispatcherServerInfo(xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize);

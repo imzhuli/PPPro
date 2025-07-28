@@ -43,11 +43,11 @@ int main(int argc, char ** argv) {
         RelayInfoReporter.UpdateLocalRelayServerInfo(LocalInfo);
     });
 
-    RIDDownloader.SetUpdateRelayInfoDispatcherServerInfoCallback([](const xRelayInfoDispatcherServerInfo & Info) {
+    RIDDownloader.SetOnUpdateRelayInfoDispatcherServerInfoCallback([](const xRelayInfoDispatcherServerInfo & Info) {
         DEBUG_LOG("RelayInfoDispatcher producer address updated: %s", Info.ProducerAddress.ToString().c_str());
         RelayInfoReporter.UpdateServerAddress(Info.ProducerAddress);
     });
-    DSRDownloader.SetUpdateDeviceStateRelayServerListCallback([](const std::vector<xDeviceStateRelayServerInfo> & ServerList) {
+    DSRDownloader.SetOnUpdateDeviceStateRelayServerListCallback([](uint32_t Version, const std::vector<xDeviceStateRelayServerInfo> & ServerList) {
         auto PSL = std::vector<xNetAddress>();
         for (auto & S : ServerList) {
             PSL.push_back(S.ProducerAddress);

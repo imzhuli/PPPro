@@ -9,10 +9,10 @@ public:
     void OnTick(uint64_t NowMS) override;
     void OnServerConnected() override;
     bool OnServerPacket(xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) override;
-    void OnServerClose() override { Reset(DeviceSelectorDispatcherServerListVersionTimestampMS); }
+    void OnServerClose() override { Reset(DeviceSelectorDispatcherServerListVersion); }
 
-    using xUpdateDeviceSelectorDispatcherServerListCallback = std::function<void(const std::vector<xDeviceSelectorDispatcherInfo> &)>;
-    void SetUpdateDeviceSelectorDispatcherServerListCallback(const xUpdateDeviceSelectorDispatcherServerListCallback & CB) {
+    using xUpdateDeviceSelectorDispatcherServerListCallback = std::function<void(uint32_t Version, const std::vector<xDeviceSelectorDispatcherInfo> & ServerList)>;
+    void SetOnUpdateDeviceSelectorDispatcherServerListCallback(const xUpdateDeviceSelectorDispatcherServerListCallback & CB) {
         UpdateDeviceSelectorDispatcherServerListCallback = CB;
     }
 
@@ -24,7 +24,7 @@ private:
     xTicker  Ticker;
     uint64_t LastUpdateTimestampMS = 0;
 
-    uint64_t                                          DeviceSelectorDispatcherServerListVersionTimestampMS = 0;
+    uint32_t                                          DeviceSelectorDispatcherServerListVersion = 0;
     std::vector<xDeviceSelectorDispatcherInfo>        DeviceSelectorDispatcherSortedServerInfoList;
     xUpdateDeviceSelectorDispatcherServerListCallback UpdateDeviceSelectorDispatcherServerListCallback;
 };

@@ -9,10 +9,10 @@ public:
     void OnTick(uint64_t NowMS) override;
     void OnServerConnected() override;
     bool OnServerPacket(xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) override;
-    void OnServerClose() override { Reset(AuditAccountServerListVersionTimestampMS); }
+    void OnServerClose() override { Reset(AuditAccountServerListVersion); }
 
-    using xUpdateAuditAccountServerListCallback = std::function<void(const std::vector<xServerInfo> &)>;
-    void SetUpdateAuditAccountServerListCallback(const xUpdateAuditAccountServerListCallback & CB) { UpdateAuditAccountServerListCallback = CB; }
+    using xUpdateAuditAccountServerListCallback = std::function<void(uint32_t Version, const std::vector<xServerInfo> & ServerList)>;
+    void SetOnUpdateAuditAccountServerListCallback(const xUpdateAuditAccountServerListCallback & CB) { UpdateAuditAccountServerListCallback = CB; }
 
 private:
     bool OnAuditAccountServerList(xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize);
@@ -22,7 +22,7 @@ private:
     xTicker  Ticker;
     uint64_t LastUpdateTimestampMS = 0;
 
-    uint64_t                              AuditAccountServerListVersionTimestampMS = 0;
+    uint32_t                              AuditAccountServerListVersion = 0;
     std::vector<xServerInfo>              AuditAccountSortedServerInfoList;
     xUpdateAuditAccountServerListCallback UpdateAuditAccountServerListCallback;
 };

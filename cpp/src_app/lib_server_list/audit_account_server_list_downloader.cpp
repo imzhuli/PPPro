@@ -40,22 +40,22 @@ bool xAuditAccountServerListDownloader::OnAuditAccountServerList(xPacketRequestI
     if (!R.Deserialize(PayloadPtr, PayloadSize)) {
         return false;
     }
-    if (AuditAccountServerListVersionTimestampMS == R.VersionTimestampMS) {
+    if (AuditAccountServerListVersion == R.Version) {
         return true;
     }
 
     AuditAccountSortedServerInfoList = std::move(R.ServerInfoList);
     std::sort(AuditAccountSortedServerInfoList.begin(), AuditAccountSortedServerInfoList.end(), [](auto & lhs, auto & rhs) { return lhs.ServerId < rhs.ServerId; });
-    AuditAccountServerListVersionTimestampMS = R.VersionTimestampMS;
+    AuditAccountServerListVersion = R.Version;
 
     if (UpdateAuditAccountServerListCallback) {
-        UpdateAuditAccountServerListCallback(AuditAccountSortedServerInfoList);
+        UpdateAuditAccountServerListCallback(AuditAccountServerListVersion, AuditAccountSortedServerInfoList);
     }
     return true;
 }
 
 void xAuditAccountServerListDownloader::PostAuditAccountServerListRequest() {
-    auto R               = xPP_DownloadAuditAccountServerList();
-    R.VersionTimestampMS = AuditAccountServerListVersionTimestampMS;
+    auto R    = xPP_DownloadAuditAccountServerList();
+    R.Version = AuditAccountServerListVersion;
     PostMessage(Cmd_DownloadAuditAccountServerList, 0, R);
 }

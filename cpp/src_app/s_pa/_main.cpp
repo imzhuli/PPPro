@@ -17,13 +17,13 @@ int main(int argc, char ** argv) {
     X_GUARD(AuthCacheServerListDownloader, ServiceIoContext, ConfigServerListDownloadAddress);
     X_GUARD(TcpServer, ServiceIoContext, ConfigTcpBindAddress, &ClientConnectionManager);
 
-    AuditAccountServerListDownloader.SetUpdateAuditAccountServerListCallback([](const std::vector<xServerInfo> & List) {
+    AuditAccountServerListDownloader.SetOnUpdateAuditAccountServerListCallback([](uint32_t Version, const std::vector<xServerInfo> & List) {
         for (auto & I : List) {
             Logger->I("AA_ServerId=%" PRIi64 ", Address=%s", I.ServerId, I.Address.ToString().c_str());
         }
         AuditAccountLocalServer.UpdateServerList(List);
     });
-    AuthCacheServerListDownloader.SetUpdateAuthCacheServerListCallback([](const std::vector<xServerInfo> & List) {
+    AuthCacheServerListDownloader.SetOnUpdateAuthCacheServerListCallback([](uint32_t Version, const std::vector<xServerInfo> & List) {
         for (auto & I : List) {
             Logger->I("AC_ServerId=%" PRIi64 ", Address=%s", I.ServerId, I.Address.ToString().c_str());
         }

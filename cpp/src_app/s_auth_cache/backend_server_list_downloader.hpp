@@ -8,14 +8,14 @@ public:
     using xClient::Init;
     void Clean() {
         Reset(BackendServerList);
-        Reset(BackendServerListVersionTimestampMS);
+        Reset(BackendServerListVersion);
         xClient::Clean();
     }
     using xClient::Tick;
 
     using xUpdateCallback =
         std::function<void(uint32_t Version, const std::vector<xNetAddress> & FullList, const std::vector<xNetAddress> & Added, const std::vector<xNetAddress> & Removed)>;
-    void SetUpdateCallback(xUpdateCallback Callback) { this->UpdateCallback = Callback; }
+    void SetOnUpdateCallback(xUpdateCallback Callback) { this->UpdateCallback = Callback; }
 
 protected:
     void OnTick(uint64_t NowMS) override;
@@ -27,7 +27,7 @@ protected:
     bool OnDownloadBackendServerListResp(ubyte * PayloadPtr, size_t PayloadSize);
 
 private:
-    uint64_t                 BackendServerListVersionTimestampMS = 0;
+    uint32_t                 BackendServerListVersion = 0;
     std::vector<xNetAddress> BackendServerList;
     xUpdateCallback          UpdateCallback;
 };

@@ -81,7 +81,7 @@ int main(int argc, char ** argv) {
 
     AuthService.UpdateBackendAuthInfo(BackendServerAppKey, BackendServerAppSecret);
 
-    BackendServerListDownloader.SetUpdateCallback([](uint32_t V, auto & FL, auto & AL, auto & RL) {
+    BackendServerListDownloader.SetOnUpdateCallback([](uint32_t V, auto & FL, auto & AL, auto & RL) {
         auto OS = std::ostringstream();
         OS << "BackendServerListVersion: " << V << endl;
         OS << "Added: " << endl;
