@@ -82,18 +82,18 @@ int main(int argc, char ** argv) {
     AuthService.UpdateBackendAuthInfo(BackendServerAppKey, BackendServerAppSecret);
 
     BackendServerListDownloader.SetOnUpdateCallback([](uint32_t V, auto & FL, auto & AL, auto & RL) {
-        // auto OS = std::ostringstream();
-        // OS << "BackendServerListVersion: " << V << endl;
-        // OS << "Added: " << endl;
-        // for (auto & A : AL) {
-        //     OS << A.ToString() << endl;
-        // }
-        // OS << "Removed: " << endl;
-        // for (auto & R : RL) {
-        //     OS << R.ToString() << endl;
-        // }
-        // OS << "BackendServerList Updated";
-        // Logger->I("BackendServerListDownloaded: %s", OS.str().c_str());
+        auto OS = std::ostringstream();
+        OS << "BackendServerListVersion: " << V << endl;
+        OS << "Added: " << endl;
+        for (auto & A : AL) {
+            OS << A.ToString() << endl;
+        }
+        OS << "Removed: " << endl;
+        for (auto & R : RL) {
+            OS << R.ToString() << endl;
+        }
+        OS << "BackendServerList Updated";
+        Logger->I("BackendServerListDownloaded: %s", OS.str().c_str());
         AuthService.UpdateBackendServerList(AL, RL);
     });
 

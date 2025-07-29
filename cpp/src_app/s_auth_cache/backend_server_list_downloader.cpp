@@ -1,8 +1,8 @@
 #include "./backend_server_list_downloader.hpp"
 
 void xAC_BackendServerListDownloader::OnTick(uint64_t NowMS) {
-    if (NowMS - BackendServerListVersion >= UPDATE_SERVER_LIST_TIMEOUT_MS) {
-        BackendServerListVersion = NowMS;
+    if (NowMS - LastUpdateTimestampMS >= UPDATE_SERVER_LIST_TIMEOUT_MS) {
+        LastUpdateTimestampMS = NowMS;
         PostUpdateServerListRequest();
     }
 }

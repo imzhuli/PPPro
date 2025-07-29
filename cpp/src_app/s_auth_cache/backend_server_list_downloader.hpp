@@ -27,6 +27,7 @@ protected:
     bool OnDownloadBackendServerListResp(ubyte * PayloadPtr, size_t PayloadSize);
 
 private:
+    uint64_t                 LastUpdateTimestampMS    = 0;
     uint32_t                 BackendServerListVersion = 0;
     std::vector<xNetAddress> BackendServerList;
     xUpdateCallback          UpdateCallback;
