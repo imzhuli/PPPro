@@ -1,14 +1,10 @@
 #pragma once
-#include <pp_common/base.hpp>
+#include <pp_common/_.hpp>
 
 class xInitCtrlStream : public xBinaryMessage {
 public:
-    void SerializeMembers() override {
-        W(CheckKey, Ipv4Address, Ipv6Address, Resolved3rdIpv6);
-    }
-    void DeserializeMembers() override {
-        R(CheckKey, Ipv4Address, Ipv6Address, Resolved3rdIpv6);
-    }
+    void SerializeMembers() override { W(CheckKey, Ipv4Address, Ipv6Address, Resolved3rdIpv6); }
+    void DeserializeMembers() override { R(CheckKey, Ipv4Address, Ipv6Address, Resolved3rdIpv6); }
 
 public:
     std::string CheckKey;
@@ -19,12 +15,8 @@ public:
 
 class xInitCtrlStreamResp : public xBinaryMessage {
 public:
-    void SerializeMembers() override {
-        W(DeviceId, CtrlId, DeviceKey, EnableIpv6);
-    }
-    void DeserializeMembers() override {
-        R(DeviceId, CtrlId, DeviceKey, EnableIpv6);
-    }
+    void SerializeMembers() override { W(DeviceId, CtrlId, DeviceKey, EnableIpv6); }
+    void DeserializeMembers() override { R(DeviceId, CtrlId, DeviceKey, EnableIpv6); }
 
 public:
     uint64_t    DeviceId;

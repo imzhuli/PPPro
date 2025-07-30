@@ -1,14 +1,10 @@
 #pragma once
-#include <pp_common/base.hpp>
+#include <pp_common/_.hpp>
 
 class xTR_CreateConnection : public xBinaryMessage {
 public:
-    void SerializeMembers() override {
-        W(RelaySideConnectionId, TargetAddress);
-    }
-    void DeserializeMembers() override {
-        R(RelaySideConnectionId, TargetAddress);
-    }
+    void SerializeMembers() override { W(RelaySideConnectionId, TargetAddress); }
+    void DeserializeMembers() override { R(RelaySideConnectionId, TargetAddress); }
 
 public:
     uint64_t    RelaySideConnectionId;
@@ -17,12 +13,8 @@ public:
 
 class xTR_DestroyConnection : public xBinaryMessage {
 public:
-    void SerializeMembers() override {
-        W(DeviceSideConnectionId, RelaySideConnectionId);
-    }
-    void DeserializeMembers() override {
-        R(DeviceSideConnectionId, RelaySideConnectionId);
-    }
+    void SerializeMembers() override { W(DeviceSideConnectionId, RelaySideConnectionId); }
+    void DeserializeMembers() override { R(DeviceSideConnectionId, RelaySideConnectionId); }
 
 public:
     uint32_t DeviceSideConnectionId;

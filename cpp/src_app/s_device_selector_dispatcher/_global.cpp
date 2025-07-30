@@ -10,3 +10,5 @@ xNetAddress ServerListRegisterAddress;
 
 xDSD_ClientSideService ClientSideService;
 xDSD_ServerSideService ServerSideService;
+
+xServiceRequestContextPool RequestContextPool;

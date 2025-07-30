@@ -1,5 +1,5 @@
 #pragma once
-#include <pp_common/base.hpp>
+#include <pp_common/_.hpp>
 #include <pp_protocol/cc_dv/device.hpp>
 #include <pp_protocol/command.hpp>
 

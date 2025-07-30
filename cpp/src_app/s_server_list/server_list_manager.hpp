@@ -1,5 +1,5 @@
 #pragma once
-#include <pp_common/base.hpp>
+#include <pp_common/_.hpp>
 #include <pp_protocol/internal/all.hpp>
 
 struct xSL_InternalServerInfo {

@@ -29,6 +29,7 @@ int main(int argc, char ** argv) {
     X_GUARD(ServerSideService, ServiceIoContext, BindAddressForServer, 5'000);
     X_GUARD(ServerIdClient, ServiceIoContext, ServerIdCenterAddress, RuntimeEnv.DefaultLocalServerIdFilePath);
     X_GUARD(RegisterServerClient, ServiceIoContext, ServerListRegisterAddress);
+    X_GUARD(RequestContextPool, 20'0000);
 
     ServerIdClient.SetCallback([](auto ServerId) {
         DumpLocalServerId(RuntimeEnv.DefaultLocalServerIdFilePath, ServerId);

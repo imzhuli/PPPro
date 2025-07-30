@@ -1,5 +1,5 @@
 #pragma once
-#include <pp_common/base.hpp>
+#include <pp_common/_.hpp>
 
 class xTR_PostData : public xBinaryMessage {
 public:
@@ -7,9 +7,7 @@ public:
         assert(PayloadView.data() && PayloadView.size());
         W(DeviceSideConnectionId, RelaySideConnectionId, PayloadView);
     }
-    void DeserializeMembers() override {
-        R(DeviceSideConnectionId, RelaySideConnectionId, PayloadView);
-    }
+    void DeserializeMembers() override { R(DeviceSideConnectionId, RelaySideConnectionId, PayloadView); }
 
 public:
     uint32_t         DeviceSideConnectionId;

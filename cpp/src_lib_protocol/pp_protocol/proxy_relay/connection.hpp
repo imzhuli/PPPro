@@ -1,14 +1,10 @@
 #pragma once
-#include <pp_common/base.hpp>
+#include <pp_common/_.hpp>
 
 class xPR_CreateConnection : public xBinaryMessage {
 public:
-    void SerializeMembers() override {
-        W(RelaySideDeviceId, ProxySideConnectionId, TargetAddress, HostnameView, HostnamePort);
-    }
-    void DeserializeMembers() override {
-        R(RelaySideDeviceId, ProxySideConnectionId, TargetAddress, HostnameView, HostnamePort);
-    }
+    void SerializeMembers() override { W(RelaySideDeviceId, ProxySideConnectionId, TargetAddress, HostnameView, HostnamePort); }
+    void DeserializeMembers() override { R(RelaySideDeviceId, ProxySideConnectionId, TargetAddress, HostnameView, HostnamePort); }
 
 public:
     uint64_t         RelaySideDeviceId;
@@ -20,12 +16,8 @@ public:
 
 class xPR_DestroyConnection : public xBinaryMessage {
 public:
-    void SerializeMembers() override {
-        W(ProxySideConnectionId, RelaySideConnectionId);
-    }
-    void DeserializeMembers() override {
-        R(ProxySideConnectionId, RelaySideConnectionId);
-    }
+    void SerializeMembers() override { W(ProxySideConnectionId, RelaySideConnectionId); }
+    void DeserializeMembers() override { R(ProxySideConnectionId, RelaySideConnectionId); }
 
 public:
     uint64_t ProxySideConnectionId;
@@ -79,12 +71,8 @@ public:
 
 class xPR_PushData : public xBinaryMessage {
 public:
-    void SerializeMembers() override {
-        W(ProxySideConnectionId, RelaySideConnectionId, PayloadView);
-    }
-    void DeserializeMembers() override {
-        R(ProxySideConnectionId, RelaySideConnectionId, PayloadView);
-    }
+    void SerializeMembers() override { W(ProxySideConnectionId, RelaySideConnectionId, PayloadView); }
+    void DeserializeMembers() override { R(ProxySideConnectionId, RelaySideConnectionId, PayloadView); }
 
 public:
     uint64_t         ProxySideConnectionId;

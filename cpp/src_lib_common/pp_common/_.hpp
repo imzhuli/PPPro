@@ -1,4 +1,5 @@
 #pragma once
+#include <config/config.hpp>
 #include <core/core_min.hpp>
 #include <core/core_os.hpp>
 #include <core/core_stream.hpp>
@@ -42,8 +43,10 @@ using xel::xAbstract;
 using xel::xBaseLogger;
 using xel::xBinaryMessage;
 using xel::xClient;
+using xel::xClientConnection;
 using xel::xClientPool;
 using xel::xCommandLine;
+using xel::xConfigLoader;
 using xel::xIndexedStorage;
 using xel::xIndexId;
 using xel::xIndexIdPool;
@@ -66,12 +69,14 @@ using xel::xResourceGuard;
 using xel::xScopeCleaner;
 using xel::xScopeGuard;
 using xel::xService;
+using xel::xServiceClientConnection;
 using xel::xSocket;
 using xel::xStreamReader;
 using xel::xStreamWriter;
 using xel::xTcpConnection;
 using xel::xTcpServer;
 using xel::xTicker;
+using xel::xTimer;
 using xel::xUdpChannel;
 
 // functions
@@ -79,16 +84,21 @@ using xel::Base64Decode;
 using xel::Base64Encode;
 using xel::BuildPacket;
 using xel::Daemonize;
+using xel::FileToLines;
+using xel::FileToStr;
 using xel::GetTimestampMS;
 using xel::HexShow;
 using xel::HexToStr;
+using xel::JoinStr;
 using xel::Md5;
 using xel::Pure;
 using xel::RuntimeAssert;
 using xel::Split;
 using xel::Steal;
 using xel::StrToHex;
+using xel::StrToHexLower;
 using xel::Todo;
+using xel::Trim;
 using xel::Unreachable;
 using xel::WriteMessage;
 using xel::ZeroFill;
@@ -256,8 +266,6 @@ struct xMessagePoster {
     virtual void     PostMessage(xPacketCommandId CmdId, xPacketRequestId RequestId, xBinaryMessage & Message) = 0;
 };
 
-// clang-format off
-
 namespace __pp_common_detail__ {
     template <typename T>
     inline void __TickOne__(uint64_t NowMS, T & Target) {
@@ -278,6 +286,26 @@ inline void TickAll(uint64_t NowMS, T &... All) {
     __pp_common_detail__::__TickAll__(NowMS, All...);
 }
 
+template <typename T>
+class xSingleton {
+    static std::atomic<xSingleton *> InstnacePtr;
+
+protected:
+    inline xSingleton() {
+        xSingleton * Expected = nullptr;
+        RuntimeAssert(InstnacePtr.compare_exchange_strong(Expected, this), "mutiple instance of singlton type");
+    }
+    inline ~xSingleton() {
+        xSingleton * Expected = this;
+        RuntimeAssert(InstnacePtr.compare_exchange_strong(Expected, nullptr), "mutiple instance destroyed of singlton type");
+    }
+    inline xSingleton(xSingleton &&) = delete;
+};
+template <typename T>
+std::atomic<xSingleton<T> *> xSingleton<T>::InstnacePtr = nullptr;
+
+// clang-format off
+
 static inline uint32_t High32(uint64_t U) { return (uint32_t)(U >> 32); }
 static inline uint32_t Low32(uint64_t U)  { return (uint32_t)(U); }
 static inline uint64_t Make64(uint32_t H32, uint32_t L32) { return (static_cast<uint64_t>(H32) << 32) + L32; }
@@ -285,6 +313,22 @@ static inline uint64_t Make64(uint32_t H32, uint32_t L32) { return (static_cast<
 static inline uint16_t High16(uint64_t U) { return (uint16_t)(U >> 48); }
 static inline uint64_t Low48(uint64_t U)  { return U & 0x0000'FFFF'FFFF'FFFFu; }
 static inline uint64_t Make64_H16L48(uint16_t H16, uint64_t L48) { return (static_cast<uint64_t>(H16) << 48) + L48; }
+
+// clang-format on
+
+// clang-format off
+
+#define CASE_PRINT(x) case x: X_DEBUG_PRINTF("%s", X_STRINGIFY(x)); break
+
+template<typename T>
+std::unique_ptr<T> P2U(T * && Ptr) { return std::unique_ptr<T>(std::move(Ptr)); }
+
+extern uint32_t HashString(const char * S);
+extern uint32_t HashString(const char * S, size_t Len);
+extern uint32_t HashString(const std::string & S);
+
+std::string DebugSign(const void * DataPtr, size_t Size);
+static inline std::string DebugSign(const std::string_view& V) { return DebugSign(V.data(), V.size()); }
 
 // clang-format on
 

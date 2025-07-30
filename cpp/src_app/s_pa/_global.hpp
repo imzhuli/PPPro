@@ -6,7 +6,7 @@
 #include "./client_base.hpp"
 #include "./client_connection_manager.hpp"
 
-#include <pp_common/base.hpp>
+#include <pp_common/_.hpp>
 
 extern xNetAddress ConfigTcpBindAddress;
 extern xNetAddress ConfigServerListDownloadAddress;

@@ -1,14 +1,10 @@
 #pragma once
-#include <pp_common/base.hpp>
+#include <pp_common/_.hpp>
 
 class xTR_CreateUdpChannel : public xBinaryMessage {
 public:
-    void SerializeMembers() override {
-        W(RelaySideChannelId);
-    }
-    void DeserializeMembers() override {
-        R(RelaySideChannelId);
-    }
+    void SerializeMembers() override { W(RelaySideChannelId); }
+    void DeserializeMembers() override { R(RelaySideChannelId); }
 
 public:
     uint64_t RelaySideChannelId;
@@ -16,12 +12,8 @@ public:
 
 class xTR_CreateUdpChannelResp : public xBinaryMessage {
 public:
-    void SerializeMembers() override {
-        W(DeviceSideChannelId, RelaySideChannelId);
-    }
-    void DeserializeMembers() override {
-        R(DeviceSideChannelId, RelaySideChannelId);
-    }
+    void SerializeMembers() override { W(DeviceSideChannelId, RelaySideChannelId); }
+    void DeserializeMembers() override { R(DeviceSideChannelId, RelaySideChannelId); }
 
 public:
     uint32_t DeviceSideChannelId;
@@ -30,12 +22,8 @@ public:
 
 class xTR_UdpChannelKeepAlive : public xBinaryMessage {
 public:
-    void SerializeMembers() override {
-        W(DeviceSideChannelId, RelaySideChannelId);
-    }
-    void DeserializeMembers() override {
-        R(DeviceSideChannelId, RelaySideChannelId);
-    }
+    void SerializeMembers() override { W(DeviceSideChannelId, RelaySideChannelId); }
+    void DeserializeMembers() override { R(DeviceSideChannelId, RelaySideChannelId); }
 
 public:
     uint32_t DeviceSideChannelId;
@@ -44,12 +32,8 @@ public:
 
 class xTR_UdpChannelClose : public xBinaryMessage {
 public:
-    void SerializeMembers() override {
-        W(DeviceSideChannelId, RelaySideChannelId);
-    }
-    void DeserializeMembers() override {
-        R(DeviceSideChannelId, RelaySideChannelId);
-    }
+    void SerializeMembers() override { W(DeviceSideChannelId, RelaySideChannelId); }
+    void DeserializeMembers() override { R(DeviceSideChannelId, RelaySideChannelId); }
 
 public:
     uint32_t DeviceSideChannelId;
@@ -62,9 +46,7 @@ public:
         assert(PayloadView.data() && PayloadView.size());
         W(DeviceSideChannelId, RelaySideChannelId, PayloadView);
     }
-    void DeserializeMembers() override {
-        R(DeviceSideChannelId, RelaySideChannelId, PayloadView);
-    }
+    void DeserializeMembers() override { R(DeviceSideChannelId, RelaySideChannelId, PayloadView); }
 
 public:
     uint32_t         DeviceSideChannelId;
