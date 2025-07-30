@@ -44,16 +44,21 @@ class xServiceRequestContextPool {
 public:
     bool Init(size_t PoolSize);
     void Clean();
+    void Tick(uint64_t NowMS) { RemoveTimeoutRequests(DefaultTimeoutMS, NowMS); }
 
     auto Acquire(xVariable RequestContext = {}, xVariable RequestContextEx = {}) -> const xServiceRequestContext *;
     auto CheckAndGet(uint64_t RequestId) -> const xServiceRequestContext *;
     void Release(const xServiceRequestContext * RCP);
 
-    template <typename tCallback = void(const xServiceRequestContext *)>
-    void RemoveTimeoutRequests(uint64_t TimeoutMS, tCallback && Callback = IgnoreTimeoutRequest) {
-        auto KillTimepoint = ServiceTicker() - TimeoutMS;
+    using xOnTimeoutRequestCallback = std::function<void(const xServiceRequestContext *)>;
+    void SetRequestTimeoutMS(uint64_t TimeoutMS) { DefaultTimeoutMS = TimeoutMS > 500 ? TimeoutMS : 500; }
+    void SetOnTimeoutRequestCallback(const xOnTimeoutRequestCallback & CB) { OnTimeoutRequestCallback = CB; }
+    void ClearTimeoutRequestCallback() { OnTimeoutRequestCallback = &IgnoreTimeoutRequest; }
+
+    void RemoveTimeoutRequests(uint64_t TimeoutMS, uint64_t NowMS = ServiceTicker()) {
+        auto KillTimepoint = NowMS - TimeoutMS;
         while (auto P = (const xServiceRequestContext *)TimeoutList.PopHead([KillTimepoint](const xServiceRequestContext & N) { return N.RequestTimestampMS <= KillTimepoint; })) {
-            std::forward<tCallback>(Callback)(P);
+            OnTimeoutRequestCallback(P);
             Pool.Release(P->RequestId);
         }
     }
@@ -64,6 +69,8 @@ private:
 private:
     xIndexedStorage<xServiceRequestContext> Pool;
     xServiceRequestContextList              TimeoutList;
+    uint64_t                                DefaultTimeoutMS         = 2'000;
+    xOnTimeoutRequestCallback               OnTimeoutRequestCallback = &IgnoreTimeoutRequest;
 };
 
 #ifndef NDEBUG

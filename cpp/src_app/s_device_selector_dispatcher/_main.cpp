@@ -38,7 +38,7 @@ int main(int argc, char ** argv) {
     RegisterServerClient.SetServerIdPoster(DSD_RegisterServer);
 
     while (ServiceRunState) {
-        ServiceUpdateOnce(ClientSideService, ServerSideService, ServerIdClient, RegisterServerClient);
+        ServiceUpdateOnce(ClientSideService, ServerSideService, ServerIdClient, RegisterServerClient, RequestContextPool);
     }
 
     return 0;
