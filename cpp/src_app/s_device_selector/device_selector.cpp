@@ -7,9 +7,7 @@
 
 bool xDS_DeviceSelectorServiceProvider::Init(xIoContext * ICP) {
     RuntimeAssert(ClientPool.Init(ICP));
-    ClientPool.SetOnConnectedCallback([this](xMessagePoster * Poster) {
-        // TODO: register server type
-    });
+    ClientPool.SetOnConnectedCallback([this](xMessagePoster * Poster) { RegisterServiceProvider(Poster); });
     ClientPool.SetOnPacketCallback([this](xMessagePoster * Source, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) -> bool {
         // TODO: process message
         return true;
@@ -26,8 +24,12 @@ void xDS_DeviceSelectorServiceProvider::Clean() {
     ClientPool.Clean();
 }
 
-// void xDS_DeviceSelectorService::OnClientConnected(xServiceClientConnection & Connection) {
-// }
+void xDS_DeviceSelectorServiceProvider::RegisterServiceProvider(xMessagePoster * Poster) {
+    auto R = xPP_RegisterDeviceSelector();
+    // TODO: set server info
+
+    Poster->PostMessage(Cmd_RegisterDeviceSelector, 0, R);
+}
 
 // void xDS_DeviceSelectorService::OnClientClose(xServiceClientConnection & Connection) {
 // }

@@ -104,9 +104,11 @@ using xel::WriteMessage;
 using xel::ZeroFill;
 
 // std-lib:
+#include <bitset>
 #include <functional>
 #include <iostream>
 using std::bind;
+using std::bitset;
 using std::cerr;
 using std::cout;
 using std::endl;
@@ -240,6 +242,21 @@ struct xDeviceSelectorDispatcherInfo {
     uint64_t    StartupTimestampMS;
     xNetAddress ExportAddressForClient          = {};
     xNetAddress ExportAddressForServiceProvider = {};
+};
+
+struct xDeviceSelectorServerInfo {
+    enum eRegionDetailLevel : uint16_t {
+        UNSPECIFIED = 0,
+        COUNTRY     = 1,
+        STATE       = 2,
+        CITY        = 3,
+        LOCAL_AREA  = 4,
+    };
+    eRegionDetailLevel RegionDetailLevel    = UNSPECIFIED;
+    bool               AllowRegionDowngrade = false;  // 当高精度区域不可用时, 返回粗精度的IP
+    bool               HasAuditBinding      = false;  // 对于要求IP不变的对象, 需要有保持记忆功能
+
+    std::bitset<128> PoolFlags = {};
 };
 
 struct xClientAuthResult {
