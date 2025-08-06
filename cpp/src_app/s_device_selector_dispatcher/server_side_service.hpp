@@ -13,6 +13,7 @@ public:
     //
 private:
     bool OnClientPacket(xServiceClientConnection & Connection, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) override;
+    void OnClientClose(xServiceClientConnection & Connection) override;
 
 private:
     bool OnRegisterServiceProvider(xServiceClientConnection & Connection, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize);

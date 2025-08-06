@@ -20,7 +20,8 @@ public:
 
 protected:
     void RegisterServiceProvider(xMessagePoster * Poster);
-    bool OnSelectDevice(xServiceClientConnection & CC, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize);
+    bool OnRegisterServerResp(ubyte * PayloadPtr, size_t PayloadSize);
+    bool OnSelectDevice(xMessagePoster * Source, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize);
 
 private:
     xClientPoolWrapper ClientPool;

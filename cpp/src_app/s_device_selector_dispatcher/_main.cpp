@@ -30,6 +30,7 @@ int main(int argc, char ** argv) {
     X_GUARD(ServerIdClient, ServiceIoContext, ServerIdCenterAddress, RuntimeEnv.DefaultLocalServerIdFilePath);
     X_GUARD(RegisterServerClient, ServiceIoContext, ServerListRegisterAddress);
     X_GUARD(RequestContextPool, 20'0000);
+    X_GUARD(ServiceProviderManager);
 
     ServerIdClient.SetCallback([](auto ServerId) {
         DumpLocalServerId(RuntimeEnv.DefaultLocalServerIdFilePath, ServerId);
@@ -39,6 +40,7 @@ int main(int argc, char ** argv) {
 
     while (ServiceRunState) {
         ServiceUpdateOnce(ClientSideService, ServerSideService, ServerIdClient, RegisterServerClient, RequestContextPool);
+        OutputLocalAudit();
     }
 
     return 0;

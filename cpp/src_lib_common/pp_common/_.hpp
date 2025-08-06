@@ -104,11 +104,9 @@ using xel::WriteMessage;
 using xel::ZeroFill;
 
 // std-lib:
-#include <bitset>
 #include <functional>
 #include <iostream>
 using std::bind;
-using std::bitset;
 using std::cerr;
 using std::cout;
 using std::endl;
@@ -143,6 +141,7 @@ static constexpr const uint32_t MAX_AUTH_CACHE_SERVER_COUNT          = 75;
 static constexpr const uint32_t MAX_DEVICE_STATE_RELAY_SERVER_COUNT  = 75;
 static constexpr const uint32_t MAX_AUDIT_DEVICE_SERVER_COUNT        = 75;
 static constexpr const uint32_t MAX_AUDIT_ACCOUNT_SERVER_COUNT       = 75;
+static constexpr const uint32_t MAX_DEVICE_SELECTOR_COUNT            = 1000;
 static constexpr const uint32_t MAX_DEVICE_SELECTOR_DISPATCHER_COUNT = 75;
 static constexpr const uint32_t MAX_BACKEND_SERVER_COUNT             = 75;
 
@@ -252,11 +251,19 @@ struct xDeviceSelectorServerInfo {
         CITY        = 3,
         LOCAL_AREA  = 4,
     };
+
+    enum eStrategyId : uint16_t {
+        SI_GENERIC = 0,
+    };
+
+    static constexpr const uint16_t MAX_POOL_ID     = 128;
+    static constexpr const uint16_t MAX_STRATEGY_ID = 128;
+
     eRegionDetailLevel RegionDetailLevel    = UNSPECIFIED;
     bool               AllowRegionDowngrade = false;  // 当高精度区域不可用时, 返回粗精度的IP
     bool               HasAuditBinding      = false;  // 对于要求IP不变的对象, 需要有保持记忆功能
-
-    std::bitset<128> PoolFlags = {};
+    uint16_t           PoolId               = 0;
+    uint16_t           StrategyId           = 0;
 };
 
 struct xClientAuthResult {

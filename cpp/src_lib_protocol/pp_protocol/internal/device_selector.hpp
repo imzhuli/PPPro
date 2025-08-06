@@ -6,20 +6,17 @@ struct xPP_RegisterDeviceSelector : public xBinaryMessage {
         W(ServerInfo.RegionDetailLevel);
         W(ServerInfo.AllowRegionDowngrade);
         W(ServerInfo.HasAuditBinding);
-        W(XR(ServerInfo.PoolFlags.to_string()));
+        W(ServerInfo.PoolId);
+        W(ServerInfo.StrategyId);
         //
     }
+
     void DeserializeMembers() override {
-        auto PoolFlagsString = std::string();
         R(ServerInfo.RegionDetailLevel);
         R(ServerInfo.AllowRegionDowngrade);
         R(ServerInfo.HasAuditBinding);
-        R(PoolFlagsString);
-        try {
-            xel::Reset(ServerInfo.PoolFlags, PoolFlagsString);
-        } catch (...) {
-            GetReader()->SetError();
-        }
+        R(ServerInfo.PoolId);
+        R(ServerInfo.StrategyId);
     }
 
     xDeviceSelectorServerInfo ServerInfo;

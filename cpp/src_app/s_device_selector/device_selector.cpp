@@ -9,7 +9,15 @@ bool xDS_DeviceSelectorServiceProvider::Init(xIoContext * ICP) {
     RuntimeAssert(ClientPool.Init(ICP));
     ClientPool.SetOnConnectedCallback([this](xMessagePoster * Poster) { RegisterServiceProvider(Poster); });
     ClientPool.SetOnPacketCallback([this](xMessagePoster * Source, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) -> bool {
-        // TODO: process message
+        switch (CommandId) {
+            case Cmd_RegisterServerResp:
+                return OnRegisterServerResp(PayloadPtr, PayloadSize);
+            case Cmd_DeviceSelector_AcquireDevice:
+                return OnSelectDevice(Source, RequestId, PayloadPtr, PayloadSize);
+            default:
+                DEBUG_LOG("Invalid command id");
+                return false;
+        }
         return true;
     });
 
@@ -24,6 +32,20 @@ void xDS_DeviceSelectorServiceProvider::Clean() {
     ClientPool.Clean();
 }
 
+bool xDS_DeviceSelectorServiceProvider::OnRegisterServerResp(ubyte * PayloadPtr, size_t PayloadSize) {
+    auto R = xPP_RegisterServerResp();
+    if (!R.Deserialize(PayloadPtr, PayloadSize)) {
+        DEBUG_LOG("invalid protocol");
+        return false;
+    }
+    if (!R.Accepted) {
+        DEBUG_LOG("not accepted");
+        return false;
+    }
+    DEBUG_LOG("device selector accepted");
+    return true;
+}
+
 void xDS_DeviceSelectorServiceProvider::RegisterServiceProvider(xMessagePoster * Poster) {
     auto R = xPP_RegisterDeviceSelector();
     // TODO: set server info
@@ -31,22 +53,21 @@ void xDS_DeviceSelectorServiceProvider::RegisterServiceProvider(xMessagePoster *
     Poster->PostMessage(Cmd_RegisterDeviceSelector, 0, R);
 }
 
+bool xDS_DeviceSelectorServiceProvider::OnSelectDevice(xMessagePoster * Source, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) {
+    auto Req = xPP_AcquireDevice();
+    if (!Req.Deserialize(PayloadPtr, PayloadSize)) {
+        DEBUG_LOG("invalid protocol");
+        return false;
+    }
+
+    // TODO: select device:
+
+    auto Resp = xPP_AcquireDeviceResp();
+    Source->PostMessage(Cmd_DeviceSelector_AcquireDeviceResp, RequestId, Resp);
+    return true;
+}
+
 // void xDS_DeviceSelectorService::OnClientClose(xServiceClientConnection & Connection) {
-// }
-
-// bool xDS_DeviceSelectorService::OnClientPacket(
-//     xServiceClientConnection & Connection, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize
-// ) {
-//     DEBUG_LOG("CommandId: %" PRIx64 ", \n%s", CommandId, HexShow(PayloadPtr, PayloadSize).c_str());
-
-//     switch (CommandId) {
-//         case Cmd_DeviceSelector_AcquireDevice:
-//             return OnSelectDevice(Connection, RequestId, PayloadPtr, PayloadSize);
-//         default:
-//             DEBUG_LOG("Invalid command id");
-//             return true;
-//     }
-//     return true;
 // }
 
 // void xDS_DeviceSelectorService::OnCleanupClientConnection(const xServiceClientConnection & Connection) {

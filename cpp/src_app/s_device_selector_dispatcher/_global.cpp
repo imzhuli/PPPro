@@ -12,3 +12,24 @@ xDSD_ClientSideService ClientSideService;
 xDSD_ServerSideService ServerSideService;
 
 xServiceRequestContextPool RequestContextPool;
+
+xDSD_ServiceProviderManager ServiceProviderManager;
+
+xDSD_LocalAudit LocalAudit;
+
+static uint64_t LastOutputLocalAuditTimestampMS = 0;
+
+void OutputLocalAudit() {
+    auto NowMS = ServiceTicker();
+    if (NowMS - LastOutputLocalAuditTimestampMS < 5 * 60'000) {
+        return;
+    }
+    LastOutputLocalAuditTimestampMS = NowMS;
+
+    auto OS = std::ostringstream();
+    OS << "DuplicateRegistation: " << Steal(LocalAudit.TotalDuplicateRegistation) << ' ';
+    OS << "AddServerInfoError: " << Steal(LocalAudit.TotalAddServerInfoError) << ' ';
+
+    OS << "CurrentServiceProviderCount: " << LocalAudit.CurrentServiceProviderCount << ' ';
+    AuditLogger->I(OS.str().c_str());
+}

@@ -22,6 +22,6 @@ bool xDSD_ClientSideService::OnDeviceSelect(xServiceClientConnection & Connectio
     }
 
     // try select server:
-
+    DEBUG_LOG("NOT PROCESSED");
     return true;
 }

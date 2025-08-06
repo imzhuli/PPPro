@@ -59,7 +59,7 @@ xRuntimeEnv xRuntimeEnv::FromCommandLine(int CmdArgc, char ** CmdArgv) {
         Env.DefaultConfigFilePath = Env.GetConfigPath("default");
     }
 
-    Env.DefaultAuditLoggerFilePath   = Env.CacheDir / (Env.ProgramName + ".audit");
+    Env.DefaultAuditLoggerFilePath   = Env.CacheDir / (Env.ProgramName + ".adt");
     Env.DefaultLoggerFilePath        = Env.CacheDir / (Env.ProgramName + ".log");
     Env.DefaultLocalServerIdFilePath = Env.CacheDir / (Env.ProgramName + ".sid");
 
