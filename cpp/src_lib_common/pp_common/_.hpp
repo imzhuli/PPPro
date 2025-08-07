@@ -78,6 +78,7 @@ using xel::xTcpServer;
 using xel::xTicker;
 using xel::xTimer;
 using xel::xUdpChannel;
+using xel::xUdpService;
 
 // functions
 using xel::Base64Decode;

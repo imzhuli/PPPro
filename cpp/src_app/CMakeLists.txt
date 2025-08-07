@@ -75,6 +75,8 @@ set(target_list
 
 	t_server_list_downloader
 
+	x_device
+
 	)
 
 

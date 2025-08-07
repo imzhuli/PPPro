@@ -1,16 +1,27 @@
 #pragma once
 #include "../base.hpp"
 
-struct xPP_AddressAutoPush : public xBinaryMessage {  // from proxy_access to relay server
+struct xPP_AddressChallenge : public xBinaryMessage {  // from proxy_access to relay server
 public:
     void SerializeMembers() override {
-        W(XR(ConnectionAddress.ToString()));  //
+        W(Hello);  //
     }
 
     void DeserializeMembers() override {
-        auto AddressString = std::string();
-        R(AddressString);
-        ConnectionAddress = xNetAddress::Parse(AddressString);
+        R(Hello);  //
+    }
+
+    std::string Hello;
+};
+
+struct xPP_AddressAutoPush : public xBinaryMessage {  // from proxy_access to relay server
+public:
+    void SerializeMembers() override {
+        W(ConnectionAddress);  //
+    }
+
+    void DeserializeMembers() override {
+        R(ConnectionAddress);  //
     }
 
     xNetAddress ConnectionAddress;
