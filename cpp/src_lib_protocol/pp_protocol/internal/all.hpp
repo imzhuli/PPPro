@@ -1,6 +1,7 @@
 #pragma once
 #include "./audit_account.hpp"
 #include "./auth_service.hpp"
+#include "./check_address.hpp"
 #include "./device_selector.hpp"
 #include "./device_state.hpp"
 #include "./download_server_list.hpp"

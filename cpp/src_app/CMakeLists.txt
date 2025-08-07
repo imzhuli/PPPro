@@ -32,7 +32,7 @@ elseif (CMAKE_SYSTEM_NAME MATCHES "Darwin")
 endif()
 
 aux_source_directory("./lib_backend_connection"      LIB_SRC)
-aux_source_directory("./lib_server_util"             LIB_SRC)
+aux_source_directory("./lib_utils"             LIB_SRC)
 aux_source_directory("./lib_server_list"  LIB_SRC)
 
 add_library(server ${LIB_SRC})
@@ -61,6 +61,7 @@ set(target_list
 	r_device_audit_to_backend
 
 	s_pa
+	s_address_test
 	s_audit_account
 	s_auth_cache
 	s_config_center

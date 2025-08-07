@@ -1,5 +1,5 @@
 #pragma once
-#include "../lib_server_util/all.hpp"
+#include "../lib_utils/all.hpp"
 
 struct xDSD_StrategyListNode : xListNode {};
 using xDSD_StrategyList = xList<xDSD_StrategyListNode>;

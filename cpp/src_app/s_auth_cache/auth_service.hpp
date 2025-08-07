@@ -1,7 +1,7 @@
 #pragma once
 #include "../lib_backend_connection/backend_connection_pool.hpp"
-#include "../lib_server_util/all.hpp"
-#include "../lib_server_util/cache_manager.hpp"
+#include "../lib_utils/all.hpp"
+#include "../lib_utils/cache_manager.hpp"
 
 #include <pp_common/_.hpp>
 

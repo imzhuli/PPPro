@@ -1,6 +1,6 @@
 #include "./client_connection_manager.hpp"
 
-#include "../lib_server_util/service_common.hpp"
+#include "../lib_utils/service_common.hpp"
 #include "_global.hpp"
 
 bool xPA_ClientConnectionManager::Init(xIoContext * ICP) {

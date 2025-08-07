@@ -1,5 +1,5 @@
 #pragma once
-#include "../lib_server_util/all.hpp"
+#include "../lib_utils/all.hpp"
 #include "./client_side_service.hpp"
 #include "./server_side_service.hpp"
 #include "./service_provider_manager.hpp"

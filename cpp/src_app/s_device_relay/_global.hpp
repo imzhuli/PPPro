@@ -1,7 +1,7 @@
 #pragma once
 #include "../lib_server_list/device_state_relay_server_list_downloader.hpp"
 #include "../lib_server_list/relay_info_dispatcher_server_info_downloader.hpp"
-#include "../lib_server_util/all.hpp"
+#include "../lib_utils/all.hpp"
 #include "./device_manager.hpp"
 #include "./relay_connection_manager.hpp"
 #include "./relay_server_info_reporter.hpp"
