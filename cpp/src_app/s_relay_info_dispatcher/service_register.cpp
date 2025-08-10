@@ -2,7 +2,7 @@
 
 #include "./global.hpp"
 
-static void RID_RegisterServer(xMessagePoster * Poster, uint64_t LocalServerId) {
+static void RID_RegisterServer(const xMessagePoster & Poster, uint64_t LocalServerId) {
     assert(LocalServerId);
     auto Req       = xPP_RegisterRelayInfoDispatcherServer();
     Req.ServerInfo = {
@@ -10,7 +10,7 @@ static void RID_RegisterServer(xMessagePoster * Poster, uint64_t LocalServerId) 
         .ProducerAddress = ExportProducerAddress,
         .ObserverAddress = ExportObserverAddress,
     };
-    Poster->PostMessage(Cmd_RegisterRelayInfoDispatcherServer, 0, Req);
+    Poster.PostMessage(Cmd_RegisterRelayInfoDispatcherServer, 0, Req);
 }
 
 bool xRID_RegisterServerService::Init() {
@@ -21,7 +21,7 @@ bool xRID_RegisterServerService::Init() {
         DumpLocalServerId(RuntimeEnv.DefaultLocalServerIdFilePath, NewServerId);
         RegisterClient.SetLocalServerId(NewServerId);
     });
-    RegisterClient.SetServerIdPoster(RID_RegisterServer);
+    RegisterClient.SetServerIdPoster(&RID_RegisterServer);
     return true;
 }
 

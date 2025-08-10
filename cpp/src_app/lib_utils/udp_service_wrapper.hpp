@@ -1,7 +1,7 @@
 #pragma once
 #include <pp_common/_.hpp>
 
-class xUdpServiceWrapper : private xel::xUdpService {
+class xUdpServiceWrapper final : private xel::xUdpService {
 
 public:
     using xUdpService::Init;

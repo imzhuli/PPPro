@@ -3,13 +3,13 @@
 static auto ServerIdClient       = xServerIdClient();
 static auto RegisterServerClient = xRegisterServerClient();
 
-static void DSD_RegisterServer(xMessagePoster * Poster, uint64_t LocalServerId) {
+static void DSD_RegisterServer(const xMessagePoster & Poster, uint64_t LocalServerId) {
     auto   Req                                 = xPP_RegisterDeviceSelectorDispatcher();
     auto & ServerInfo                          = Req.ServerInfo;
     ServerInfo.ServerId                        = LocalServerId;
     ServerInfo.ExportAddressForClient          = ExportBindAddressForClient;
     ServerInfo.ExportAddressForServiceProvider = ExportBindAddressForServer;
-    Poster->PostMessage(Cmd_RegisterDeviceSelectorDispatcherServer, 0, Req);
+    Poster.PostMessage(Cmd_RegisterDeviceSelectorDispatcherServer, 0, Req);
 }
 
 int main(int argc, char ** argv) {

@@ -288,7 +288,8 @@ struct xAuditAccountInfo {
 
 struct xMessagePoster {
     virtual uint64_t GetInternalId() const { return 0; }
-    virtual void     PostMessage(xPacketCommandId CmdId, xPacketRequestId RequestId, xBinaryMessage & Message) = 0;
+    virtual void     PostMessage(xPacketCommandId CmdId, xPacketRequestId RequestId, xBinaryMessage & Message) const = 0;
+    virtual void     PostMessageUnchecked(xPacketCommandId CmdId, xPacketRequestId RequestId, xBinaryMessage & Message) const { PostMessage(CmdId, RequestId, Message); }
 };
 
 namespace __pp_common_detail__ {

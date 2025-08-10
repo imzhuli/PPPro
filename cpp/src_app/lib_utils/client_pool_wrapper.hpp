@@ -40,18 +40,26 @@ private:
         auto operator==(const xCPW_InternalServerInfo & O) const { return Address == O.Address; }
     };
 
-    struct xCPW_MessagePoster final : xMessagePoster {
+    class xCPW_MessagePoster final : public xMessagePoster {
     public:
         xCPW_MessagePoster(xClientPool * CPP, xClientConnection * CCP) {
-            this->CPP = CPP;
-            this->CCP = CCP;
+            this->CPP          = CPP;
+            this->CCP          = CCP;
+            this->ConnectionId = CCP->GetConnectionId();
         }
-        uint64_t GetInternalId() const { return CCP->GetConnectionId(); }
-        void     PostMessage(xPacketCommandId CmdId, xPacketRequestId RequestId, xBinaryMessage & Message) override { CPP->PostMessage(*CCP, CmdId, RequestId, Message); }
+
+        uint64_t GetInternalId() const override { return ConnectionId; }
+        void     PostMessage(xPacketCommandId CmdId, xPacketRequestId RequestId, xBinaryMessage & Message) const override {  //
+            CPP->PostMessage(ConnectionId, CmdId, RequestId, Message);
+        }
+        void PostMessageUnchecked(xPacketCommandId CmdId, xPacketRequestId RequestId, xBinaryMessage & Message) const override {
+            CPP->PostMessage(*CCP, CmdId, RequestId, Message);
+        }
 
     private:
         xClientPool *       CPP;
         xClientConnection * CCP;
+        uint64_t            ConnectionId;
     };
 
     std::vector<xCPW_InternalServerInfo> SortedServerList;

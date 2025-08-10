@@ -1,5 +1,9 @@
 #include "./register_server_client.hpp"
 
+void xRegisterServerClientMessagePoster::PostMessage(xPacketCommandId CmdId, xPacketRequestId RequestId, xBinaryMessage & Message) const {
+    Owner->PostMessage(CmdId, RequestId, Message);
+}
+
 void xRegisterServerClient::Clean() {
     Reset(LocalServerId);
     xClient::Clean();
@@ -12,12 +16,8 @@ void xRegisterServerClient::SetLocalServerId(uint64_t NewServerId) {
     }
 }
 
-void xRegisterServerClient::PostMessage(xPacketCommandId CmdId, xPacketRequestId RequestId, xBinaryMessage & Message) {
-    xClient::PostMessage(CmdId, RequestId, Message);
-}
-
 void xRegisterServerClient::OnServerConnected() {
     if (LocalServerId && IdPoster) {
-        IdPoster(this, LocalServerId);
+        IdPoster(xRegisterServerClientMessagePoster(this), LocalServerId);
     }
 }

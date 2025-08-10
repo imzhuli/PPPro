@@ -56,11 +56,11 @@ using namespace std::chrono_literals;
 //     }
 // }
 
-static void AC_RegisterServer(xMessagePoster * Poster, uint64_t LocalServerId) {
+static void AC_RegisterServer(const xMessagePoster & Poster, uint64_t LocalServerId) {
     auto Req     = xPP_RegisterAuthCacheServer();
     Req.ServerId = LocalServerId;
     Req.Address  = ExportServerAddress;
-    Poster->PostMessage(Cmd_RegisterAuthCacheServer, 0, Req);
+    Poster.PostMessage(Cmd_RegisterAuthCacheServer, 0, Req);
 }
 
 int main(int argc, char ** argv) {

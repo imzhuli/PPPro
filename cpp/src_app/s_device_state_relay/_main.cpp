@@ -48,12 +48,12 @@ private:
 
 static xObserverService OS;
 
-static void DSR_RegisterServer(xMessagePoster * Poster, uint64_t LocalServerId) {
+static void DSR_RegisterServer(const xMessagePoster & Poster, uint64_t LocalServerId) {
     auto Req            = xPP_RegisterDeviceStateRelayServer();
     Req.ServerId        = LocalServerId;
     Req.Address         = ExportProducerAddress;
     Req.ObserverAddress = ExportObserverAddress;
-    Poster->PostMessage(Cmd_RegisterDeviceStateRelayServer, 0, Req);
+    Poster.PostMessage(Cmd_RegisterDeviceStateRelayServer, 0, Req);
 }
 
 class xProducerService : xService {

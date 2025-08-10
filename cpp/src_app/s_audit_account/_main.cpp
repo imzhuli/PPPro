@@ -21,11 +21,11 @@ static auto Topic               = std::string();
 auto ServerIdClient       = xServerIdClient();
 auto RegisterServerClient = xRegisterServerClient();
 
-static void AA_RegisterServer(xMessagePoster * Poster, uint64_t LocalServerId) {
+static void AA_RegisterServer(const xMessagePoster & Poster, uint64_t LocalServerId) {
     auto Req     = xPP_RegisterAuditAccountServer();
     Req.ServerId = LocalServerId;
     Req.Address  = ExportServerAddress;
-    Poster->PostMessage(Cmd_RegisterAuditAccountServer, 0, Req);
+    Poster.PostMessage(Cmd_RegisterAuditAccountServer, 0, Req);
 }
 
 struct xAuditAccountInfoNode
