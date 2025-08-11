@@ -56,7 +56,7 @@ using namespace std::chrono_literals;
 //     }
 // }
 
-static void AC_RegisterServer(const xMessagePoster & Poster, uint64_t LocalServerId) {
+static void AC_RegisterServer(const xMessageChannel & Poster, uint64_t LocalServerId) {
     auto Req     = xPP_RegisterAuthCacheServer();
     Req.ServerId = LocalServerId;
     Req.Address  = ExportServerAddress;
@@ -99,7 +99,7 @@ int main(int argc, char ** argv) {
 
     RegisterServerClient.SetServerIdPoster(&AC_RegisterServer);
 
-    ServerIdClient.SetCallback([](uint64_t LocalServerId) {
+    ServerIdClient.SetOnServerIdUpdateCallback([](uint64_t LocalServerId) {
         DumpLocalServerId(RuntimeEnv.DefaultLocalServerIdFilePath, LocalServerId);
         RegisterServerClient.SetLocalServerId(LocalServerId);
     });

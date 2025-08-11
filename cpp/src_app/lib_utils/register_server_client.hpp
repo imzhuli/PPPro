@@ -1,15 +1,15 @@
 #pragma once
 #include "../lib_utils/all.hpp"
 
-using xServerIdPoster = std::function<void(const xMessagePoster & Poster, uint64_t LocalServerId)>;
+using xServerIdPoster = std::function<void(const xMessageChannel & Poster, uint64_t LocalServerId)>;
 
 class xRegisterServerClient;
-class xRegisterServerClientMessagePoster;
+class xRegisterServerClientMessageChannel;
 
-class xRegisterServerClientMessagePoster final : protected xMessagePoster {
+class xRegisterServerClientMessageChannel final : protected xMessageChannel {
 
 public:
-    xRegisterServerClientMessagePoster(xRegisterServerClient * RSC) : Owner(RSC) {}
+    xRegisterServerClientMessageChannel(xRegisterServerClient * RSC) : Owner(RSC) {}
 
 private:
     friend class xRegisterServerClient;

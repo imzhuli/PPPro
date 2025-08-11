@@ -27,7 +27,7 @@ int main(int argc, char ** argv) {
     DSDDownloader.SetOnUpdateDeviceSelectorDispatcherServerListCallback([](uint32_t Version, const std::vector<xDeviceSelectorDispatcherInfo> & ServerList) {
         DeviceSelectorService.UpdateDispatcherList(ServerList);
     });
-    DeviceObserver.SetOnPacketCallback([](const xMessagePoster & Source, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) -> bool {
+    DeviceObserver.SetOnPacketCallback([](const xMessageChannel & Source, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) -> bool {
         switch (CommandId) {
             case Cmd_DSR_DS_DeviceUpdate: {
                 auto PP = xPP_DeviceInfoUpdate();

@@ -48,7 +48,7 @@ private:
 
 static xObserverService OS;
 
-static void DSR_RegisterServer(const xMessagePoster & Poster, uint64_t LocalServerId) {
+static void DSR_RegisterServer(const xMessageChannel & Poster, uint64_t LocalServerId) {
     auto Req            = xPP_RegisterDeviceStateRelayServer();
     Req.ServerId        = LocalServerId;
     Req.Address         = ExportProducerAddress;
@@ -102,7 +102,7 @@ int main(int argc, char ** argv) {
     X_GUARD(ServerIdClient, ServiceIoContext, ServerIdCenterAddress, RuntimeEnv.DefaultLocalServerIdFilePath);
     X_GUARD(RegisterServerClient, ServiceIoContext, ServerListRegisterAddress);
 
-    ServerIdClient.SetCallback([](auto ServerId) {
+    ServerIdClient.SetOnServerIdUpdateCallback([](auto ServerId) {
         DumpLocalServerId(RuntimeEnv.DefaultLocalServerIdFilePath, ServerId);
         RegisterServerClient.SetLocalServerId(ServerId);
     });

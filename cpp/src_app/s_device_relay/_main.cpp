@@ -29,7 +29,7 @@ int main(int argc, char ** argv) {
     X_GUARD(DSRDownloader, ServiceIoContext, ServerListDownloadAddress);
     X_GUARD(RelayInfoReporter, ServiceIoContext);
 
-    ServerIdClient.SetCallback([&](auto ServerId) {
+    ServerIdClient.SetOnServerIdUpdateCallback([&](auto ServerId) {
         ServerRuntimeId = ServerId;
         DumpLocalServerId(RuntimeEnv.DefaultLocalServerIdFilePath, ServerRuntimeId);
 

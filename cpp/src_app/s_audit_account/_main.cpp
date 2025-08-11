@@ -21,7 +21,7 @@ static auto Topic               = std::string();
 auto ServerIdClient       = xServerIdClient();
 auto RegisterServerClient = xRegisterServerClient();
 
-static void AA_RegisterServer(const xMessagePoster & Poster, uint64_t LocalServerId) {
+static void AA_RegisterServer(const xMessageChannel & Poster, uint64_t LocalServerId) {
     auto Req     = xPP_RegisterAuditAccountServer();
     Req.ServerId = LocalServerId;
     Req.Address  = ExportServerAddress;
@@ -184,7 +184,7 @@ int main(int argc, char ** argv) {
     X_GUARD(RegisterServerClient, ServiceIoContext, ServerListRegisterAddress);
     X_GUARD(AuditService, ServiceIoContext, BindAddress, MAX_AUDIT_REPORTER_COUNT);
 
-    ServerIdClient.SetCallback([](uint64_t LocalServerId) {
+    ServerIdClient.SetOnServerIdUpdateCallback([](uint64_t LocalServerId) {
         DumpLocalServerId(RuntimeEnv.DefaultLocalServerIdFilePath, LocalServerId);
         RegisterServerClient.SetLocalServerId(LocalServerId);
     });

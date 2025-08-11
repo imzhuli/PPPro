@@ -22,27 +22,22 @@ public:
         return true;
     }
     void Clean() {
-        Reset(Callback);
         Reset(LocalServerId);
         xClient::Clean();
     };
     using xClient::Tick;
 
-    void     SetCallback(const std::function<void(uint64_t)> & C) { Callback = C; }
+    void     SetOnServerIdUpdateCallback(const std::function<void(uint64_t)> & C) { OnServerIdUpdateCallback = C; }
     uint64_t GetLocalServerId() const { return LocalServerId; }
 
 protected:
-    virtual void OnServerIdUpdated(uint64_t NewServerId) {
-        if (Callback) {
-            Callback(NewServerId);
-        }
-    }
+    virtual void OnServerIdUpdated(uint64_t NewServerId) { OnServerIdUpdateCallback(NewServerId); }
 
 private:
     void OnServerConnected() final override;
     bool OnServerPacket(xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) final override;
 
 private:
-    uint64_t                      LocalServerId = 0;
-    std::function<void(uint64_t)> Callback      = {};
+    uint64_t                      LocalServerId            = 0;
+    std::function<void(uint64_t)> OnServerIdUpdateCallback = {};
 };

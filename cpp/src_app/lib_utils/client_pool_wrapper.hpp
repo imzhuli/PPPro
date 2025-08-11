@@ -21,10 +21,10 @@ public:
     using xOnUpdateServerListCallback = std::function<void(const std::vector<xNetAddress> & Added, const std::vector<xNetAddress> & Removed)>;
     void SetOnUpdateServerListCallback(const xOnUpdateServerListCallback & Callback) { OnUpdateServerListCallback = Callback; }
 
-    using xOnConnectedCallback = std::function<void(const xMessagePoster & Source)>;
+    using xOnConnectedCallback = std::function<void(const xMessageChannel & Source)>;
     void SetOnConnectedCallback(const xOnConnectedCallback & CB) { OnConnectedCallback = CB; }
 
-    using xOnPacketCallback = std::function<bool(const xMessagePoster & Source, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize)>;
+    using xOnPacketCallback = std::function<bool(const xMessageChannel & Source, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize)>;
     void SetOnPacketCallback(const xOnPacketCallback & CB) { OnPacketCallback = CB; }
 
 private:
@@ -40,16 +40,15 @@ private:
         auto operator==(const xCPW_InternalServerInfo & O) const { return Address == O.Address; }
     };
 
-    class xCPW_MessagePoster final : public xMessagePoster {
+    class xCPW_MessageChannel final : public xMessageChannel {
     public:
-        xCPW_MessagePoster(xClientPool * CPP, xClientConnection * CCP) {
+        xCPW_MessageChannel(xClientPool * CPP, xClientConnection * CCP) {
             this->CPP          = CPP;
             this->CCP          = CCP;
             this->ConnectionId = CCP->GetConnectionId();
         }
 
-        uint64_t GetInternalId() const override { return ConnectionId; }
-        void     PostMessage(xPacketCommandId CmdId, xPacketRequestId RequestId, xBinaryMessage & Message) const override {  //
+        void PostMessage(xPacketCommandId CmdId, xPacketRequestId RequestId, xBinaryMessage & Message) const override {  //
             CPP->PostMessage(ConnectionId, CmdId, RequestId, Message);
         }
         void PostMessageUnchecked(xPacketCommandId CmdId, xPacketRequestId RequestId, xBinaryMessage & Message) const override {
@@ -69,6 +68,6 @@ private:
 
 private:
     static void IgnoreUpdateServerList(const std::vector<xNetAddress> & Added, const std::vector<xNetAddress> & Removed) {}
-    static void IgnoreConnected(const xMessagePoster & Source) {}
-    static bool IgnorePacket(const xMessagePoster & Source, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) { return true; }
+    static void IgnoreConnected(const xMessageChannel & Source) {}
+    static bool IgnorePacket(const xMessageChannel & Source, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) { return true; }
 };

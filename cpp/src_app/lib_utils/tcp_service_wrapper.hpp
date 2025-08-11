@@ -1,22 +1,22 @@
 #pragma once
 #include <pp_common/_.hpp>
 
-class xTcpServiceMessagePoster;
 class xTcpServiceWrapper;
 
-class xTcpServiceMessagePoster final : public xMessagePoster {
+class xTcpServiceMessageChannel final : public xMessageChannel {
 
 public:
-    xTcpServiceMessagePoster(xTcpServiceWrapper & Service, xServiceClientConnection & SCC) {
+    xTcpServiceMessageChannel(xTcpServiceWrapper & Service, xServiceClientConnection & SCC) {
         Owner         = &Service;
         ConnectionPtr = &SCC;
         ConnectionId  = SCC.GetConnectionId();
         assert(ConnectionId);
     }
 
-    uint64_t GetInternalId() const override { return ConnectionId; }
-    void     PostMessage(xPacketCommandId CmdId, xPacketRequestId RequestId, xBinaryMessage & Message) const override;
-    void     PostMessageUnchecked(xPacketCommandId CmdId, xPacketRequestId RequestId, xBinaryMessage & Message) const override;
+    void * GetUnderLayeredObject() const override;
+    void * GetUnderLayeredObjectUnchecked() const override { return ConnectionPtr; }
+    void   PostMessage(xPacketCommandId CmdId, xPacketRequestId RequestId, xBinaryMessage & Message) const override;
+    void   PostMessageUnchecked(xPacketCommandId CmdId, xPacketRequestId RequestId, xBinaryMessage & Message) const override;
 
 private:
     friend class xTcpServiceWrapper;
@@ -40,18 +40,35 @@ public:
     //
     using xService::DeferKillConnection;
 
-    using xOnClientConnectedCallback = std::function<void(xServiceClientConnection & Connection)>;
-    using xOnClientCloseCallback     = std::function<void(xServiceClientConnection & Connection)>;
+    using xOnClientConnectedCallback = std::function<void(const xTcpServiceMessageChannel & Channel)>;
     using xOnClientPacketCallback =
-        std::function<bool(const xMessagePoster & Poster, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize)>;
+        std::function<bool(const xTcpServiceMessageChannel & Channel, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize)>;
+    using xOnClientCloseCallback = std::function<void(const xTcpServiceMessageChannel & Channel)>;
+
+    void SetOnCLientConnectedCallback(const xOnClientConnectedCallback & CB) { OnClientConnectedCallback = CB; }
+    void SetOnClientPacketCallback(const xOnClientPacketCallback & CB) { OnClientPacketCallback = CB; }
+    void SetOnClientCloseCallback(const xOnClientCloseCallback & CB) { OnClientCloseCallback = CB; }
+
+    xTcpServiceMessageChannel Wrap(xServiceClientConnection & ServiceClientConnection) {
+        assert(GetConnection(ServiceClientConnection.GetConnectionId()) == &ServiceClientConnection);
+        return { *this, ServiceClientConnection };
+    }
 
 private:
-    xOnClientConnectedCallback OnClientConnectedCallback = IgnoreConnetionEvent;
-    xOnClientCloseCallback     OnClientCloseCallback     = IgnoreConnetionEvent;
-    xOnClientPacketCallback    OnClientPacketCallback    = IgnorePacket;
+    void OnClientConnected(xServiceClientConnection & Connection) override { OnClientConnectedCallback(Wrap(Connection)); }
+    void OnClientClose(xServiceClientConnection & Connection) override { OnClientCloseCallback(Wrap(Connection)); }
+    bool OnClientPacket(xServiceClientConnection & Connection, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) override {
+        return OnClientPacketCallback(Wrap(Connection), CommandId, RequestId, PayloadPtr, PayloadSize);
+    }
 
-    static void IgnoreConnetionEvent(xServiceClientConnection & Connection) {}
-    static bool IgnorePacket(const xMessagePoster & Poster, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) { return true; }
+    friend class xTcpServiceMessageChannel;
+
+    xOnClientConnectedCallback OnClientConnectedCallback = IgnoreConnetionEvent;
+    xOnClientPacketCallback    OnClientPacketCallback    = IgnorePacket;
+    xOnClientCloseCallback     OnClientCloseCallback     = IgnoreConnetionEvent;
+
+    static void IgnoreConnetionEvent(const xTcpServiceMessageChannel & Channel) {}
+    static bool IgnorePacket(const xTcpServiceMessageChannel &, xPacketCommandId, xPacketRequestId, ubyte *, size_t) { return true; }
 
     //
 };

@@ -10,9 +10,6 @@ void xClientWrapper::Clean() {
         xClient::Clean();
     }
     Reset(ICP);
-    Reset(OnConnectedCallback);
-    Reset(OnDisconnectedCallback);
-    Reset(OnPacketCallback);
 }
 
 void xClientWrapper::Tick(uint64_t NowMS) {

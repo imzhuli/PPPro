@@ -3,9 +3,6 @@
 void xClientPoolWrapper::Clean() {
     xClientPool::Clean();
     Reset(SortedServerList);
-    Reset(OnUpdateServerListCallback);
-    Reset(OnConnectedCallback);
-    Reset(OnPacketCallback);
 }
 
 void xClientPoolWrapper::AddServer(const xNetAddress & Address) {
@@ -97,7 +94,7 @@ void xClientPoolWrapper::PostMessage(xPacketCommandId CmdId, xPacketRequestId Re
 }
 
 void xClientPoolWrapper::OnServerConnected(xClientConnection & CC) {
-    auto Poster = xCPW_MessagePoster{
+    auto Poster = xCPW_MessageChannel{
         this,
         &CC,
     };
@@ -105,7 +102,7 @@ void xClientPoolWrapper::OnServerConnected(xClientConnection & CC) {
 }
 
 bool xClientPoolWrapper::OnServerPacket(xClientConnection & CC, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) {
-    auto Poster = xCPW_MessagePoster{
+    auto Poster = xCPW_MessageChannel{
         this,
         &CC,
     };

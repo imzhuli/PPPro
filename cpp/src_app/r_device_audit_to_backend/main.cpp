@@ -120,7 +120,7 @@ static void OnDeviceUpdate(ubyte * PayloadPtr, size_t PayloadSize) {
     DeviceTimeoutList.GrabTail(DI);
 }
 
-static bool OnServerPacket(const xMessagePoster & Source, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) {
+static bool OnServerPacket(const xMessageChannel & Source, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) {
 
     DEBUG_LOG("CommandId=% " PRIx32 "\n%s", CommandId, HexShow(PayloadPtr, PayloadSize).c_str());
     switch (CommandId) {

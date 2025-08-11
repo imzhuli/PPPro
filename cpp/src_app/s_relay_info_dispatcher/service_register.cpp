@@ -2,7 +2,7 @@
 
 #include "./global.hpp"
 
-static void RID_RegisterServer(const xMessagePoster & Poster, uint64_t LocalServerId) {
+static void RID_RegisterServer(const xMessageChannel & Poster, uint64_t LocalServerId) {
     assert(LocalServerId);
     auto Req       = xPP_RegisterRelayInfoDispatcherServer();
     Req.ServerInfo = {
@@ -17,7 +17,7 @@ bool xRID_RegisterServerService::Init() {
     RuntimeAssert(ServerIdClient.Init(ServiceIoContext, ServerIdCenterAddress, RuntimeEnv.DefaultLocalServerIdFilePath));
     RuntimeAssert(RegisterClient.Init(ServiceIoContext, ServerListRegisterAddress));
 
-    ServerIdClient.SetCallback([this](uint64_t NewServerId) {
+    ServerIdClient.SetOnServerIdUpdateCallback([this](uint64_t NewServerId) {
         DumpLocalServerId(RuntimeEnv.DefaultLocalServerIdFilePath, NewServerId);
         RegisterClient.SetLocalServerId(NewServerId);
     });

@@ -11,9 +11,9 @@ public:
     ~xCollectableErrorPrinter() = default;
 
     bool Init(size_t TriggerCountLimit = 1'000, uint64_t TriggerTimeoutLimitMS = 60'000);
-    bool Init(xLogger * LoggerPtr, size_t TriggerCountLimit, uint64_t TriggerTimeoutLimitMS);
     void Clean();
     void Hit();
+    void SetLogger(xLogger * Logger) { this->LoggerPtr = Logger; }
 
 private:
     xLogger *         LoggerPtr              = nullptr;

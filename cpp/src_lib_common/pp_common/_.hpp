@@ -286,8 +286,10 @@ struct xAuditAccountInfo {
     uint64_t TotalUdpCount     = {};
 };
 
-struct xMessagePoster {
+struct xMessageChannel {
     virtual uint64_t GetInternalId() const { return 0; }
+    virtual void *   GetUnderLayeredObject() const { return nullptr; }
+    virtual void *   GetUnderLayeredObjectUnchecked() const { return GetUnderLayeredObject(); }
     virtual void     PostMessage(xPacketCommandId CmdId, xPacketRequestId RequestId, xBinaryMessage & Message) const = 0;
     virtual void     PostMessageUnchecked(xPacketCommandId CmdId, xPacketRequestId RequestId, xBinaryMessage & Message) const { PostMessage(CmdId, RequestId, Message); }
 };
