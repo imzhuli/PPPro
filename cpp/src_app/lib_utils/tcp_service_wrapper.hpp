@@ -45,7 +45,7 @@ public:
         std::function<bool(const xTcpServiceMessageChannel & Channel, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize)>;
     using xOnClientCloseCallback = std::function<void(const xTcpServiceMessageChannel & Channel)>;
 
-    void SetOnCLientConnectedCallback(const xOnClientConnectedCallback & CB) { OnClientConnectedCallback = CB; }
+    void SetOnClientConnectedCallback(const xOnClientConnectedCallback & CB) { OnClientConnectedCallback = CB; }
     void SetOnClientPacketCallback(const xOnClientPacketCallback & CB) { OnClientPacketCallback = CB; }
     void SetOnClientCloseCallback(const xOnClientCloseCallback & CB) { OnClientCloseCallback = CB; }
 
