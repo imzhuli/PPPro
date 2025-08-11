@@ -79,35 +79,22 @@ public:
     void SetAsyncResultData(uint64_t CacheNodeId, const void * Data);
 
 protected:
-    bool MakeAsyncQuery(uint64_t CacheNodeId, const std::string & Key) {
-        if (!AsyncQueryCallback) {
-            return false;
-        }
-        return AsyncQueryCallback(CacheNodeId, Key);
-    }
-    void OnImmediateResult(const xCacheRequestContext & Context, const void * Data) {
-        if (OnImmediateResultCallback) {
-            OnImmediateResultCallback(Context, Data);
-        }
-    }
-    void OnAsyncResultData(const xCacheRequestContext & Context, const void * Data) {
-        if (OnAsyncResultCallback) {
-            OnAsyncResultCallback(Context, Data);
-        }
-    }
-    void OnReleaseData(uint64_t CacheNodeId, const void * Data) {
-        if (OnReleaseDataCallback) {
-            OnReleaseDataCallback(CacheNodeId, Data);
-        }
-    }
+    bool MakeAsyncQuery(uint64_t CacheNodeId, const std::string & Key) { return AsyncQueryCallback(CacheNodeId, Key); }
+    void OnImmediateResult(const xCacheRequestContext & Context, const void * Data) { OnImmediateResultCallback(Context, Data); }
+    void OnAsyncResultData(const xCacheRequestContext & Context, const void * Data) { OnAsyncResultCallback(Context, Data); }
+    void OnReleaseData(uint64_t CacheNodeId, const void * Data) { OnReleaseDataCallback(CacheNodeId, Data); }
 
 private:
     void ReleaseCacheNode(xCacheNode * NP);
 
-    xAsyncQueryCallback        AsyncQueryCallback;
-    xOnImmediateResultCallback OnImmediateResultCallback;
-    xOnAsyncResultCallback     OnAsyncResultCallback;
-    xOnReleaseDataCallback     OnReleaseDataCallback;
+    xAsyncQueryCallback        AsyncQueryCallback        = IgnoreAsyncQuery;
+    xOnImmediateResultCallback OnImmediateResultCallback = IgnoreResult;
+    xOnAsyncResultCallback     OnAsyncResultCallback     = IgnoreResult;
+    xOnReleaseDataCallback     OnReleaseDataCallback     = IgnoreReleaseData;
+
+    static bool IgnoreAsyncQuery(uint64_t CacheNodeId, const std::string & Key) { return false; }
+    static void IgnoreResult(const xCacheRequestContext & Context, const void * Data) {}
+    static void IgnoreReleaseData(uint64_t CacheNodeId, const void * Data) {}
 
 private:
     xIndexedStorage<xCacheNode>                   CacheNodePool;

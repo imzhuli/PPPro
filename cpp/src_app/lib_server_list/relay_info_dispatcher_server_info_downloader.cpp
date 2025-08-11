@@ -50,9 +50,7 @@ bool xRelayInfoDispatcherServerInfoDownloader::OnDownloadRelayInfoDispatcherServ
     }
 
     ServerInfo = R.ServerInfo;
-    if (UpdateRelayInfoDispatcherServerInfoCallback) {
-        UpdateRelayInfoDispatcherServerInfoCallback(ServerInfo);
-    }
+    UpdateRelayInfoDispatcherServerInfoCallback(ServerInfo);
     return true;
 }
 

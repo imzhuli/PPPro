@@ -24,7 +24,9 @@ private:
     xTicker  Ticker;
     uint64_t LastUpdateTimestampMS = 0;
 
-    uint32_t                                          DeviceSelectorDispatcherServerListVersion = 0;
-    std::vector<xDeviceSelectorDispatcherInfo>        DeviceSelectorDispatcherSortedServerInfoList;
-    xUpdateDeviceSelectorDispatcherServerListCallback UpdateDeviceSelectorDispatcherServerListCallback;
+    uint32_t                                          DeviceSelectorDispatcherServerListVersion        = 0;
+    std::vector<xDeviceSelectorDispatcherInfo>        DeviceSelectorDispatcherSortedServerInfoList     = {};
+    xUpdateDeviceSelectorDispatcherServerListCallback UpdateDeviceSelectorDispatcherServerListCallback = IgnoreUpdateDeviceSelectorDispatcherServerListCallback;
+
+    static void IgnoreUpdateDeviceSelectorDispatcherServerListCallback(uint32_t Version, const std::vector<xDeviceSelectorDispatcherInfo> & ServerList) {};
 };

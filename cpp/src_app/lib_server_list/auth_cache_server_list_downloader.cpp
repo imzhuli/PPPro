@@ -48,9 +48,7 @@ bool xAuthCacheServerListDownloader::OnAuthCacheServerList(xPacketRequestId Requ
     std::sort(AuthCacheSortedServerInfoList.begin(), AuthCacheSortedServerInfoList.end(), [](auto & lhs, auto & rhs) { return lhs.ServerId < rhs.ServerId; });
     AuthCacheServerListVersion = R.Version;
 
-    if (UpdateAuthCacheServerListCallback) {
-        UpdateAuthCacheServerListCallback(AuthCacheServerListVersion, AuthCacheSortedServerInfoList);
-    }
+    UpdateAuthCacheServerListCallback(AuthCacheServerListVersion, AuthCacheSortedServerInfoList);
     return true;
 }
 

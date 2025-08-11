@@ -49,9 +49,7 @@ bool xDeviceStateRelayServerListDownloader::OnDeviceStateRelayServerList(xPacket
     DeviceStateRelaySortedServerInfoList = std::move(R.ServerInfoList);
     DeviceStateRelayServerListVersion    = R.Version;
 
-    if (UpdateDeviceStateRelayServerListCallback) {
-        UpdateDeviceStateRelayServerListCallback(DeviceStateRelayServerListVersion, DeviceStateRelaySortedServerInfoList);
-    }
+    UpdateDeviceStateRelayServerListCallback(DeviceStateRelayServerListVersion, DeviceStateRelaySortedServerInfoList);
     return true;
 }
 

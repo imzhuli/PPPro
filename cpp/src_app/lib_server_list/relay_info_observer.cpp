@@ -74,9 +74,7 @@ void xRelayInfoObserver::InsertOrKeepAliveDeviceRelayInfo(const xRelayServerInfo
     // new:
     auto LocalId = DeviceRelayInfoPool.Acquire();
     if (!LocalId) {
-        if (OnNewDeviceRelayInfoErrorCallback) {
-            OnNewDeviceRelayInfoErrorCallback(&Info);
-        }
+        OnNewDeviceRelayInfoErrorCallback(&Info);
         return;
     }
     auto & RS                   = DeviceRelayInfoPool[LocalId];
@@ -85,9 +83,7 @@ void xRelayInfoObserver::InsertOrKeepAliveDeviceRelayInfo(const xRelayServerInfo
     RelayInfoTimeoutList.AddTail(RS);
     DeviceRelayServerIdLocalMap.insert(std::make_pair(Info.ServerId, LocalId));
 
-    if (OnNewDeviceRelayInfoCallback) {
-        OnNewDeviceRelayInfoCallback(&RS.Info);
-    }
+    OnNewDeviceRelayInfoCallback(&RS.Info);
 }
 
 void xRelayInfoObserver::RemoveDeviceRelayInfo(xRelayServerInfo * RSI) {
@@ -95,9 +91,7 @@ void xRelayInfoObserver::RemoveDeviceRelayInfo(xRelayServerInfo * RSI) {
     assert(RSI->Info.ServerId);
     assert(RSI->Info.ServerType == eRelayServerType::DEVICE);
 
-    if (OnRemoveDeviceRelayInfoCallback) {
-        OnRemoveDeviceRelayInfoCallback(&RSI->Info);
-    }
+    OnRemoveDeviceRelayInfoCallback(&RSI->Info);
 
     auto ServerId = RSI->Info.ServerId;
     auto MapIter  = DeviceRelayServerIdLocalMap.find(ServerId);

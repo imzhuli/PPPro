@@ -48,9 +48,11 @@ private:
     std::vector<xBackendServerInfo>        SortedServerList;
 
     //
-    xBackendPacketCallback BackendPacketCallback;
+    xBackendPacketCallback BackendPacketCallback = IgnoreBackendPacket;
 
-private:
+    static void IgnoreBackendPacket(xPacketCommandId, xPacketRequestId, ubyte *, size_t) {};
+
+private:  // audit
     size_t TotalAddedServer           = 0;
     size_t TotalRemovedServer         = 0;
     size_t TotalAddingServerConflict  = 0;

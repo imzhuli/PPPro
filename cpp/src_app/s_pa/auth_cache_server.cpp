@@ -7,9 +7,11 @@ bool xPA_AuthCacheLocalServer::Init(xIoContext * ICP) {
     if (!ClientHashPool.Init(ICP)) {
         return false;
     }
-    ClientHashPool.SetOnPacketCallback([this](xMessagePoster * Source, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) -> bool {
-        return OnServerPacket(CommandId, RequestId, PayloadPtr, PayloadSize);
-    });
+    ClientHashPool.SetOnPacketCallback(
+        [this](const xMessagePoster & Source, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) -> bool {
+            return OnServerPacket(CommandId, RequestId, PayloadPtr, PayloadSize);
+        }
+    );
 
     return true;
 }
@@ -39,7 +41,6 @@ void xPA_AuthCacheLocalServer::PostAuthRequest(uint64_t RequestContextId, const 
 }
 
 bool xPA_AuthCacheLocalServer::OnServerPacket(xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) {
-
     DEBUG_LOG("CommondId=%" PRIx32 ", RequestId:%" PRIx64 " Data=\n%s", CommandId, RequestId, HexShow(PayloadPtr, PayloadSize).c_str());
     if (CommandId != Cmd_AuthService_QueryAuthCacheResp) {
         Logger->E("Invalid server response command");
@@ -50,12 +51,6 @@ bool xPA_AuthCacheLocalServer::OnServerPacket(xPacketCommandId CommandId, xPacke
         Logger->E("Invalid server response protocol");
         return true;
     }
-    DoCallback(RequestId, Resp.Result);
+    OnAuthCacheResultCallback(RequestId, Resp.Result);
     return true;
-}
-
-void xPA_AuthCacheLocalServer::DoCallback(uint64_t RequestContextId, const xClientAuthResult & AuthResult) {
-    if (Callback) {
-        Callback(RequestContextId, AuthResult);
-    }
 }

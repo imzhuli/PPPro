@@ -25,4 +25,8 @@ private:
 
     xRelayInfoDispatcherServerInfo               ServerInfo = {};
     xUpdateRelayInfoDispatcherServerInfoCallback UpdateRelayInfoDispatcherServerInfoCallback;
+
+    static void IgnoreUpdateRelayInfoDispatcherServerInfoCallback(const xRelayInfoDispatcherServerInfo &) {}
+
+    //
 };

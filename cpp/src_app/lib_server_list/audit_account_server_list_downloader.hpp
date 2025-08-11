@@ -24,5 +24,7 @@ private:
 
     uint32_t                              AuditAccountServerListVersion = 0;
     std::vector<xServerInfo>              AuditAccountSortedServerInfoList;
-    xUpdateAuditAccountServerListCallback UpdateAuditAccountServerListCallback;
+    xUpdateAuditAccountServerListCallback UpdateAuditAccountServerListCallback = IgnoreUpdateAuditAccountList;
+
+    static void IgnoreUpdateAuditAccountList(uint32_t Version, const std::vector<xServerInfo> & ServerList) {}
 };

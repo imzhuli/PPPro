@@ -69,7 +69,6 @@ void xClientPoolWrapper::UpdateServerList(const std::vector<xNetAddress> & Serve
     for (; IOld < SortedServerList.size(); ++IOld) {
         Rem.push_back(SortedServerList[IOld].Address);
     }
-
     for (const auto & A : Add) {
         AddServer(A);
     }
@@ -77,9 +76,7 @@ void xClientPoolWrapper::UpdateServerList(const std::vector<xNetAddress> & Serve
         RemoveServer(R);
     }
 
-    if (OnUpdateServerListCallback) {
-        OnUpdateServerListCallback(Add, Rem);
-    }
+    OnUpdateServerListCallback(Add, Rem);
 }
 
 void xClientPoolWrapper::PostMessageByConnectionId(uint64_t ConnectionId, xPacketCommandId CmdId, xPacketRequestId RequestId, xBinaryMessage & Message) {
@@ -100,22 +97,17 @@ void xClientPoolWrapper::PostMessage(xPacketCommandId CmdId, xPacketRequestId Re
 }
 
 void xClientPoolWrapper::OnServerConnected(xClientConnection & CC) {
-    if (OnConnectedCallback) {
-        auto Poster = xCPW_MessagePoster{
-            this,
-            &CC,
-        };
-        OnConnectedCallback(&Poster);
-    }
+    auto Poster = xCPW_MessagePoster{
+        this,
+        &CC,
+    };
+    OnConnectedCallback(Poster);
 }
 
 bool xClientPoolWrapper::OnServerPacket(xClientConnection & CC, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) {
-    if (OnPacketCallback) {
-        auto Poster = xCPW_MessagePoster{
-            this,
-            &CC,
-        };
-        return OnPacketCallback(&Poster, CommandId, RequestId, PayloadPtr, PayloadSize);
-    }
-    return true;
+    auto Poster = xCPW_MessagePoster{
+        this,
+        &CC,
+    };
+    return OnPacketCallback(Poster, CommandId, RequestId, PayloadPtr, PayloadSize);
 }

@@ -8,15 +8,18 @@ public:
     void Tick(uint64_t NowMS);
 
     void UpdateServerList(const std::vector<xServerInfo> & ServerList);
-    void SetCallback(auto && CB) { this->Callback = std::forward<decltype(CB)>(CB); }
     void PostAuthRequest(uint64_t RequestContextId, const std::string & AuthKey);
 
-protected:
+    using xOnAuthCacheResultCallback = std::function<void(uint64_t RequestContextId, const xClientAuthResult & AuthResult)>;
+    void SetOnAuthCacheResultCallback(auto && CB) { this->OnAuthCacheResultCallback = std::forward<decltype(CB)>(CB); }
+
+private:
     bool OnServerPacket(xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize);
-    void DoCallback(uint64_t RequestContextId, const xClientAuthResult & AuthResult);
 
 private:
     xClientPoolWrapper ClientHashPool;
-
-    std::function<void(uint64_t RequestContextId, const xClientAuthResult & AuthResult)> Callback;
+    //
+    std::function<void(uint64_t RequestContextId, const xClientAuthResult & AuthResult)> OnAuthCacheResultCallback = IgnoreAuthCacheResult;
+    //
+    static void IgnoreAuthCacheResult(uint64_t RequestContextId, const xClientAuthResult & AuthResult) {}
 };

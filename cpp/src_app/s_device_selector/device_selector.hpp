@@ -19,9 +19,9 @@ public:
     void UpdateDispatcherList(const std::vector<xDeviceSelectorDispatcherInfo> & ServerList);
 
 protected:
-    void RegisterServiceProvider(xMessagePoster * Poster);
+    void RegisterServiceProvider(const xMessagePoster & Poster);
     bool OnRegisterServerResp(ubyte * PayloadPtr, size_t PayloadSize);
-    bool OnSelectDevice(xMessagePoster * Source, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize);
+    bool OnSelectDevice(const xMessagePoster & Source, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize);
 
 private:
     xClientPoolWrapper ClientPool;

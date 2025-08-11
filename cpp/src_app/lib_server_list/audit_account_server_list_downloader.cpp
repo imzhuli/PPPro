@@ -48,9 +48,7 @@ bool xAuditAccountServerListDownloader::OnAuditAccountServerList(xPacketRequestI
     std::sort(AuditAccountSortedServerInfoList.begin(), AuditAccountSortedServerInfoList.end(), [](auto & lhs, auto & rhs) { return lhs.ServerId < rhs.ServerId; });
     AuditAccountServerListVersion = R.Version;
 
-    if (UpdateAuditAccountServerListCallback) {
-        UpdateAuditAccountServerListCallback(AuditAccountServerListVersion, AuditAccountSortedServerInfoList);
-    }
+    UpdateAuditAccountServerListCallback(AuditAccountServerListVersion, AuditAccountSortedServerInfoList);
     return true;
 }
 

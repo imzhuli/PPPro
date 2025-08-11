@@ -24,5 +24,7 @@ private:
 
     uint32_t                           AuthCacheServerListVersion = 0;
     std::vector<xServerInfo>           AuthCacheSortedServerInfoList;
-    xUpdateAuthCacheServerListCallback UpdateAuthCacheServerListCallback;
+    xUpdateAuthCacheServerListCallback UpdateAuthCacheServerListCallback = IgnoreUpdateAuthCacheServerListCallback;
+
+    static void IgnoreUpdateAuthCacheServerListCallback(uint32_t Version, const std::vector<xServerInfo> & ServerList) {};
 };

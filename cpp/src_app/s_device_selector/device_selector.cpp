@@ -7,8 +7,8 @@
 
 bool xDS_DeviceSelectorServiceProvider::Init(xIoContext * ICP) {
     RuntimeAssert(ClientPool.Init(ICP));
-    ClientPool.SetOnConnectedCallback([this](xMessagePoster * Poster) { RegisterServiceProvider(Poster); });
-    ClientPool.SetOnPacketCallback([this](xMessagePoster * Source, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) -> bool {
+    ClientPool.SetOnConnectedCallback([this](const xMessagePoster & Poster) { RegisterServiceProvider(Poster); });
+    ClientPool.SetOnPacketCallback([this](const xMessagePoster & Source, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) -> bool {
         switch (CommandId) {
             case Cmd_RegisterServerResp:
                 return OnRegisterServerResp(PayloadPtr, PayloadSize);
@@ -46,14 +46,14 @@ bool xDS_DeviceSelectorServiceProvider::OnRegisterServerResp(ubyte * PayloadPtr,
     return true;
 }
 
-void xDS_DeviceSelectorServiceProvider::RegisterServiceProvider(xMessagePoster * Poster) {
+void xDS_DeviceSelectorServiceProvider::RegisterServiceProvider(const xMessagePoster & Poster) {
     auto R = xPP_RegisterDeviceSelector();
     // TODO: set server info
 
-    Poster->PostMessage(Cmd_RegisterDeviceSelector, 0, R);
+    Poster.PostMessage(Cmd_RegisterDeviceSelector, 0, R);
 }
 
-bool xDS_DeviceSelectorServiceProvider::OnSelectDevice(xMessagePoster * Source, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) {
+bool xDS_DeviceSelectorServiceProvider::OnSelectDevice(const xMessagePoster & Source, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) {
     auto Req = xPP_AcquireDevice();
     if (!Req.Deserialize(PayloadPtr, PayloadSize)) {
         DEBUG_LOG("invalid protocol");
@@ -63,7 +63,7 @@ bool xDS_DeviceSelectorServiceProvider::OnSelectDevice(xMessagePoster * Source, 
     // TODO: select device:
 
     auto Resp = xPP_AcquireDeviceResp();
-    Source->PostMessage(Cmd_DeviceSelector_AcquireDeviceResp, RequestId, Resp);
+    Source.PostMessage(Cmd_DeviceSelector_AcquireDeviceResp, RequestId, Resp);
     return true;
 }
 

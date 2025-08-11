@@ -7,9 +7,11 @@ bool xPA_AuditAccountLocalServer::Init(xIoContext * ICP) {
     if (!ClientHashPool.Init(ICP)) {
         return false;
     }
-    ClientHashPool.SetOnPacketCallback([this](xMessagePoster * Source, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) -> bool {
-        return OnServerPacket(CommandId, RequestId, PayloadPtr, PayloadSize);
-    });
+    ClientHashPool.SetOnPacketCallback(
+        [this](const xMessagePoster & Source, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) -> bool {
+            return OnServerPacket(CommandId, RequestId, PayloadPtr, PayloadSize);
+        }
+    );
 
     return true;
 }

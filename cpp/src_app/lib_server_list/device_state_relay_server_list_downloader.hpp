@@ -25,4 +25,6 @@ private:
     uint32_t                                  DeviceStateRelayServerListVersion = 0;
     std::vector<xDeviceStateRelayServerInfo>  DeviceStateRelaySortedServerInfoList;
     xUpdateDeviceStateRelayServerListCallback UpdateDeviceStateRelayServerListCallback;
+
+    static void IgnoreUpdateDeviceStateRelayServerListCallback(uint32_t Version, const std::vector<xDeviceStateRelayServerInfo> & ServerList) {}
 };

@@ -29,7 +29,7 @@ int main(int argc, char ** argv) {
         }
         AuthCacheLocalServer.UpdateServerList(List);
     });
-    AuthCacheLocalServer.SetCallback([](uint64_t RequestContextId, const xClientAuthResult & AuthResult) {
+    AuthCacheLocalServer.SetOnAuthCacheResultCallback([](uint64_t RequestContextId, const xClientAuthResult & AuthResult) {
         ClientConnectionManager.OnAuthResult(RequestContextId, AuthResult);  // relay result
     });
 
