@@ -1,41 +1,27 @@
 #include "../lib_utils/all.hpp"
 
-struct xTestAddressServer : xService {
+static void OnTcpClientConnected(const xTcpServiceClientConnectionHandle & Handle) {
+    auto PeerAddress = Handle.GetRemoteAddress();
+    Logger->I("NewConnectin: Id=%" PRIx64 ", Address=%s", Handle.GetConnectionId(), PeerAddress.ToString().c_str());
+    auto Push              = xPP_AddressAutoPush();
+    Push.ConnectionAddress = PeerAddress;
+    Handle.PostMessage(Cmd_DV_RL_AddressPush, 0, Push);
+    Handle.Kill();
+}
 
-    void OnClientConnected(xServiceClientConnection & Connection) override {
-        auto PeerAddress = Connection.GetRemoteAddress();
-        Logger->I("NewConnectin: Id=%" PRIx64 ", Address=%s", Connection.GetConnectionId(), PeerAddress.ToString().c_str());
-
-        auto Push              = xPP_AddressAutoPush();
-        Push.ConnectionAddress = PeerAddress;
-
-        PostMessage(Connection, Cmd_DV_RL_AddressPush, 0, Push);
-        DeferKillConnection(Connection);
+static void OnUdpPacket(const xUdpServiceChannelHandle & Handle, xPacketCommandId CommandId, xPacketRequestId, ubyte *, size_t) {
+    if (CommandId != Cmd_DV_RL_AddressChallenge) {
+        return;
     }
+    auto Push              = xPP_AddressAutoPush();
+    Push.ConnectionAddress = Handle.GetRemoteAddress();
+    Handle.PostMessage(Cmd_DV_RL_AddressPush, 0, Push);
+}
 
-    //
-};
-
-struct xTestAddressUdpServer : xUdpService {
-    void OnPacket(const xNetAddress & RemoteAddress, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) override {
-        if (CommandId != Cmd_DV_RL_AddressChallenge) {
-            return;
-        }
-
-        auto Push              = xPP_AddressAutoPush();
-        Push.ConnectionAddress = RemoteAddress;
-
-        PostMessage(RemoteAddress, Cmd_DV_RL_AddressPush, 0, Push);
-        //
-    }
-
-    //
-};
-
-static xTestAddressServer    TestAddressServer4;
-static xTestAddressServer    TestAddressServer6;
-static xTestAddressUdpServer TestAddressUdpServer4;
-static xTestAddressUdpServer TestAddressUdpServer6;
+static xTcpService TestAddressServer4;
+static xTcpService TestAddressServer6;
+static xUdpService TestAddressUdpServer4;
+static xUdpService TestAddressUdpServer6;
 
 int main(int argc, char ** argv) {
 
@@ -53,6 +39,12 @@ int main(int argc, char ** argv) {
     if (!V4Enabled && !V6Enabled) {
         Logger->F("no available bind address");
     }
+
+    TestAddressServer4.OnClientConnected = OnTcpClientConnected;
+    TestAddressServer6.OnClientConnected = OnTcpClientConnected;
+
+    TestAddressUdpServer4.OnPacketCallback = OnUdpPacket;
+    TestAddressUdpServer6.OnPacketCallback = OnUdpPacket;
 
     X_COND_GUARD(V4Enabled, TestAddressServer4, ServiceIoContext, BindAddress4, 1024);
     X_COND_GUARD(V4Enabled, TestAddressUdpServer4, ServiceIoContext, BindAddress4);

@@ -14,7 +14,6 @@
 #include "./server_id_manager.hpp"
 #include "./service_common.hpp"
 #include "./tcp_service_wrapper.hpp"
-#include "./udp_service_wrapper.hpp"
 
 #include <pp_protocol/command.hpp>
 #include <pp_protocol/internal/all.hpp>

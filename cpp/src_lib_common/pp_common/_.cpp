@@ -2,6 +2,8 @@
 
 #include <crypto/sha.hpp>
 
+static constexpr const char * StaicSignSalt = "!#@SFas098xc()*&";
+
 uint64_t         ServerId = {};
 xNetAddress      ExportProxyAddress;
 eRelayServerType ServerType;
@@ -21,9 +23,27 @@ std::string xRelayServerInfoBase::ToString() const {
     return OS.str();
 }
 
-std::string DebugSign(const void * DataPtr, size_t Size) {
-    auto D = xel::Sha256(DataPtr, Size);
-    return StrToHex(D.Digest, 32);
+std::string AppSign(uint64_t Timestamp, const std::string & SecretKey, const void * DataPtr, size_t Size) {
+    auto TS     = std::to_string(Timestamp);
+    auto Source = StaicSignSalt + TS + SecretKey + std::string((const char *)DataPtr, Size);
+    auto D      = xel::Sha256(Source.data(), Source.size());
+    return TS + ":" + StrToHex(D.Digest, 32);
+}
+
+bool ValidateAppSign(const std::string & Sign, const std::string & SecretKey, const void * DataPtr, size_t Size) {
+    auto Segs = Split(Sign, ":");
+    if (Segs.size() != 2) {
+        return false;
+    }
+    uint64_t TimestampMS = (uint64_t)std::strtoumax(Segs[0].c_str(), nullptr, 10);
+    uint64_t TimeDiff    = std::abs(SignedDiff(TimestampMS, xel::GetTimestampMS()));
+    if (TimeDiff >= 60'000) {
+        return false;
+    }
+    auto Source = StaicSignSalt + Segs[0] + SecretKey + std::string((const char *)DataPtr, Size);
+    auto D      = xel::Sha256(Source.data(), Source.size());
+
+    return StrToHex(D.Digest, 32) == Segs[1];
 }
 
 uint32_t HashString(const char * S) {

@@ -73,6 +73,7 @@ set(target_list
 	s_server_id_center
 	s_server_list
 
+	t_base
 	t_server_list_downloader
 
 	x_device

@@ -23,6 +23,8 @@
 #include <server_arch/client_pool.hpp>
 #include <server_arch/message.hpp>
 #include <server_arch/service.hpp>
+#include <server_arch/tcp_service.hpp>
+#include <server_arch/udp_service.hpp>
 
 //
 #include <cinttypes>
@@ -75,10 +77,13 @@ using xel::xStreamReader;
 using xel::xStreamWriter;
 using xel::xTcpConnection;
 using xel::xTcpServer;
+using xel::xTcpService;
+using xel::xTcpServiceClientConnectionHandle;
 using xel::xTicker;
 using xel::xTimer;
 using xel::xUdpChannel;
 using xel::xUdpService;
+using xel::xUdpServiceChannelHandle;
 
 // functions
 using xel::Base64Decode;
@@ -355,23 +360,10 @@ extern uint32_t HashString(const char * S);
 extern uint32_t HashString(const char * S, size_t Len);
 extern uint32_t HashString(const std::string & S);
 
-std::string DebugSign(const void * DataPtr, size_t Size);
-static inline std::string DebugSign(const std::string_view& V) { return DebugSign(V.data(), V.size()); }
+extern std::string AppSign(uint64_t Timestamp, const std::string & SecretKey, const void * DataPtr, size_t Size);
+static inline std::string AppSign(uint64_t Timestamp, const std::string & SecretKey, const std::string_view& V) { return AppSign(Timestamp, SecretKey, V.data(), V.size()); }
+
+extern bool ValidateAppSign(const std::string & Sign, const std::string & SecretKey, const void * DataPtr, size_t Size);
+static inline bool ValidateAppSign(const std::string & Sign, const std::string & SecretKey, const std::string_view& V) { return ValidateAppSign(Sign, SecretKey, V.data(), V.size()); }
 
 // clang-format on
-
-#define X_CONCAT(a, b)              a##b
-#define X_CONCAT_FORCE_EXPAND(a, b) X_CONCAT(a, b)
-
-#ifndef X_GUARD
-#define X_GUARD(...)                                                                        \
-    auto X_CONCAT_FORCE_EXPAND(__X_Guard__, __LINE__) = ::xel::xResourceGuard(__VA_ARGS__); \
-    ::xel::RuntimeAssert(X_CONCAT_FORCE_EXPAND(__X_Guard__, __LINE__))
-#endif
-
-#ifndef X_COND_GUARD
-#define X_COND_GUARD(cond, ...)                                                                                                                     \
-    auto X_CONCAT_FORCE_EXPAND(__X_Cond__, __LINE__)  = (bool)(cond);                                                                               \
-    auto X_CONCAT_FORCE_EXPAND(__X_Guard__, __LINE__) = ::xel::xConditionalResourceGuard(X_CONCAT_FORCE_EXPAND(__X_Cond__, __LINE__), __VA_ARGS__); \
-    ::xel::RuntimeAssert(!X_CONCAT_FORCE_EXPAND(__X_Cond__, __LINE__) || X_CONCAT_FORCE_EXPAND(__X_Guard__, __LINE__))
-#endif

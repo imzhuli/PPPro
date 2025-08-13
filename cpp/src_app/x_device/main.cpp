@@ -13,14 +13,14 @@ struct xD_TestAddressServerAddress {
     xNetAddress V6;
 };
 
-static xNetAddress        GainedAddress4       = {};
-static xNetAddress        GainedAddress6       = {};
-static bool               FinishedTestAddress4 = false;
-static bool               FinishedTestAddress6 = false;
-static xClientWrapper     Ipv4TestClient;
-static xClientWrapper     Ipv6TestClient;
-static xUdpServiceWrapper Ipv4UdpTestClient;
-static xUdpServiceWrapper Ipv6UdpTestClient;
+static xNetAddress    GainedAddress4       = {};
+static xNetAddress    GainedAddress6       = {};
+static bool           FinishedTestAddress4 = false;
+static bool           FinishedTestAddress6 = false;
+static xClientWrapper Ipv4TestClient;
+static xClientWrapper Ipv6TestClient;
+static xUdpService    Ipv4UdpTestClient;
+static xUdpService    Ipv6UdpTestClient;
 
 static auto OutputAddress            = xD_OutputAddress();
 static auto TestAddressServerAddress = xD_TestAddressServerAddress();
@@ -35,7 +35,7 @@ bool OnServerPush(xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte 
         Logger->E("invalid protocol");
         return false;
     }
-    Logger->I("ServerPushedAddress: %s", R.ConnectionAddress.ToString().c_str());
+    Logger->I("(tcp)ServerPushedAddress: %s", R.ConnectionAddress.ToString().c_str());
     if (R.ConnectionAddress.IsV4()) {
         GainedAddress4 = R.ConnectionAddress;
     } else if (R.ConnectionAddress.IsV6()) {
@@ -45,7 +45,7 @@ bool OnServerPush(xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte 
     return true;
 }
 
-void OnUdpServerPush(const xNetAddress & RemoteAddress, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) {
+void OnUdpServerPush(const xUdpServiceChannelHandle & Handle, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) {
 
     // DEBUG_LOG("CID=%" PRIx64 ", RID=%" PRIx64 "\n%s", CommandId, RequestId, HexShow(PayloadPtr, PayloadSize).c_str());
 
@@ -81,8 +81,8 @@ int main(int argc, char ** argv) {
         Ipv4TestClient.SetOnPacketCallback(&OnServerPush);
 
         RuntimeAssert(Ipv4UdpTestClient.Init(ServiceIoContext, xNetAddress::Make4()));
-        Ipv4UdpTestClient.SetOnPacketCallback(OnUdpServerPush);
-        auto UdpChallenge = xPP_AddressChallenge();
+        Ipv4UdpTestClient.OnPacketCallback = OnUdpServerPush;
+        auto UdpChallenge                  = xPP_AddressChallenge();
         Ipv4UdpTestClient.PostMessage(TestAddressServerAddress.V4, Cmd_DV_RL_AddressChallenge, 0, UdpChallenge);
     }
     if (EnableV6) {
@@ -92,8 +92,8 @@ int main(int argc, char ** argv) {
         Ipv6TestClient.SetOnPacketCallback(&OnServerPush);
 
         RuntimeAssert(Ipv6UdpTestClient.Init(ServiceIoContext, xNetAddress::Make6()));
-        Ipv6UdpTestClient.SetOnPacketCallback(OnUdpServerPush);
-        auto UdpChallenge = xPP_AddressChallenge();
+        Ipv6UdpTestClient.OnPacketCallback = OnUdpServerPush;
+        auto UdpChallenge                  = xPP_AddressChallenge();
         Ipv6UdpTestClient.PostMessage(TestAddressServerAddress.V6, Cmd_DV_RL_AddressChallenge, 0, UdpChallenge);
     }
 
