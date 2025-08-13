@@ -64,12 +64,12 @@ int main(int argc, char ** argv) {
     ErrorPrinter.SetLogger(Logger);
 
     X_GUARD(ServerIdManager);
-    if (BindAddress4 && BindAddress4.IsV4() && BindAddress4.Port) {
+    if (BindAddress4.IsV4() && BindAddress4.Port) {
         Ipv4Enabled = true;
         Ipv4Service.SetOnClientPacketCallback(OnClientPacket);
         Ipv4Service.SetOnClientCloseCallback(OnClientClose);
     }
-    if (BindAddress6 && BindAddress6.IsV6() && BindAddress6.Port) {
+    if (BindAddress6.IsV6() && BindAddress6.Port) {
         Ipv6Enabled = true;
         Ipv6Service.SetOnClientPacketCallback(OnClientPacket);
         Ipv6Service.SetOnClientCloseCallback(OnClientClose);
