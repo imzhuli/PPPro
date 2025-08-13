@@ -56,7 +56,7 @@ public:
         Reset(RelayInfoDispatcherServerInfo);
     }
 
-    void OnTick(uint64_t NowMS);
+    void Tick(uint64_t NowMS);
 
     bool AddAuthCacheServerInfo(uint64_t ServerId, xNetAddress ServerAddress);
     void RemoveAuthCacheServerInfo(uint64_t ServerId);

@@ -58,7 +58,7 @@ void xCC_Ipv6TestChennelReactor::OnTerminalChallenge(xUdpChannel * ChannelPtr, c
     auto  RSize = WriteMessage(Buffer, Cmd_DV_CC_ChallengeResp, 0, Resp);
 
     DEBUG_LOG("Post Response to %s\n%s", RemoteAddress.ToString().c_str(), HexShow(Buffer, RSize).c_str());
-    ChannelPtr->PostData(Buffer, RSize, RemoteAddress);
+    ChannelPtr->PostData(RemoteAddress, Buffer, RSize);
 }
 
 ///////////
@@ -137,5 +137,5 @@ void xCC_ChallengeChennelReactor::OnTerminalChallenge(xUdpChannel * ChannelPtr, 
     auto  RSize = WriteMessage(Buffer, Cmd_DV_CC_ChallengeResp, 0, Resp);
 
     DEBUG_LOG("Post Response to %s\n%s", RemoteAddress.ToString().c_str(), HexShow(Buffer, RSize).c_str());
-    ChannelPtr->PostData(Buffer, RSize, RemoteAddress);
+    ChannelPtr->PostData(RemoteAddress, Buffer, RSize);
 };
