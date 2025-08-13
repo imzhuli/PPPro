@@ -23,6 +23,26 @@ std::string xRelayServerInfoBase::ToString() const {
     return OS.str();
 }
 
+uint32_t HashString(const char * S) {
+    uint32_t H = 0;
+    while (auto C = *(S++)) {
+        H = H * 33 + C;
+    }
+    return H;
+}
+
+uint32_t HashString(const char * S, size_t Len) {
+    uint32_t H = 0;
+    for (size_t I = 0; I < Len; ++I) {
+        H = H * 33 + S[I];
+    }
+    return H;
+}
+
+uint32_t HashString(const std::string & S) {
+    return HashString(S.data(), S.size());
+}
+
 std::string AppSign(uint64_t Timestamp, const std::string & SecretKey, const void * DataPtr, size_t Size) {
     auto TS     = std::to_string(Timestamp);
     auto Source = StaicSignSalt + TS + SecretKey + std::string((const char *)DataPtr, Size);
@@ -44,24 +64,4 @@ bool ValidateAppSign(const std::string & Sign, const std::string & SecretKey, co
     auto D      = xel::Sha256(Source.data(), Source.size());
 
     return StrToHex(D.Digest, 32) == Segs[1];
-}
-
-uint32_t HashString(const char * S) {
-    uint32_t H = 0;
-    while (auto C = *(S++)) {
-        H = H * 33 + C;
-    }
-    return H;
-}
-
-uint32_t HashString(const char * S, size_t Len) {
-    uint32_t H = 0;
-    for (size_t I = 0; I < Len; ++I) {
-        H = H * 33 + S[I];
-    }
-    return H;
-}
-
-uint32_t HashString(const std::string & S) {
-    return HashString(S.data(), S.size());
 }
