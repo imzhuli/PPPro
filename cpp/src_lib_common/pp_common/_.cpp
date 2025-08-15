@@ -65,3 +65,21 @@ bool ValidateAppSign(const std::string & Sign, const std::string & SecretKey, co
 
     return StrToHex(D.Digest, 32) == Segs[1];
 }
+
+std::string PackAndSignAddress(uint64_t Timestamp, const std::string & SecretKey, const xNetAddress & Address) {
+    auto IpString = Address.ToString();
+    auto Sign     = AppSign(Timestamp, SecretKey, IpString);
+    return IpString + "=" + Sign;
+}
+
+xNetAddress ExtractAddressFromSignedPack(const std::string & SignedIp, const std::string & SecretKey) {
+    auto Segs = Split(SignedIp, "=");
+    if (Segs.size() != 2) {
+        return {};
+    }
+    const auto & IpString = Segs[0];
+    if (!ValidateAppSign(Segs[1], SecretKey, IpString)) {
+        return {};
+    }
+    return xNetAddress::Parse(IpString);
+}

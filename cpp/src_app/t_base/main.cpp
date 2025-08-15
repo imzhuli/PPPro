@@ -12,5 +12,12 @@ int main(int, char **) {
     auto Valid = ValidateAppSign(Sign, SecretKey, SomeData);
     cout << "valid=" << YN(Valid) << endl;
 
+    auto Address  = xNetAddress::Parse("127.0.0.1:1234");
+    auto SignedIp = PackAndSignAddress(GetTimestampMS(), SecretKey, Address);
+    cout << "Signed Ip : " << SignedIp << endl;
+
+    auto ExtractedAddress = ExtractAddressFromSignedPack(SignedIp, SecretKey);
+    cout << "ExtractedAddress: " << ExtractedAddress.ToString() << endl;
+
     return 0;
 }
