@@ -13,10 +13,10 @@ int main(int, char **) {
     cout << "valid=" << YN(Valid) << endl;
 
     auto Address  = xNetAddress::Parse("127.0.0.1:1234");
-    auto SignedIp = PackAndSignAddress(GetTimestampMS(), SecretKey, Address);
+    auto SignedIp = SignAndPackAddress(GetTimestampMS(), SecretKey, Address);
     cout << "Signed Ip : " << SignedIp << endl;
 
-    auto ExtractedAddress = ExtractAddressFromSignedPack(SignedIp, SecretKey);
+    auto ExtractedAddress = ExtractAddressFromPack(SignedIp, SecretKey);
     cout << "ExtractedAddress: " << ExtractedAddress.ToString() << endl;
 
     return 0;

@@ -20,6 +20,7 @@ aux_source_directory("./pp_protocol/device_relay"           SRC)
 aux_source_directory("./pp_protocol/dns_server"             SRC)
 aux_source_directory("./pp_protocol/geo_server"             SRC)
 aux_source_directory("./pp_protocol/proxy_relay"            SRC)
+aux_source_directory("./pp_protocol/internal"               SRC)
 
 add_library(${libname} ${SRC})
 target_compile_definitions(${libname} PRIVATE X_OPTION_STATIC)

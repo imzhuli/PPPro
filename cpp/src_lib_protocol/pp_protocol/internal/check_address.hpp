@@ -16,13 +16,8 @@ public:
 
 struct xPP_AddressAutoPush : public xBinaryMessage {  // from proxy_access to relay server
 public:
-    void SerializeMembers() override {
-        W(ConnectionAddress);  //
-    }
-
-    void DeserializeMembers() override {
-        R(ConnectionAddress);  //
-    }
+    void SerializeMembers() override;
+    void DeserializeMembers() override;
 
     xNetAddress ConnectionAddress;
 };

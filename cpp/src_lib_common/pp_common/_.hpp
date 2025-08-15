@@ -366,7 +366,7 @@ static inline std::string AppSign(uint64_t Timestamp, const std::string & Secret
 extern bool ValidateAppSign(const std::string & Sign, const std::string & SecretKey, const void * DataPtr, size_t Size);
 static inline bool ValidateAppSign(const std::string & Sign, const std::string & SecretKey, const std::string_view& V) { return ValidateAppSign(Sign, SecretKey, V.data(), V.size()); }
 
-extern std::string PackAndSignAddress(uint64_t Timestamp, const std::string & SecretKey, const xNetAddress & Address);
-extern xNetAddress ExtractAddressFromSignedPack(const std::string & SignedIp, const std::string & SecretKey);
+extern std::string SignAndPackAddress(uint64_t Timestamp, const std::string & SecretKey, const xNetAddress & Address);
+extern xNetAddress ExtractAddressFromPack(const std::string & SignedIp, const std::string & SecretKey);
 
 // clang-format on
