@@ -2,7 +2,7 @@
 
 #include "../lib_utils/all.hpp"
 
-static constexpr const uint64_t UPGRADE_VERSION_TIMEOUT_MS           = 5'000;
+static constexpr const uint64_t UPGRADE_VERSION_TIMEOUT_MS           = 3'000;
 static constexpr const uint64_t RELOAD_BACKEND_SERVER_LIST_TIMEOUTMS = 1 * 60'000;
 
 void xSL_InternalServerListManager::Tick(uint64_t NowMS) {

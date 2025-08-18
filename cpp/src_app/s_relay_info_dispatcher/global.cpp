@@ -14,7 +14,8 @@ xNetAddress ExportProducerAddress6;
 xNetAddress ExportObserverAddress4;
 xNetAddress ExportObserverAddress6;
 
-xRID_LocalAudit LocalAudit;
+xRID_LocalAudit       LocalAudit;
+xRID_LocalAuditLogger LocalAuditLogger;
 
 #define O(x) OS << #x << "=" << LocalAudit.x << endl
 static std::string LocalAuditToString() {

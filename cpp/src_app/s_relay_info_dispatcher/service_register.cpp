@@ -19,10 +19,10 @@ bool xRID_RegisterServerService::Init() {
     RuntimeAssert(ServerIdClient.Init(ServiceIoContext, ServerIdCenterAddress, RuntimeEnv.DefaultLocalServerIdFilePath));
     RuntimeAssert(RegisterClient.Init(ServiceIoContext, ServerListRegisterAddress));
 
-    ServerIdClient.SetOnServerIdUpdateCallback([this](uint64_t NewServerId) {
+    ServerIdClient.OnServerIdUpdateCallback = [this](uint64_t NewServerId) {
         DumpLocalServerId(RuntimeEnv.DefaultLocalServerIdFilePath, NewServerId);
         RegisterClient.SetLocalServerId(NewServerId);
-    });
+    };
     RegisterClient.SetServerIdPoster(&RID_RegisterServer);
     return true;
 }

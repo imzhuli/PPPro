@@ -1,22 +1,30 @@
 #include "./_global.hpp"
 
-xNetAddress BindAddress4;
-xNetAddress BindAddress6;
-xNetAddress ProxyAddress4;
-xNetAddress ProxyAddress6;
+uint64_t   ServerRuntimeId = {};
+xIoContext GlobalIoContext = {};
 
-xNetAddress ExportAddress4;
-xNetAddress ExportAddress6;
-xNetAddress ExportProxyAddress4;
-xNetAddress ExportProxyAddress6;
+xNetAddress BindCtrlAddress;
+xNetAddress BindDataAddress;
+xNetAddress BindProxyAddress;
+
+xNetAddress ExportCtrlAddress;
+xNetAddress ExportDataAddress;
+xNetAddress ExportProxyAddress;
 
 xNetAddress ServerIdCenterAddress;
 xNetAddress ServerListDownloadAddress;
 
-xServerIdClient                          ServerIdClient;
 xRelayInfoDispatcherServerInfoDownloader RIDDownloader;
 xDeviceStateRelayServerListDownloader    DSRDownloader;
 xClientPoolWrapper                       DeviceReporter;
+
+xRD_DeviceConnectionManager DeviceConnectionManager;
+xDeviceManager              DeviceManager;
+xRD_ProxyConnectionManager  ProxyConnectionManager;
+xDeviceRelayService         DeviceRelayService;
+xRD_RelayConnectionManager  RelayConnectionManager;
+xRelayInfoReporter          RelayInfoReporter;
+xServerIdClient             ServerIdClient;
 
 xRD_LocalAudit LocalAudit;
 
@@ -30,7 +38,6 @@ void xRD_LocalAudit::ResetPeriodicalValues() {
 }
 
 #define O(x) OS << #x << "=" << (x) << ' '
-
 std::string xRD_LocalAudit::ToString() const {
 
     auto OS = std::ostringstream();
@@ -46,5 +53,3 @@ std::string xRD_LocalAudit::ToString() const {
 
     return OS.str();
 }
-
-#undef O

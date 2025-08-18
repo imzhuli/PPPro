@@ -184,10 +184,10 @@ int main(int argc, char ** argv) {
     X_GUARD(RegisterServerClient, ServiceIoContext, ServerListRegisterAddress);
     X_GUARD(AuditService, ServiceIoContext, BindAddress, MAX_AUDIT_REPORTER_COUNT);
 
-    ServerIdClient.SetOnServerIdUpdateCallback([](uint64_t LocalServerId) {
+    ServerIdClient.OnServerIdUpdateCallback = [](uint64_t LocalServerId) {
         DumpLocalServerId(RuntimeEnv.DefaultLocalServerIdFilePath, LocalServerId);
         RegisterServerClient.SetLocalServerId(LocalServerId);
-    });
+    };
     RegisterServerClient.SetServerIdPoster(&AA_RegisterServer);
 
     while (ServiceRunState) {

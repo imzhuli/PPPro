@@ -29,6 +29,27 @@ void DumpLocalServerId(const std::string & LocalServerIdFilename, uint64_t Local
 
 //////////////////////////////////////////////////////
 
+bool xServerIdClient::Init(xIoContext * ICP, xNetAddress TargetAddress, uint64_t FirstTryServerId) {
+    if (!xClient::Init(ICP, TargetAddress)) {
+        return false;
+    }
+    LocalServerId = FirstTryServerId;
+    return true;
+}
+
+bool xServerIdClient::Init(xIoContext * ICP, xNetAddress TargetAddress, const std::string & LocalServerIdFilename) {
+    if (!xClient::Init(ICP, TargetAddress)) {
+        return false;
+    }
+    LocalServerId = LoadLocalServerId(LocalServerIdFilename);
+    return true;
+}
+
+void xServerIdClient::Clean() {
+    Reset(LocalServerId);
+    xClient::Clean();
+};
+
 void xServerIdClient::OnServerConnected() {
     auto Req             = xPP_AcquireServerId();
     Req.PreviousServerId = LocalServerId;

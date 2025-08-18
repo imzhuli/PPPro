@@ -99,10 +99,10 @@ int main(int argc, char ** argv) {
 
     RegisterServerClient.SetServerIdPoster(&AC_RegisterServer);
 
-    ServerIdClient.SetOnServerIdUpdateCallback([](uint64_t LocalServerId) {
+    ServerIdClient.OnServerIdUpdateCallback = [](uint64_t LocalServerId) {
         DumpLocalServerId(RuntimeEnv.DefaultLocalServerIdFilePath, LocalServerId);
         RegisterServerClient.SetLocalServerId(LocalServerId);
-    });
+    };
 
     while (true) {
         ServiceUpdateOnce(ServerIdClient, RegisterServerClient, BackendServerListDownloader, AuthService);

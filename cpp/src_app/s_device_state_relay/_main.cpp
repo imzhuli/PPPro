@@ -102,10 +102,10 @@ int main(int argc, char ** argv) {
     X_GUARD(ServerIdClient, ServiceIoContext, ServerIdCenterAddress, RuntimeEnv.DefaultLocalServerIdFilePath);
     X_GUARD(RegisterServerClient, ServiceIoContext, ServerListRegisterAddress);
 
-    ServerIdClient.SetOnServerIdUpdateCallback([](auto ServerId) {
+    ServerIdClient.OnServerIdUpdateCallback = [](auto ServerId) {
         DumpLocalServerId(RuntimeEnv.DefaultLocalServerIdFilePath, ServerId);
         RegisterServerClient.SetLocalServerId(ServerId);
-    });
+    };
 
     RegisterServerClient.SetServerIdPoster(&DSR_RegisterServer);
 

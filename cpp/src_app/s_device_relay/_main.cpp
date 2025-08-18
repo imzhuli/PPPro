@@ -1,5 +1,4 @@
 #include "./_global.hpp"
-#include "./relay_service.hpp"
 
 #include <pp_protocol/device_relay/init_ctrl_stream.hpp>
 
@@ -8,46 +7,22 @@ int main(int argc, char ** argv) {
     auto SEG = xRuntimeEnvGuard(argc, argv);
 
     auto CL = xConfigLoader(RuntimeEnv.DefaultConfigFilePath);
-    CL.Require(BindCtrlAddress, "BindCtrlAddress");
-    CL.Require(BindDataAddress, "BindDataAddress");
-    CL.Require(BindProxyAddress, "BindProxyAddress");
-    CL.Require(ExportCtrlAddress, "ExportCtrlAddress");
-    CL.Require(ExportDataAddress, "ExportDataAddress");
-    CL.Require(ExportProxyAddress, "ExportProxyAddress");
+    CL.Optional(BindAddress4, "BindAddress4");
+    CL.Optional(BindAddress6, "BindAddress6");
+    CL.Optional(ProxyAddress4, "ProxyAddress4");
+    CL.Optional(ProxyAddress6, "ProxyAddress6");
+    CL.Optional(ExportAddress4, "ExportAddress4");
+    CL.Optional(ExportAddress6, "ExportAddress6");
+
     CL.Require(ServerIdCenterAddress, "ServerIdCenterAddress");
     CL.Require(ServerListDownloadAddress, "ServerListDownloadAddress");
 
-    RuntimeAssert(DeviceReporter.Init(ServiceIoContext));
-    RuntimeAssert(DeviceManager.Init(MaxDeviceCount));
-    RuntimeAssert(DeviceConnectionManager.Init(ServiceIoContext, MaxDeviceCount * 2));
-    RuntimeAssert(DeviceRelayService.Init(ServiceIoContext, BindCtrlAddress, BindDataAddress, BindProxyAddress));
-    RuntimeAssert(ProxyConnectionManager.Init(ServiceIoContext, MaxProxyCount));
-
-    X_GUARD(ServerIdClient, ServiceIoContext, ServerIdCenterAddress, RuntimeEnv.DefaultLocalServerIdFilePath);
-    X_GUARD(RelayConnectionManager, MaxRelayConnectionCount);
-    X_GUARD(RIDDownloader, ServiceIoContext, ServerListDownloadAddress);
-    X_GUARD(DSRDownloader, ServiceIoContext, ServerListDownloadAddress);
-    X_GUARD(RelayInfoReporter, ServiceIoContext);
-
-    ServerIdClient.SetOnServerIdUpdateCallback([&](auto ServerId) {
-        ServerRuntimeId = ServerId;
-        DumpLocalServerId(RuntimeEnv.DefaultLocalServerIdFilePath, ServerRuntimeId);
-
-        auto LocalInfo                    = xRelayServerInfoBase();
-        LocalInfo.ServerId                = ServerRuntimeId;
-        LocalInfo.StartupTimestampMS      = ServiceTicker();
-        LocalInfo.ServerType              = eRelayServerType::DEVICE;
-        LocalInfo.ExportDeviceCtrlAddress = ExportCtrlAddress;
-        LocalInfo.ExportDeviceDataAddress = ExportDataAddress;
-        LocalInfo.ExportProxyAddress      = ExportProxyAddress;
-        RelayInfoReporter.UpdateLocalRelayServerInfo(LocalInfo);
-    });
-
-    RIDDownloader.SetOnUpdateRelayInfoDispatcherServerInfoCallback([](const xRelayInfoDispatcherServerInfo & Info) {
+    ServerIdClient.OnServerIdUpdateCallback = [&](auto ServerId) {};
+    RIDDownloader.UpdateServerInfoCallback  = [](const xRelayInfoDispatcherServerInfo & Info) {
         DEBUG_LOG("RelayInfoDispatcher producer address updated: %s", Info.ToString().c_str());
         Todo("using correct target address");
         // RelayInfoReporter.UpdateServerAddress(Info.ProducerAddress);
-    });
+    };
     DSRDownloader.SetOnUpdateDeviceStateRelayServerListCallback([](uint32_t Version, const std::vector<xDeviceStateRelayServerInfo> & ServerList) {
         auto PSL = std::vector<xNetAddress>();
         for (auto & S : ServerList) {
@@ -66,24 +41,18 @@ int main(int argc, char ** argv) {
         DEBUG_LOG("%s", OS.str().c_str());
     });
 
-    auto AuditTimer = xTimer();
     while (true) {
-        ServiceUpdateOnce(
-            DeviceConnectionManager,  //
-            DeviceManager,            //
-            DeviceRelayService,       //
-            ProxyConnectionManager,   //
-            RelayConnectionManager,   //
-            DeviceReporter,           //
-            ServerIdClient,           //
-            RIDDownloader,            //
-            DSRDownloader,            //
-            RelayInfoReporter
+        ServiceUpdateOnce(ServerIdClient  //
+                                          // DeviceConnectionManager,  //
+                                          // DeviceManager,            //
+                                          // DeviceRelayService,       //
+                                          // ProxyConnectionManager,   //
+                                          // RelayConnectionManager,   //
+                                          // DeviceReporter,           //
+                                          // RIDDownloader,            //
+                                          // DSRDownloader,            //
+                                          // RelayInfoReporter
         );
-        if (AuditTimer.TestAndTag(std::chrono::minutes(1))) {
-            Logger->I("%s", LocalAudit.ToString().c_str());
-            LocalAudit.ResetPeriodicalValues();
-        }
     }
 
     return 0;

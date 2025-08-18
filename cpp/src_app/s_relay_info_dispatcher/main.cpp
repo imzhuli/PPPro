@@ -122,7 +122,7 @@
 //     std::vector<xServiceClientConnection *> SortedAvailableObserverConnections;
 // };
 
-// static auto RSS = xRID_RegisterServerService();
+static auto RSS = xRID_RegisterServerService();
 // static auto PS  = xRID_ProducerService();
 // static auto OS  = xRID_ConsumerService();
 
@@ -131,22 +131,46 @@ int main(int argc, char ** argv) {
     auto REG = xRuntimeEnvGuard(argc, argv);
     auto CL  = RuntimeEnv.LoadConfig();
 
+    // extern xNetAddress ProducerAddress4;
+    // extern xNetAddress ProducerAddress6;
+    // extern xNetAddress ObserverAddress4;
+    // extern xNetAddress ObserverAddress6;
+    extern xNetAddress ExportProducerAddress4;
+    extern xNetAddress ExportProducerAddress6;
+    extern xNetAddress ExportObserverAddress4;
+    extern xNetAddress ExportObserverAddress6;
+
     CL.Require(ServerIdCenterAddress, "ServerIdCenterAddress");
     CL.Require(ServerListRegisterAddress, "ServerListRegisterAddress");
+
     // CL.Require(ProducerAddress, "ProducerAddress");
     // CL.Require(ObserverAddress, "ObserverAddress");
-    // CL.Require(ExportProducerAddress, "ExportProducerAddress");
-    // CL.Require(ExportObserverAddress, "ExportObserverAddress");
+    CL.Optional(ExportProducerAddress4, "ExportProducerAddress4");
+    CL.Optional(ExportProducerAddress6, "ExportProducerAddress6");
+    CL.Optional(ExportObserverAddress4, "ExportObserverAddress4");
+    CL.Optional(ExportObserverAddress6, "ExportObserverAddress6");
 
-    // X_GUARD(RSS);
+    bool Enable4 = ExportProducerAddress4.IsV4() && ExportProducerAddress4.Port && ExportObserverAddress4.IsV4() && ExportObserverAddress4.Port;
+    bool Enable6 = ExportProducerAddress6.IsV6() && ExportProducerAddress6.Port && ExportObserverAddress6.IsV6() && ExportObserverAddress6.Port;
+
+    if (!Enable4 && !Enable6) {
+        Logger->F("neither ipv4 or ipv6 is enabled");
+        return 0;
+    }
+
+    X_GUARD(RSS);
     // X_GUARD(PS, ServiceIoContext, ProducerAddress, MAX_DEVICE_RELAY_SERVER_SUPPORTED, true);
     // X_GUARD(OS, ServiceIoContext, ObserverAddress, DEFAULT_MAX_SERVER_CONNECTIONS, true);
 
     // PS.SetRelayServerKeepAliveCallback([](auto & Info) { OS.BroadCastRelayInfo(Info); });
 
-    // while (ServiceRunState) {
-    //     ServiceUpdateOnce(RSS, PS, OS, LocalAuditLogger);
-    // }
+    while (ServiceRunState) {
+        ServiceUpdateOnce(
+            RSS,
+            // PS, OS,
+            LocalAuditLogger
+        );
+    }
 
     return 0;
 

@@ -5,6 +5,7 @@
 static constexpr const char * StaicSignSalt = "!#@SFas098xc()*&";
 
 #define O(x) OS << #x << "=" << (x) << ' '
+
 std::string xRelayServerInfoBase::ToString() const {
     auto OS = std::ostringstream();
     O(ServerId);

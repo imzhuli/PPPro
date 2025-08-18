@@ -7,40 +7,42 @@
 
 void xRelayInfoDispatcherServerInfoDownloader::OnTick(uint64_t NowMS) {
     Ticker.Update(NowMS);
-    if (NowMS - LastUpdateTimestampMS < QuickUpdateTimeoutMS) {
+    auto TimeoutMS = NowMS - LastUpdateTimestampMS;
+    if (EnableQuickUpdate && TimeoutMS < QuickUpdateTimeoutMS) {
         return;
     }
-    if (ServerInfo.ServerId && NowMS - LastUpdateTimestampMS < UpdateTimeoutMS) {
+    if (TimeoutMS < UpdateTimeoutMS) {
         return;
     }
     if (IsOpen()) {
         PostDownloadRelayInfoDispatcherServerInfoRequest();
-        LastUpdateTimestampMS = Ticker();
         return;
     }
 }
 
 void xRelayInfoDispatcherServerInfoDownloader::OnServerConnected() {
+    Reset(QuickUpdateCount);
+    Reset(EnableQuickUpdate, true);
     PostDownloadRelayInfoDispatcherServerInfoRequest();
-    LastUpdateTimestampMS = Ticker();
+}
+
+void xRelayInfoDispatcherServerInfoDownloader::OnServerClose() {
+    Reset(ServerInfo);
+    Reset(QuickUpdateCount);
+    Reset(EnableQuickUpdate, true);
 }
 
 bool xRelayInfoDispatcherServerInfoDownloader::OnServerPacket(xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) {
-
     switch (CommandId) {
         case Cmd_DownloadRelayInfoDispatcherServerResp:
             return OnDownloadRelayInfoDispatcherServerInfo(RequestId, PayloadPtr, PayloadSize);
         default:
             return false;
     }
-
     return true;
 }
 
 bool xRelayInfoDispatcherServerInfoDownloader::OnDownloadRelayInfoDispatcherServerInfo(xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) {
-
-    // DEBUG_LOG("%s", HexShow(PayloadPtr, PayloadSize).c_str());
-
     auto R = xPP_DownloadRelayInfoDispatcherServerResp();
     if (!R.Deserialize(PayloadPtr, PayloadSize)) {
         return false;
@@ -48,13 +50,24 @@ bool xRelayInfoDispatcherServerInfoDownloader::OnDownloadRelayInfoDispatcherServ
     if (R.ServerInfo == ServerInfo) {
         return true;
     }
+    if (R.ServerInfo.ServerId) {
+        EnableQuickUpdate = false;
+    }
 
     ServerInfo = R.ServerInfo;
-    UpdateRelayInfoDispatcherServerInfoCallback(ServerInfo);
+    UpdateServerInfoCallback(ServerInfo);
     return true;
 }
 
 void xRelayInfoDispatcherServerInfoDownloader::PostDownloadRelayInfoDispatcherServerInfoRequest() {
     auto R = xPP_DownloadRelayInfoDispatcherServer();
     PostMessage(Cmd_DownloadRelayInfoDispatcherServer, 0, R);
+    if (EnableQuickUpdate) {
+        if (QuickUpdateCount < 15) {
+            ++QuickUpdateCount;
+        } else {
+            EnableQuickUpdate = false;
+        }
+    }
+    LastUpdateTimestampMS = Ticker();
 }

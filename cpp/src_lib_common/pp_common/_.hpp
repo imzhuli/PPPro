@@ -306,7 +306,11 @@ struct xMessageChannel {
 namespace __pp_common_detail__ {
     template <typename T>
     inline void __TickOne__(uint64_t NowMS, T & Target) {
-        Target.Tick(NowMS);
+        if constexpr (std::is_object_v<T>) {
+            Target.Tick(NowMS);
+        } else {
+            Target(NowMS);
+        }
     }
     inline void __TickAll__(uint64_t) {  // iteration finishes here
     }

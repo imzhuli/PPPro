@@ -17,8 +17,8 @@ int main(int argc, char ** argv) {
     auto REG = xRuntimeEnvGuard(argc, argv);
     auto CL  = xConfigLoader(RuntimeEnv.DefaultConfigFilePath);
 
-    // CL.Require(ServerListDownloadAddress, "ServerListDownloadAddress");
-    // Logger->D("DownloadAddress: %s", ServerListDownloadAddress.ToString().c_str());
+    CL.Require(ServerListDownloadAddress, "ServerListDownloadAddress");
+    Logger->D("DownloadAddress: %s", ServerListDownloadAddress.ToString().c_str());
 
     // X_GUARD(AADownloader, ServiceIoContext, ServerListDownloadAddress);
     // AADownloader.SetOnUpdateAuditAccountServerListCallback([](uint32_t Version, const std::vector<xServerInfo> & ServerList) {
@@ -53,14 +53,10 @@ int main(int argc, char ** argv) {
     //     Logger->D("%s", OS.str().c_str());
     // });
 
-    // X_GUARD(RIDDownloader, ServiceIoContext, ServerListDownloadAddress);
-    // RIDDownloader.SetOnUpdateRelayInfoDispatcherServerInfoCallback([](const xRelayInfoDispatcherServerInfo & S) {
-    //     auto OS = std::ostringstream();
-    //     OS << "updated relay info dispatcher server: " << endl;
-    //     OS << "ServerId: " << S.ServerId << endl;
-    //     OS << "ServerAddress: P:" << S.ProducerAddress.ToString() << ", O: " << S.ObserverAddress.ToString() << endl;
-    //     Logger->D("%s", OS.str().c_str());
-    // });
+    X_GUARD(RIDDownloader, ServiceIoContext, ServerListDownloadAddress);
+    RIDDownloader.UpdateServerInfoCallback = [](const xRelayInfoDispatcherServerInfo & S) {  //
+        Logger->D("%s", S.ToString().c_str());
+    };
 
     // X_GUARD(DSDDownloader, ServiceIoContext, ServerListDownloadAddress);
     // DSDDownloader.SetOnUpdateDeviceSelectorDispatcherServerListCallback([](uint32_t Version, const std::vector<xDeviceSelectorDispatcherInfo> & SL) {
@@ -74,6 +70,10 @@ int main(int argc, char ** argv) {
     // });
 
     while (ServiceRunState) {
-        ServiceUpdateOnce(AADownloader, ACDownloader, DSRDownloader, RIDDownloader, DSDDownloader);
+        ServiceUpdateOnce(
+            // AADownloader, ACDownloader, DSRDownloader,
+            RIDDownloader
+            // DSDDownloader
+        );
     }
 }
