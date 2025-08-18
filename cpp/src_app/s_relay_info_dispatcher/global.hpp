@@ -1,4 +1,8 @@
 #pragma once
+#include "../lib_utils/all.hpp"
+#include "./observer.hpp"
+#include "./producer.hpp"
+
 #include <pp_common/_.hpp>
 
 extern xNetAddress ServerIdCenterAddress;
@@ -12,6 +16,11 @@ extern xNetAddress ExportProducerAddress4;
 extern xNetAddress ExportProducerAddress6;
 extern xNetAddress ExportObserverAddress4;
 extern xNetAddress ExportObserverAddress6;
+
+extern xTcpService ProducerService4;
+extern xTcpService ProducerService6;
+extern xTcpService ObserverService4;
+extern xTcpService ObserverService6;
 
 struct xRID_LocalAudit {
     size_t TotalRelayConnections          = 0;

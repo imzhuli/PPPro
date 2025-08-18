@@ -230,18 +230,20 @@ enum struct eRelayServerType : uint16_t {
 };
 
 struct xRelayServerInfoBase {
+    eRelayServerType ServerType;
     uint64_t         ServerId = {};
     uint64_t         StartupTimestampMS;
-    xNetAddress      ExportProxyAddress;
-    eRelayServerType ServerType;
-    uint64_t         Flags;
-    uint64_t         FlagsEx;
-    uint32_t         ForcedPoolId;
+    xNetAddress      ExportProxyAddress4;
+    xNetAddress      ExportProxyAddress6;
 
-    xNetAddress ExportDeviceCtrlAddress;
-    xNetAddress ExportDeviceDataAddress;
-    xNetAddress ExportStaticIpAddress;
-    xNetAddress ExportStaticUdpAddress;
+    xNetAddress ExportDeviceAddress4;
+    xNetAddress ExportDeviceAddress6;
+    xNetAddress ExportStaticIpAddress4;
+    xNetAddress ExportStaticIpAddress6;
+    xNetAddress ExportStaticUdpAddress4;
+    xNetAddress ExportStaticUdpAddress6;
+
+    uint32_t ForcedPoolId;
 
     std::string ToString() const;
 };
@@ -304,27 +306,19 @@ struct xMessageChannel {
 };
 
 namespace __pp_common_detail__ {
-    template <typename T>
-    inline void __TickOne__(uint64_t NowMS, T & Target) {
-        if constexpr (std::is_object_v<T>) {
-            Target.Tick(NowMS);
-        } else {
-            Target(NowMS);
-        }
-    }
     inline void __TickAll__(uint64_t) {  // iteration finishes here
     }
     template <typename T, typename... TOthers>
-    inline void __TickAll__(uint64_t NowMS, T & First, TOthers &... Others) {
-        __TickOne__(NowMS, First);
-        __TickAll__(NowMS, Others...);
+    inline void __TickAll__(uint64_t NowMS, T && First, TOthers &&... Others) {
+        std::forward<T>(First).Tick(NowMS);
+        __TickAll__(NowMS, std::forward<TOthers>(Others)...);
     }
 
 }  // namespace __pp_common_detail__
 
 template <typename... T>
-inline void TickAll(uint64_t NowMS, T &... All) {
-    __pp_common_detail__::__TickAll__(NowMS, All...);
+inline void TickAll(uint64_t NowMS, T &&... All) {
+    __pp_common_detail__::__TickAll__(NowMS, std::forward<T>(All)...);
 }
 
 template <typename T>

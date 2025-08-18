@@ -14,6 +14,11 @@ xNetAddress ExportProducerAddress6;
 xNetAddress ExportObserverAddress4;
 xNetAddress ExportObserverAddress6;
 
+xTcpService ProducerService4;
+xTcpService ProducerService6;
+xTcpService ObserverService4;
+xTcpService ObserverService6;
+
 xRID_LocalAudit       LocalAudit;
 xRID_LocalAuditLogger LocalAuditLogger;
 

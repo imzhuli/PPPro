@@ -78,7 +78,7 @@ int main(int argc, char ** argv) {
         Logger->I("ipv4 enabled");
         RuntimeAssert(Ipv4TestClient.Init(ServiceIoContext));
         Ipv4TestClient.UpdateTarget(TestAddressServerAddress.V4);
-        Ipv4TestClient.SetOnPacketCallback(&OnServerPush);
+        Ipv4TestClient.OnPacketCallback = OnServerPush;
 
         RuntimeAssert(Ipv4UdpTestClient.Init(ServiceIoContext, xNetAddress::Make4()));
         Ipv4UdpTestClient.OnPacketCallback = OnUdpServerPush;
@@ -89,7 +89,7 @@ int main(int argc, char ** argv) {
         Logger->I("ipv6 enabled");
         RuntimeAssert(Ipv6TestClient.Init(ServiceIoContext));
         Ipv6TestClient.UpdateTarget(TestAddressServerAddress.V6);
-        Ipv6TestClient.SetOnPacketCallback(&OnServerPush);
+        Ipv6TestClient.OnPacketCallback = OnServerPush;
 
         RuntimeAssert(Ipv6UdpTestClient.Init(ServiceIoContext, xNetAddress::Make6()));
         Ipv6UdpTestClient.OnPacketCallback = OnUdpServerPush;

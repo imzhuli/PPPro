@@ -54,7 +54,7 @@ int main(int argc, char ** argv) {
     // });
 
     X_GUARD(RIDDownloader, ServiceIoContext, ServerListDownloadAddress);
-    RIDDownloader.UpdateServerInfoCallback = [](const xRelayInfoDispatcherServerInfo & S) {  //
+    RIDDownloader.OnUpdateServerInfoCallback = [](const xRelayInfoDispatcherServerInfo & S) {  //
         Logger->D("%s", S.ToString().c_str());
     };
 

@@ -8,13 +8,24 @@ static constexpr const char * StaicSignSalt = "!#@SFas098xc()*&";
 
 std::string xRelayServerInfoBase::ToString() const {
     auto OS = std::ostringstream();
-    O(ServerId);
-    O(ExportProxyAddress.ToString());
     O((unsigned)ServerType);
-    O(ForcedPoolId);
+    O(ServerId);
     O(StartupTimestampMS);
-    O(ExportDeviceCtrlAddress.ToString());
-    O(ExportDeviceDataAddress.ToString());
+
+    O(ExportProxyAddress4.ToString());
+    O(ExportProxyAddress6.ToString());
+
+    O(ExportDeviceAddress4.ToString());
+    O(ExportDeviceAddress6.ToString());
+
+    O(ExportStaticIpAddress4.ToString());
+    O(ExportStaticIpAddress6.ToString());
+
+    O(ExportStaticUdpAddress4.ToString());
+    O(ExportStaticUdpAddress6.ToString());
+
+    O(ForcedPoolId);
+
     return OS.str();
 }
 

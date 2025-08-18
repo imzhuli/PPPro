@@ -41,7 +41,5 @@ extern const xRelayServerInfoBase * GetRandomRelayServerInfoByRegion(const xGeoI
 
 extern xCC_IpLocationManager IpLocationManager;
 
-extern xUdpChannel                 ChallengeChannel;
-extern xCC_ChallengeChennelReactor ChallengeChennelReactor;
-extern xUdpChannel                 Ipv6TestChennel;
-extern xCC_Ipv6TestChennelReactor  Ipv6TestChennelReactor;
+extern xel::xUdpService ChallengeService4;
+extern xel::xUdpService ChallengeService6;

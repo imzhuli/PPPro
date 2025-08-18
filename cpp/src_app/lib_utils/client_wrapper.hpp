@@ -1,7 +1,7 @@
 #pragma once
 #include <pp_common/_.hpp>
 
-class xClientWrapper : private xClient {
+class xClientWrapper final : private xClient {
 
 public:
     bool Init(xIoContext * ICP);
@@ -15,9 +15,9 @@ public:
     using xOnDisconnectedCallback = std::function<void()>;
     using xOnPacketCallback       = std::function<bool(xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize)>;
 
-    void SetOnConnectedCallback(const xOnConnectedCallback & CB) { OnConnectedCallback = CB; }
-    void SetOnDisconnectedCallback(const xOnDisconnectedCallback & CB) { OnDisconnectedCallback = CB; }
-    void SetOnPacketCallback(const xOnPacketCallback & CB) { OnPacketCallback = CB; }
+    xOnConnectedCallback    OnConnectedCallback;
+    xOnDisconnectedCallback OnDisconnectedCallback;
+    xOnPacketCallback       OnPacketCallback;
 
 private:
     void OnServerConnected() override;
@@ -27,8 +27,4 @@ private:
 private:
     bool         HasInstance = false;
     xIoContext * ICP         = nullptr;
-
-    xOnConnectedCallback    OnConnectedCallback;
-    xOnDisconnectedCallback OnDisconnectedCallback;
-    xOnPacketCallback       OnPacketCallback;
 };

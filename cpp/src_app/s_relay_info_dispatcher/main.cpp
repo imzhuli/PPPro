@@ -1,5 +1,6 @@
 #include "../lib_utils/all.hpp"
 #include "./global.hpp"
+#include "./producer.hpp"
 #include "./service_register.hpp"
 
 // struct xRID_ProducerService : public xService {
@@ -9,56 +10,7 @@
 //     void SetRelayServerKeepAliveCallback(const xRelayServerKeepAliveCallback & CB) { OnRelayServerKeepAliveCallback = CB; }
 
 //     void OnClientConnected(xServiceClientConnection & Connection) override { ++LocalAudit.TotalRelayConnections; }
-//     bool OnClientPacket(xServiceClientConnection & Connection, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) override {
-//         // DEBUG_LOG("\n%s", HexShow(PayloadPtr, PayloadSize).c_str());
-
-//         auto & P = Connection.UserContext.P;
-//         if (P) {
-//             DEBUG_LOG("duplicate server registration");
-//             return false;
-//         }
-
-//         if (CommandId != Cmd_RelayServerHeartBeat) {
-//             DEBUG_LOG("invalid command id");
-//             return false;
-//         }
-
-//         auto R = xPP_RelayServerHeartBeat();
-//         if (!R.Deserialize(PayloadPtr, PayloadSize)) {
-//             DEBUG_LOG("invalid protocol base");
-//             return false;
-//         }
-
-//         auto InfoCopy = new xRelayServerInfoBase(R.ServerInfo);
-//         P             = InfoCopy;
-//         ++LocalAudit.TotalRegisteredConnections;
-//         ++LocalAudit.TotalAvailableRelayConnections;
-//         if (OnRelayServerKeepAliveCallback) {
-//             Logger->I("New relay server info: %s", InfoCopy->ToString().c_str());
-//             OnRelayServerKeepAliveCallback(*InfoCopy);
-//         }
-//         return true;
-//     }
-
-//     void OnClientKeepAlive(xServiceClientConnection & Connection) {
-//         auto InfoCopy = static_cast<xRelayServerInfoBase *>(Connection.UserContext.P);
-//         if (!InfoCopy) {
-//             return;
-//         }
-//         if (OnRelayServerKeepAliveCallback) {
-//             OnRelayServerKeepAliveCallback(*InfoCopy);
-//         }
-//     }
-
-//     void OnClientClose(xServiceClientConnection & Connection) override {
-//         ++LocalAudit.TotalClosedConnections;
-//         auto InfoCopy = static_cast<xRelayServerInfoBase *>(Steal(Connection.UserContext.P));
-//         if (!InfoCopy) {
-//             return;
-//         }
-//         delete InfoCopy;
-//         --LocalAudit.TotalAvailableRelayConnections;
-//     }
+//
 
 // private:
 //     xRelayServerKeepAliveCallback OnRelayServerKeepAliveCallback;
@@ -106,18 +58,6 @@
 //         --LocalAudit.CurrentObserverCount;
 //     }
 
-//     void BroadCastRelayInfo(const xRelayServerInfoBase & Info) {
-//         auto Msg       = xPP_BroadcastRelayInfo();
-//         Msg.ServerInfo = Info;
-
-//         ubyte B[MaxPacketSize];
-//         auto  RS = WriteMessage(B, Cmd_BroadcastRelayInfo, 0, Msg);
-
-//         for (auto & P : SortedAvailableObserverConnections) {
-//             PostData(*P, B, RS);
-//         }
-//     }
-
 // private:
 //     std::vector<xServiceClientConnection *> SortedAvailableObserverConnections;
 // };
@@ -125,6 +65,9 @@
 static auto RSS = xRID_RegisterServerService();
 // static auto PS  = xRID_ProducerService();
 // static auto OS  = xRID_ConsumerService();
+
+static bool Enable4 = false;
+static bool Enable6 = false;
 
 int main(int argc, char ** argv) {
 
@@ -143,15 +86,19 @@ int main(int argc, char ** argv) {
     CL.Require(ServerIdCenterAddress, "ServerIdCenterAddress");
     CL.Require(ServerListRegisterAddress, "ServerListRegisterAddress");
 
-    // CL.Require(ProducerAddress, "ProducerAddress");
-    // CL.Require(ObserverAddress, "ObserverAddress");
+    CL.Require(ProducerAddress4, "ProducerAddress4");
+    CL.Require(ObserverAddress4, "ObserverAddress4");
+    CL.Require(ProducerAddress6, "ProducerAddress6");
+    CL.Require(ObserverAddress6, "ObserverAddress6");
+
     CL.Optional(ExportProducerAddress4, "ExportProducerAddress4");
-    CL.Optional(ExportProducerAddress6, "ExportProducerAddress6");
     CL.Optional(ExportObserverAddress4, "ExportObserverAddress4");
+    CL.Optional(ExportProducerAddress6, "ExportProducerAddress6");
     CL.Optional(ExportObserverAddress6, "ExportObserverAddress6");
 
-    bool Enable4 = ExportProducerAddress4.IsV4() && ExportProducerAddress4.Port && ExportObserverAddress4.IsV4() && ExportObserverAddress4.Port;
-    bool Enable6 = ExportProducerAddress6.IsV6() && ExportProducerAddress6.Port && ExportObserverAddress6.IsV6() && ExportObserverAddress6.Port;
+    Enable4 = ProducerAddress4.IsV4() && ProducerAddress4.Port && ObserverAddress4.IsV4() && ObserverAddress4.Port;
+    Enable6 = ProducerAddress6.IsV6() && ProducerAddress6.Port && ObserverAddress6.IsV6() && ObserverAddress6.Port;
+    Logger->I("Enable4=%s, Enable6=%s", YN(Enable4), YN(Enable6));
 
     if (!Enable4 && !Enable6) {
         Logger->F("neither ipv4 or ipv6 is enabled");
@@ -159,17 +106,28 @@ int main(int argc, char ** argv) {
     }
 
     X_GUARD(RSS);
-    // X_GUARD(PS, ServiceIoContext, ProducerAddress, MAX_DEVICE_RELAY_SERVER_SUPPORTED, true);
-    // X_GUARD(OS, ServiceIoContext, ObserverAddress, DEFAULT_MAX_SERVER_CONNECTIONS, true);
 
-    // PS.SetRelayServerKeepAliveCallback([](auto & Info) { OS.BroadCastRelayInfo(Info); });
+    ProducerService4.OnClientPacket    = OnProducerClientPacket;
+    ProducerService4.OnClientKeepAlive = OnProducerClientKeepAlive;
+    ProducerService4.OnClientClose     = OnProducerClientClose;
+    X_COND_GUARD(Enable4, ProducerService4, ServiceIoContext, ProducerAddress4, MAX_DEVICE_RELAY_SERVER_SUPPORTED);
+    X_COND_GUARD(Enable4, ObserverService4, ServiceIoContext, ObserverAddress4, DEFAULT_MAX_SERVER_CONNECTIONS);
+
+    ProducerService6.OnClientPacket    = OnProducerClientPacket;
+    ProducerService6.OnClientKeepAlive = OnProducerClientKeepAlive;
+    ProducerService6.OnClientClose     = OnProducerClientClose;
+
+    X_COND_GUARD(Enable6, ProducerService6, ServiceIoContext, ProducerAddress6, MAX_DEVICE_RELAY_SERVER_SUPPORTED);
+    X_COND_GUARD(Enable6, ObserverService6, ServiceIoContext, ObserverAddress6, DEFAULT_MAX_SERVER_CONNECTIONS);
 
     while (ServiceRunState) {
-        ServiceUpdateOnce(
-            RSS,
-            // PS, OS,
-            LocalAuditLogger
-        );
+        ServiceUpdateOnce(RSS, LocalAuditLogger);
+        if (Enable4) {
+            TickAll(ServiceTicker(), ProducerService4, ObserverService4);
+        }
+        if (Enable6) {
+            TickAll(ServiceTicker(), ProducerService6, ObserverService6);
+        }
     }
 
     return 0;

@@ -15,6 +15,7 @@ xNetAddress ServerListDownloadAddress;
 
 xServerIdClient                          ServerIdClient;
 xRelayInfoDispatcherServerInfoDownloader RIDDownloader;
+xRelayInfoReporter                       RIReporter;
 xDeviceStateRelayServerListDownloader    DSRDownloader;
 xClientPoolWrapper                       DeviceReporter;
 

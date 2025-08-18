@@ -2,8 +2,8 @@
 
 #include "../lib_utils/all.hpp"
 
-xNetAddress BindAddressForDevice;
-xNetAddress BindAddressForDeviceV6Test;
+xNetAddress BindAddressForDevice4;
+xNetAddress BindAddressForDevice6;
 xNetAddress ServerListDownloadAddress;
 std::string GeoInfoMapFilename;
 std::string IpLocationDbFilename;
@@ -49,7 +49,5 @@ const xRelayServerInfoBase * GetRandomRelayServerInfoByRegion(const xGeoInfo & G
 
 xCC_IpLocationManager IpLocationManager;
 
-xUdpChannel                 ChallengeChannel;
-xCC_ChallengeChennelReactor ChallengeChennelReactor;
-xUdpChannel                 Ipv6TestChennel;
-xCC_Ipv6TestChennelReactor  Ipv6TestChennelReactor;
+xel::xUdpService ChallengeService4;
+xel::xUdpService ChallengeService6;

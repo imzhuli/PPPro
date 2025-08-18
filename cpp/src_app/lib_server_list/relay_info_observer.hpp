@@ -25,9 +25,9 @@ public:
     void Clean();
     void Tick(uint64_t NowMS);
 
-    void SetOnNewDeviceRelayInfoCallback(const xOnNewDeviceRelayInfoCallback & CB) { OnNewDeviceRelayInfoCallback = CB; }
-    void SetOnNewDeviceRelayInfoErrorCallback(const xOnNewDeviceRelayInfoErrorCallback & CB) { OnNewDeviceRelayInfoErrorCallback = CB; }
-    void SetOnRemoveDeviceRelayInfoCallback(const xOnRemoveDeviceRelayInfoCallback & CB) { OnRemoveDeviceRelayInfoCallback = CB; }
+    xOnNewDeviceRelayInfoCallback      OnNewDeviceRelayInfoCallback      = Ignore<const xRelayServerInfoBase *>;
+    xOnNewDeviceRelayInfoErrorCallback OnNewDeviceRelayInfoErrorCallback = Ignore<const xRelayServerInfoBase *>;
+    xOnRemoveDeviceRelayInfoCallback   OnRemoveDeviceRelayInfoCallback   = Ignore<const xRelayServerInfoBase *>;
 
 private:
     bool OnRelayInfoDispatcherPacket(xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize);
@@ -44,8 +44,4 @@ private:
     std::map<uint64_t, uint64_t>      DeviceRelayServerIdLocalMap;
     xRelayInfoTimeoutList             RelayInfoTimeoutList;
     xIndexedStorage<xRelayServerInfo> DeviceRelayInfoPool;
-
-    xOnNewDeviceRelayInfoCallback      OnNewDeviceRelayInfoCallback      = Ignore<const xRelayServerInfoBase *>;
-    xOnNewDeviceRelayInfoErrorCallback OnNewDeviceRelayInfoErrorCallback = Ignore<const xRelayServerInfoBase *>;
-    xOnRemoveDeviceRelayInfoCallback   OnRemoveDeviceRelayInfoCallback   = Ignore<const xRelayServerInfoBase *>;
 };

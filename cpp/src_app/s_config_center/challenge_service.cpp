@@ -128,9 +128,8 @@ void xCC_ChallengeChennelReactor::OnTerminalChallenge(xUdpChannel * ChannelPtr, 
     RegionWriter.W4(RID.StateId);
     RegionWriter.W4(RID.CityId);
     if (RSI) {
-        Resp.CtrlAddress = RSI->ExportDeviceCtrlAddress;
-        Resp.DataAddress = RSI->ExportDeviceDataAddress;
-        Resp.CheckKey    = "TLMPP-FOR-TEST:" + StrToHex(RegionWriter.Origin(), RegionWriter.Offset());
+        Resp.Address  = RSI->ExportDeviceAddress4;
+        Resp.CheckKey = "TLMPP-FOR-TEST:" + StrToHex(RegionWriter.Origin(), RegionWriter.Offset());
     }
 
     ubyte Buffer[MaxPacketSize];

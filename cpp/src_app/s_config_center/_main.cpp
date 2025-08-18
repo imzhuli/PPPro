@@ -2,38 +2,49 @@
 #include "../lib_utils/all.hpp"
 #include "./_global.hpp"
 
-auto RelayInfoObserver = xRelayInfoObserver();
+static auto RelayInfoObserver = xRelayInfoObserver();
+
+static bool Enable4 = false;
+static bool Enable6 = false;
 
 int main(int argc, char ** argv) {
     auto REG = xRuntimeEnvGuard(argc, argv);
     auto CL  = REG->LoadConfig();
 
-    // CL.Require(BindAddressForDevice, "BindAddressForDevice");
-    // CL.Optional(BindAddressForDeviceV6Test, "BindAddressForDeviceV6Test");
-    // CL.Require(ServerListDownloadAddress, "ServerListDownloadAddress");
-    // CL.Require(GeoInfoMapFilename, "GeoInfoMapFilename");
-    // CL.Require(IpLocationDbFilename, "IpLocationDbFilename");
+    CL.Optional(BindAddressForDevice4, "BindAddressForDevice4");
+    CL.Optional(BindAddressForDevice6, "BindAddressForDevice6");
 
-    // X_GUARD(IpLocationManager, GeoInfoMapFilename, IpLocationDbFilename);
-    // X_GUARD(RelayInfoObserver, ServiceIoContext, ServerListDownloadAddress);
-    // X_GUARD(ChallengeChannel, ServiceIoContext, BindAddressForDevice, &ChallengeChennelReactor);
-    // X_COND_GUARD(BindAddressForDeviceV6Test, Ipv6TestChennel, ServiceIoContext, BindAddressForDeviceV6Test, &Ipv6TestChennelReactor);
+    CL.Require(ServerListDownloadAddress, "ServerListDownloadAddress");
+    CL.Require(GeoInfoMapFilename, "GeoInfoMapFilename");
+    CL.Require(IpLocationDbFilename, "IpLocationDbFilename");
 
-    // RelayInfoObserver.SetOnNewDeviceRelayInfoCallback([](const xRelayServerInfoBase * Info) {
-    //     auto TempRef = xCC_RelayInfoReference{ Info };
+    Enable4 = BindAddressForDevice4.IsV4() && BindAddressForDevice4.Port;
+    Enable6 = BindAddressForDevice6.IsV6() && BindAddressForDevice6.Port;
+    if (!Enable4 && !Enable6) {
+        Logger->F("neither ipv4 or ipv6 is enabled");
+        return 0;
+    }
+    X_COND_GUARD(Enable4, ChallengeService4, ServiceIoContext, BindAddressForDevice4);
+    X_COND_GUARD(Enable6, ChallengeService6, ServiceIoContext, BindAddressForDevice6);
 
-    //     auto & List       = TaggedDeviceRelayServerListMap[Info->ForcedPoolId];
-    //     auto   InsertIter = std::lower_bound(List.begin(), List.end(), TempRef);
-    //     RuntimeAssert(InsertIter == List.end() || *InsertIter != TempRef);
-    //     auto NewIter = List.insert(InsertIter, TempRef);
+    X_GUARD(IpLocationManager, GeoInfoMapFilename, IpLocationDbFilename);
+    X_GUARD(RelayInfoObserver, ServiceIoContext, ServerListDownloadAddress);
 
-    //     if (List.size() == 1) {
-    //         ++LocalAudit.TotalDeviceRelayTags;
-    //     }
-    //     ++LocalAudit.TotalDeviceRelayServerCount;
-    //     ++LocalAudit.TotalNewDeviceRelayServerCount;
-    //     DEBUG_LOG("NewDeviceRelayInfo: %s", NewIter->Info->ToString().c_str());
-    // });
+    RelayInfoObserver.OnNewDeviceRelayInfoCallback = [](const xRelayServerInfoBase * Info) {
+        auto TempRef = xCC_RelayInfoReference{ Info };
+
+        auto & List       = TaggedDeviceRelayServerListMap[Info->ForcedPoolId];
+        auto   InsertIter = std::lower_bound(List.begin(), List.end(), TempRef);
+        RuntimeAssert(InsertIter == List.end() || *InsertIter != TempRef);
+        auto NewIter = List.insert(InsertIter, TempRef);
+
+        if (List.size() == 1) {
+            ++LocalAudit.TotalDeviceRelayTags;
+        }
+        ++LocalAudit.TotalDeviceRelayServerCount;
+        ++LocalAudit.TotalNewDeviceRelayServerCount;
+        DEBUG_LOG("NewDeviceRelayInfo: %s", NewIter->Info->ToString().c_str());
+    };
 
     // RelayInfoObserver.SetOnRemoveDeviceRelayInfoCallback([](const xRelayServerInfoBase * Info) {
     //     auto TempRef  = xCC_RelayInfoReference{ Info };
@@ -56,9 +67,9 @@ int main(int argc, char ** argv) {
     //     ++LocalAudit.TotalRemoveDeviceRelayServerCount;
     // });
 
-    // while (ServiceRunState) {
-    //     ServiceUpdateOnce(RelayInfoObserver, LocalAudit);
-    // }
+    while (ServiceRunState) {
+        ServiceUpdateOnce(RelayInfoObserver, LocalAudit);
+    }
 
     return 0;
 }

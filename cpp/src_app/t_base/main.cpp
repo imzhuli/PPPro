@@ -19,5 +19,8 @@ int main(int, char **) {
     auto ExtractedAddress = ExtractAddressFromPack(SignedIp, SecretKey);
     cout << "ExtractedAddress: " << ExtractedAddress.ToString() << endl;
 
+    auto Address6 = xNetAddress::Parse("[::]");
+    cout << "Address6: " << Address6.ToString() << endl;
+
     return 0;
 }

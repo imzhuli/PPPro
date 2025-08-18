@@ -246,19 +246,16 @@ struct xPP_DownloadRelayInfoDispatcherServerResp : xBinaryMessage {
 struct xPP_RelayServerHeartBeat : xBinaryMessage {
 
     void SerializeMembers() override {
-        assert(ServerInfo.ServerId && ServerInfo.StartupTimestampMS);
-
+        assert((bool)ServerInfo.ServerType && ServerInfo.ServerId && ServerInfo.StartupTimestampMS);
+        W(ServerInfo.ServerType);
         W(ServerInfo.ServerId);
         W(ServerInfo.StartupTimestampMS);
-        W(ServerInfo.ExportProxyAddress);
-        W(ServerInfo.ServerType);
-        W(ServerInfo.Flags);
-        W(ServerInfo.FlagsEx);
-        W(ServerInfo.ForcedPoolId);
+        W(ServerInfo.ExportProxyAddress4);
+        W(ServerInfo.ExportProxyAddress6);
         switch (ServerInfo.ServerType) {
             case eRelayServerType::DEVICE:
-                W(ServerInfo.ExportDeviceCtrlAddress);
-                W(ServerInfo.ExportDeviceDataAddress);
+                W(ServerInfo.ExportDeviceAddress4);
+                W(ServerInfo.ExportDeviceAddress6);
                 break;
             default:
                 break;
@@ -266,17 +263,15 @@ struct xPP_RelayServerHeartBeat : xBinaryMessage {
     }
 
     void DeserializeMembers() override {
+        R(ServerInfo.ServerType);
         R(ServerInfo.ServerId);
         R(ServerInfo.StartupTimestampMS);
-        R(ServerInfo.ExportProxyAddress);
-        R(ServerInfo.ServerType);
-        R(ServerInfo.Flags);
-        R(ServerInfo.FlagsEx);
-        R(ServerInfo.ForcedPoolId);
+        R(ServerInfo.ExportProxyAddress4);
+        R(ServerInfo.ExportProxyAddress6);
         switch (ServerInfo.ServerType) {
             case eRelayServerType::DEVICE:
-                R(ServerInfo.ExportDeviceCtrlAddress);
-                R(ServerInfo.ExportDeviceDataAddress);
+                R(ServerInfo.ExportDeviceAddress4);
+                R(ServerInfo.ExportDeviceAddress6);
                 break;
             default:
                 break;
@@ -297,18 +292,16 @@ struct xPP_RegisterRelayInfoObserver : xBinaryMessage {
 struct xPP_BroadcastRelayInfo : xBinaryMessage {
 
     void SerializeMembers() override {
-        assert(ServerInfo.ServerId && ServerInfo.StartupTimestampMS);
-
+        assert((bool)ServerInfo.ServerType && ServerInfo.ServerId && ServerInfo.StartupTimestampMS);
+        W(ServerInfo.ServerType);
         W(ServerInfo.ServerId);
         W(ServerInfo.StartupTimestampMS);
-        W(ServerInfo.ExportProxyAddress);
-        W(ServerInfo.ServerType);
-        W(ServerInfo.ForcedPoolId);
-
+        W(ServerInfo.ExportProxyAddress4);
+        W(ServerInfo.ExportProxyAddress6);
         switch (ServerInfo.ServerType) {
             case eRelayServerType::DEVICE:
-                W(ServerInfo.ExportDeviceCtrlAddress);
-                W(ServerInfo.ExportDeviceDataAddress);
+                W(ServerInfo.ExportDeviceAddress4);
+                W(ServerInfo.ExportDeviceAddress6);
                 break;
             default:
                 break;
@@ -316,16 +309,15 @@ struct xPP_BroadcastRelayInfo : xBinaryMessage {
     }
 
     void DeserializeMembers() override {
+        R(ServerInfo.ServerType);
         R(ServerInfo.ServerId);
         R(ServerInfo.StartupTimestampMS);
-        R(ServerInfo.ExportProxyAddress);
-        R(ServerInfo.ServerType);
-        R(ServerInfo.ForcedPoolId);
-
+        R(ServerInfo.ExportProxyAddress4);
+        R(ServerInfo.ExportProxyAddress6);
         switch (ServerInfo.ServerType) {
             case eRelayServerType::DEVICE:
-                R(ServerInfo.ExportDeviceCtrlAddress);
-                R(ServerInfo.ExportDeviceDataAddress);
+                R(ServerInfo.ExportDeviceAddress4);
+                R(ServerInfo.ExportDeviceAddress6);
                 break;
             default:
                 break;

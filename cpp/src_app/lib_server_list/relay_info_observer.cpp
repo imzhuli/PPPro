@@ -1,18 +1,27 @@
 #include "./relay_info_observer.hpp"
 
 bool xRelayInfoObserver::Init(xIoContext * ICP, const xNetAddress & ServerListDownloadAddress) {
-    // assert(DeviceRelayServerIdLocalMap.empty());
-    // RuntimeAssert(DeviceRelayInfoPool.Init(MAX_DEVICE_RELAY_SERVER_SUPPORTED));
-    // if (!RelayInfoDispatcherClient.Init(ICP)) {
-    //     return false;
-    // }
-    // if (!DispatcherServerInfoDownloader.Init(ICP, ServerListDownloadAddress)) {
-    //     RelayInfoDispatcherClient.Clean();
-    //     return false;
-    // }
-    // DispatcherServerInfoDownloader.SetOnUpdateRelayInfoDispatcherServerInfoCallback([this](const xRelayInfoDispatcherServerInfo & Info) {
-    //     RelayInfoDispatcherClient.UpdateTarget(Info.ObserverAddress);
-    // });
+    assert(DeviceRelayServerIdLocalMap.empty());
+    RuntimeAssert(DeviceRelayInfoPool.Init(MAX_DEVICE_RELAY_SERVER_SUPPORTED));
+    if (!RelayInfoDispatcherClient.Init(ICP)) {
+        return false;
+    }
+    if (!DispatcherServerInfoDownloader.Init(ICP, ServerListDownloadAddress)) {
+        RelayInfoDispatcherClient.Clean();
+        return false;
+    }
+
+    bool Prefer4 = ServerListDownloadAddress.IsV4();
+    bool Prefer6 = ServerListDownloadAddress.IsV6();
+    RuntimeAssert(Prefer4 || Prefer6);
+
+    DispatcherServerInfoDownloader.OnUpdateServerInfoCallback = [this, Prefer4, Prefer6](const xRelayInfoDispatcherServerInfo & Info) {
+        if (Prefer4) {
+            RelayInfoDispatcherClient.UpdateTarget(Info.ObserverAddress4);
+        } else if (Prefer6) {
+            RelayInfoDispatcherClient.UpdateTarget(Info.ObserverAddress6);
+        }
+    };
     // RelayInfoDispatcherClient.SetOnConnectedCallback([this]() { RelayInfoDispatcherClient.PostMessage(Cmd_RegisterRelayInfoObserver, 0, XR(xPP_RegisterRelayInfoObserver())); });
     // RelayInfoDispatcherClient.SetOnPacketCallback([this](xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) {
     //     return OnRelayInfoDispatcherPacket(CommandId, RequestId, PayloadPtr, PayloadSize);
