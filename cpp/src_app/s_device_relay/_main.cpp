@@ -44,8 +44,9 @@ int main(int argc, char ** argv) {
     });
 
     RIDDownloader.SetOnUpdateRelayInfoDispatcherServerInfoCallback([](const xRelayInfoDispatcherServerInfo & Info) {
-        DEBUG_LOG("RelayInfoDispatcher producer address updated: %s", Info.ProducerAddress.ToString().c_str());
-        RelayInfoReporter.UpdateServerAddress(Info.ProducerAddress);
+        DEBUG_LOG("RelayInfoDispatcher producer address updated: %s", Info.ToString().c_str());
+        Todo("using correct target address");
+        // RelayInfoReporter.UpdateServerAddress(Info.ProducerAddress);
     });
     DSRDownloader.SetOnUpdateDeviceStateRelayServerListCallback([](uint32_t Version, const std::vector<xDeviceStateRelayServerInfo> & ServerList) {
         auto PSL = std::vector<xNetAddress>();

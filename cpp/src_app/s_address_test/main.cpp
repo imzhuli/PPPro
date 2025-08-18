@@ -4,7 +4,7 @@ static void OnTcpClientConnected(const xTcpServiceClientConnectionHandle & Handl
     auto PeerAddress = Handle.GetRemoteAddress();
     Logger->I("NewConnectin: Id=%" PRIx64 ", Address=%s", Handle.GetConnectionId(), PeerAddress.ToString().c_str());
     auto Push              = xPP_AddressAutoPush();
-    Push.ConnectionAddress = PeerAddress;
+    Push.ConnectionAddress = PeerAddress.Ip();
     Handle.PostMessage(Cmd_DV_RL_AddressPush, 0, Push);
     Handle.Kill();
 }
@@ -14,7 +14,7 @@ static void OnUdpPacket(const xUdpServiceChannelHandle & Handle, xPacketCommandI
         return;
     }
     auto Push              = xPP_AddressAutoPush();
-    Push.ConnectionAddress = Handle.GetRemoteAddress();
+    Push.ConnectionAddress = Handle.GetRemoteAddress().Ip();
     Handle.PostMessage(Cmd_DV_RL_AddressPush, 0, Push);
 }
 

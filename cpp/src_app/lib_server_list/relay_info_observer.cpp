@@ -1,22 +1,22 @@
 #include "./relay_info_observer.hpp"
 
 bool xRelayInfoObserver::Init(xIoContext * ICP, const xNetAddress & ServerListDownloadAddress) {
-    assert(DeviceRelayServerIdLocalMap.empty());
-    RuntimeAssert(DeviceRelayInfoPool.Init(MAX_DEVICE_RELAY_SERVER_SUPPORTED));
-    if (!RelayInfoDispatcherClient.Init(ICP)) {
-        return false;
-    }
-    if (!DispatcherServerInfoDownloader.Init(ICP, ServerListDownloadAddress)) {
-        RelayInfoDispatcherClient.Clean();
-        return false;
-    }
-    DispatcherServerInfoDownloader.SetOnUpdateRelayInfoDispatcherServerInfoCallback([this](const xRelayInfoDispatcherServerInfo & Info) {
-        RelayInfoDispatcherClient.UpdateTarget(Info.ObserverAddress);
-    });
-    RelayInfoDispatcherClient.SetOnConnectedCallback([this]() { RelayInfoDispatcherClient.PostMessage(Cmd_RegisterRelayInfoObserver, 0, XR(xPP_RegisterRelayInfoObserver())); });
-    RelayInfoDispatcherClient.SetOnPacketCallback([this](xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) {
-        return OnRelayInfoDispatcherPacket(CommandId, RequestId, PayloadPtr, PayloadSize);
-    });
+    // assert(DeviceRelayServerIdLocalMap.empty());
+    // RuntimeAssert(DeviceRelayInfoPool.Init(MAX_DEVICE_RELAY_SERVER_SUPPORTED));
+    // if (!RelayInfoDispatcherClient.Init(ICP)) {
+    //     return false;
+    // }
+    // if (!DispatcherServerInfoDownloader.Init(ICP, ServerListDownloadAddress)) {
+    //     RelayInfoDispatcherClient.Clean();
+    //     return false;
+    // }
+    // DispatcherServerInfoDownloader.SetOnUpdateRelayInfoDispatcherServerInfoCallback([this](const xRelayInfoDispatcherServerInfo & Info) {
+    //     RelayInfoDispatcherClient.UpdateTarget(Info.ObserverAddress);
+    // });
+    // RelayInfoDispatcherClient.SetOnConnectedCallback([this]() { RelayInfoDispatcherClient.PostMessage(Cmd_RegisterRelayInfoObserver, 0, XR(xPP_RegisterRelayInfoObserver())); });
+    // RelayInfoDispatcherClient.SetOnPacketCallback([this](xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) {
+    //     return OnRelayInfoDispatcherPacket(CommandId, RequestId, PayloadPtr, PayloadSize);
+    // });
     return true;
 }
 

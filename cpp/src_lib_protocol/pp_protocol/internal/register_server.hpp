@@ -76,10 +76,15 @@ struct xPP_RegisterDeviceStateRelayServer : xBinaryMessage {
 };
 
 struct xPP_RegisterRelayInfoDispatcherServer : xBinaryMessage {
+    void SerializeMembers() override {  //
+        W(ServerInfo.ServerId, ServerInfo.ProducerAddress4, ServerInfo.ObserverAddress4);
+        W(ServerInfo.ServerId, ServerInfo.ProducerAddress6, ServerInfo.ObserverAddress6);
+    }
 
-    void SerializeMembers() override { W(ServerInfo.ServerId, ServerInfo.ProducerAddress, ServerInfo.ObserverAddress); }
-    void DeserializeMembers() override { R(ServerInfo.ServerId, ServerInfo.ProducerAddress, ServerInfo.ObserverAddress); }
-
+    void DeserializeMembers() override {  //
+        R(ServerInfo.ServerId, ServerInfo.ProducerAddress4, ServerInfo.ObserverAddress4);
+        R(ServerInfo.ServerId, ServerInfo.ProducerAddress6, ServerInfo.ObserverAddress6);
+    }
     xRelayInfoDispatcherServerInfo ServerInfo;
     //
 };

@@ -209,7 +209,7 @@ bool OnRegisterRelayInfoDispatcherServer(const xTcpServiceClientConnectionHandle
     }
 
     auto R = xPP_RegisterRelayInfoDispatcherServer();
-    if (!R.Deserialize(PayloadPtr, PayloadSize) || !R.ServerInfo.ServerId || !R.ServerInfo.ProducerAddress || !R.ServerInfo.ObserverAddress) {
+    if (!R.Deserialize(PayloadPtr, PayloadSize) || !R.ServerInfo.ServerId) {
         Logger->E("invalid request");
         return false;
     }
@@ -219,10 +219,7 @@ bool OnRegisterRelayInfoDispatcherServer(const xTcpServiceClientConnectionHandle
     }
     TypeRef     = (uint32_t)eServerType::RELAY_INFO_DISPATCHER;
     ServerIdRef = R.ServerInfo.ServerId;
-    Logger->I(
-        "OnRegisterRelayInfoDispatcherServer: ServerId=%" PRIi64 ", ProducerAddress=%s, ObserverAddress=%s", R.ServerInfo.ServerId, R.ServerInfo.ProducerAddress.ToString().c_str(),
-        R.ServerInfo.ObserverAddress.ToString().c_str()
-    );
+    Logger->I("OnRegisterRelayInfoDispatcherServer: %s", R.ServerInfo.ToString().c_str());
     return true;
 }
 

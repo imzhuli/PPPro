@@ -344,20 +344,11 @@ bool xSL_InternalServerListManager::ReloadBackendServerList() {
 
 bool xSL_InternalServerListManager::SetRelayInfoDispatcherServerInfo(const xRelayInfoDispatcherServerInfo & ServerInfo) {
     if (RelayInfoDispatcherServerInfo.ServerId && ServerInfo.ServerId) {
-        Logger->E(
-            "Duplicated RelayInfoDispaterRegistered, force updating server info, previous server info: ServerId=%" PRIx64 ", ProducerAddress=%s, ObserverAddress=%s",
-            RelayInfoDispatcherServerInfo.ServerId, RelayInfoDispatcherServerInfo.ProducerAddress.ToString().c_str(),
-            RelayInfoDispatcherServerInfo.ObserverAddress.ToString().c_str()
-        );
+        Logger->E("Duplicated RelayInfoDispaterRegistered, force updating server info, previous server info: %s", RelayInfoDispatcherServerInfo.ToString().c_str());
         return false;
     }
 
     RelayInfoDispatcherServerInfo = ServerInfo;
-    Logger->I(
-        "New RelayInfoDispaterRegistered, ServerId=%" PRIx64 ", ProducerAddress=%s, ObserverAddress=%s",  //
-        RelayInfoDispatcherServerInfo.ServerId,                                                           //
-        RelayInfoDispatcherServerInfo.ProducerAddress.ToString().c_str(),                                 //
-        RelayInfoDispatcherServerInfo.ObserverAddress.ToString().c_str()
-    );
+    Logger->I("New RelayInfoDispaterRegistered, %s", RelayInfoDispatcherServerInfo.ToString().c_str());
     return true;
 }

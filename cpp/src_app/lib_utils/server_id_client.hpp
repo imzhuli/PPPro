@@ -5,7 +5,7 @@
 extern uint64_t LoadLocalServerId(const std::string & LocalServerIdFilename);
 extern void     DumpLocalServerId(const std::string & LocalServerIdFilename, uint64_t LocalServerId);
 
-class xServerIdClient : public xel::xClient {
+class xServerIdClient final : public xel::xClient {
 public:
     bool Init(xIoContext * ICP, xNetAddress TargetAddress, uint64_t FirstTryServerId = 0) {
         if (!xClient::Init(ICP, TargetAddress)) {

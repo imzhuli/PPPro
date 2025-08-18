@@ -4,12 +4,6 @@
 
 static constexpr const char * StaicSignSalt = "!#@SFas098xc()*&";
 
-uint64_t         ServerId = {};
-xNetAddress      ExportProxyAddress;
-eRelayServerType ServerType;
-xNetAddress      ExportDeviceCtrlAddress;
-xNetAddress      ExportDeviceDataAddress;
-
 #define O(x) OS << #x << "=" << (x) << ' '
 std::string xRelayServerInfoBase::ToString() const {
     auto OS = std::ostringstream();
@@ -22,6 +16,18 @@ std::string xRelayServerInfoBase::ToString() const {
     O(ExportDeviceDataAddress.ToString());
     return OS.str();
 }
+
+std::string xRelayInfoDispatcherServerInfo::ToString() const {
+    auto OS = std::ostringstream();
+    O(ServerId);
+    O(ProducerAddress4.ToString());
+    O(ObserverAddress4.ToString());
+    O(ProducerAddress6.ToString());
+    O(ObserverAddress6.ToString());
+    return OS.str();
+}
+
+#undef O
 
 uint32_t HashString(const char * S) {
     uint32_t H = 0;

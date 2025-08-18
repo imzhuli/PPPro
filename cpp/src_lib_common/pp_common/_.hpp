@@ -211,11 +211,15 @@ struct xDeviceStateRelayServerInfo {
 };
 
 struct xRelayInfoDispatcherServerInfo {
-    uint64_t    ServerId        = {};
-    xNetAddress ProducerAddress = {};
-    xNetAddress ObserverAddress = {};
+    uint64_t    ServerId         = {};
+    xNetAddress ProducerAddress4 = {};
+    xNetAddress ObserverAddress4 = {};
+    xNetAddress ProducerAddress6 = {};
+    xNetAddress ObserverAddress6 = {};
 
     bool operator==(const xRelayInfoDispatcherServerInfo &) const = default;
+
+    std::string ToString() const;
 };
 
 enum struct eRelayServerType : uint16_t {

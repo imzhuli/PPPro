@@ -6,8 +6,8 @@
 #include <map>
 #include <pp_common/_.hpp>
 
-extern xNetAddress BindAddressForDevice;
-extern xNetAddress BindAddressForDeviceV6Test;
+extern xNetAddress BindAddressForDevice4;
+extern xNetAddress BindAddressForDevice6;
 extern xNetAddress ServerListDownloadAddress;
 extern std::string GeoInfoMapFilename;
 extern std::string IpLocationDbFilename;

@@ -45,9 +45,7 @@ private:
     xRelayInfoTimeoutList             RelayInfoTimeoutList;
     xIndexedStorage<xRelayServerInfo> DeviceRelayInfoPool;
 
-    xOnNewDeviceRelayInfoCallback      OnNewDeviceRelayInfoCallback      = IgnoreDeviceRelayInfoEvent;
-    xOnNewDeviceRelayInfoErrorCallback OnNewDeviceRelayInfoErrorCallback = IgnoreDeviceRelayInfoEvent;
-    xOnRemoveDeviceRelayInfoCallback   OnRemoveDeviceRelayInfoCallback   = IgnoreDeviceRelayInfoEvent;
-
-    static void IgnoreDeviceRelayInfoEvent(const xRelayServerInfoBase * Info) {}
+    xOnNewDeviceRelayInfoCallback      OnNewDeviceRelayInfoCallback      = Ignore<const xRelayServerInfoBase *>;
+    xOnNewDeviceRelayInfoErrorCallback OnNewDeviceRelayInfoErrorCallback = Ignore<const xRelayServerInfoBase *>;
+    xOnRemoveDeviceRelayInfoCallback   OnRemoveDeviceRelayInfoCallback   = Ignore<const xRelayServerInfoBase *>;
 };
