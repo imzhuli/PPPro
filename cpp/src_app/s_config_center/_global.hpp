@@ -1,7 +1,9 @@
 #pragma once
 #include "../lib_utils/all.hpp"
+#include "./_local_audit.hpp"
 #include "./challenge_service.hpp"
 #include "./ip_location.hpp"
+#include "./relay_node.hpp"
 
 #include <map>
 #include <pp_common/_.hpp>
@@ -12,34 +14,21 @@ extern xNetAddress ServerListDownloadAddress;
 extern std::string GeoInfoMapFilename;
 extern std::string IpLocationDbFilename;
 
-struct xCC_RelayInfoReference {
-    const xRelayServerInfoBase * Info;
+extern xCC_IpLocationManager IpLocationManager;
 
-    bool operator==(const xCC_RelayInfoReference & O) const { return Info->ServerId == O.Info->ServerId; }
-    auto operator<=>(const xCC_RelayInfoReference & O) { return Info->ServerId <=> O.Info->ServerId; };
-};
+extern xCC_RelayV4List RelayV4List;
+extern xCC_RelayV6List RelayV6List;
 
-struct xCC_LocalAudit {
-    uint64_t TotalDeviceRelayServerCount       = 0;
-    uint64_t TotalNewDeviceRelayServerCount    = 0;
-    uint64_t TotalRemoveDeviceRelayServerCount = 0;
-    uint32_t TotalDeviceRelayTags              = 0;
+extern xUdpService ChallengeService4;
+extern xUdpService ChallengeService6;
 
-    std::string ToString();
-
-    uint64_t LastOutputTimestampMS = 0;
-    void     Tick(uint64_t NowMS);
-};
 extern xCC_LocalAudit LocalAudit;
 
 using xCC_DeviceRelayList             = std::vector<xCC_RelayInfoReference>;
 using xTaggedDeviceRelayServerListMap = std::map<uint32_t, xCC_DeviceRelayList>;
 extern xTaggedDeviceRelayServerListMap TaggedDeviceRelayServerListMap;
 
-extern uint32_t                     GeoInfoToForcedPoolId(const xGeoInfo & GeoInfo);
-extern const xRelayServerInfoBase * GetRandomRelayServerInfoByRegion(const xGeoInfo & GeoInfo);
+extern uint32_t GeoInfoToForcedPoolId(const xGeoInfo & GeoInfo);
 
-extern xCC_IpLocationManager IpLocationManager;
-
-extern xel::xUdpService ChallengeService4;
-extern xel::xUdpService ChallengeService6;
+extern const xRelayServerInfoBase * GetRandomDeviceRelayServer4();
+extern const xRelayServerInfoBase * GetRandomDeviceRelayServer6();

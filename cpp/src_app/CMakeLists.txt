@@ -60,20 +60,23 @@ set(target_list
 
 	r_device_audit_to_backend
 
-	# s_pa
+	s_server_id_center
+	s_server_list
 	s_address_test
+	
+	s_relay_info_dispatcher
+	s_device_relay
+
 	# s_audit_account
 	# s_auth_cache
+
+	# s_pa
 	s_config_center
-	s_device_relay
 
 	# s_device_selector
 	# s_device_selector_dispatcher
 	# s_device_state_relay
 
-	s_relay_info_dispatcher
-	s_server_id_center
-	s_server_list
 
 	t_base
 	t_server_list_downloader

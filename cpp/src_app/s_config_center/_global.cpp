@@ -8,6 +8,14 @@ xNetAddress ServerListDownloadAddress;
 std::string GeoInfoMapFilename;
 std::string IpLocationDbFilename;
 
+xCC_IpLocationManager IpLocationManager;
+
+xCC_RelayV4List RelayV4List;
+xCC_RelayV6List RelayV6List;
+
+xUdpService ChallengeService4;
+xUdpService ChallengeService6;
+
 xCC_LocalAudit LocalAudit;
 
 std::string xCC_LocalAudit::ToString() {
@@ -34,20 +42,20 @@ uint32_t GeoInfoToForcedPoolId(const xGeoInfo & GeoInfo) {
     return 0;
 }
 
-const xRelayServerInfoBase * GetRandomRelayServerInfoByRegion(const xGeoInfo & GeoInfo) {
-    auto RID  = GeoInfoToForcedPoolId(GeoInfo);
-    auto Iter = TaggedDeviceRelayServerListMap.find(RID);
-    if (Iter == TaggedDeviceRelayServerListMap.end()) {
+const xRelayServerInfoBase * GetRandomDeviceRelayServer4() {
+    auto C = static_cast<xCC_RelayScheduleNode *>(RelayV4List.PopHead());
+    if (!C) {
         return nullptr;
     }
-    auto & List = Iter->second;
-    assert(List.size());
-
-    auto Index = rand() % List.size();
-    return List[Index].Info;
+    RelayV4List.AddTail(*C);
+    return C->ServerInfo;
 }
 
-xCC_IpLocationManager IpLocationManager;
-
-xel::xUdpService ChallengeService4;
-xel::xUdpService ChallengeService6;
+const xRelayServerInfoBase * GetRandomDeviceRelayServer6() {
+    auto C = static_cast<xCC_RelayScheduleNode *>(RelayV6List.PopHead());
+    if (!C) {
+        return nullptr;
+    }
+    RelayV4List.AddTail(*C);
+    return C->ServerInfo;
+}

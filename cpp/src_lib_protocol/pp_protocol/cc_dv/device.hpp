@@ -33,15 +33,26 @@ struct xCC_DeviceChallenge : xBinaryMessage {
 };
 
 struct xCC_DeviceChallengeResp : xBinaryMessage {
-    void SerializeMembers() override { W(Address, CheckKey, TerminalAddress, UseOldVersion, EnableSpeedControl); };
 
-    void DeserializeMembers() override { R(Address, CheckKey, TerminalAddress, UseOldVersion, EnableSpeedControl); };
+    void SerializeMembers() override {
+        W(Accepted, RelayAddress, RelayCheckKey);
+        W(EnableOldVersion, EnableSpeedControl);
+        W(BanVersionTimeMS);
+    };
+    void DeserializeMembers() override {
+        R(Accepted, RelayAddress, RelayCheckKey);
+        R(EnableOldVersion, EnableSpeedControl);
+        R(BanVersionTimeMS);
+    };
 
-    xNetAddress Address;
-    std::string CheckKey;
-
-    xNetAddress TerminalAddress;
-    bool        UseOldVersion      = false;
+    bool        Accepted           = false;
+    xNetAddress RelayAddress       = {};
+    std::string RelayCheckKey      = {};
+    bool        EnableOldVersion   = false;
     bool        EnableSpeedControl = false;
+
+    // on error:
+    uint64_t BanVersionTimeMS = 0;
+
     //
 };

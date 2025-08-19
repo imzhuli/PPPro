@@ -42,7 +42,7 @@ void xRelayInfoObserver::Tick(uint64_t NowMS) {
     TickAll(Ticker(), RelayInfoDispatcherClient, DispatcherServerInfoDownloader);
 
     auto KilliTimepoint = NowMS - RELAY_INFO_TIMEOUT_MS;
-    while (auto RSI = RelayInfoTimeoutList.PopHead([KilliTimepoint](const xRelayServerInfo & N) { return N.LastKeepAliveTimestampMS < KilliTimepoint; })) {
+    while (auto RSI = RelayInfoTimeoutList.PopHead([KilliTimepoint](const xManagedRelayServerInfo & N) { return N.LastKeepAliveTimestampMS < KilliTimepoint; })) {
         RemoveDeviceRelayInfo(RSI);
     }
 }
@@ -79,7 +79,7 @@ bool xRelayInfoObserver::OnBroadcastRelayOffline(ubyte * PayloadPtr, size_t Payl
         return true;
     }
     auto & RS = DeviceRelayInfoPool[MapIter->second];
-    if (R.ServerStartupTimestampMS != RS.Info.StartupTimestampMS) {
+    if (R.ServerStartupTimestampMS != RS.Context.ServerInfo.StartupTimestampMS) {
         // relay info conflict, do nothing;
         return true;
     }
@@ -92,7 +92,7 @@ void xRelayInfoObserver::InsertOrKeepAliveDeviceRelayInfo(const xRelayServerInfo
     auto MapIter = DeviceRelayServerIdLocalMap.find(Info.ServerId);
     if (MapIter != DeviceRelayServerIdLocalMap.end()) {  // keep alive
         auto & RS = DeviceRelayInfoPool[MapIter->second];
-        if (Info.StartupTimestampMS == RS.Info.StartupTimestampMS) {
+        if (Info.StartupTimestampMS == RS.Context.ServerInfo.StartupTimestampMS) {
             RS.LastKeepAliveTimestampMS = Ticker();
             RelayInfoTimeoutList.GrabTail(RS);
             return;
@@ -103,26 +103,25 @@ void xRelayInfoObserver::InsertOrKeepAliveDeviceRelayInfo(const xRelayServerInfo
     // new:
     auto LocalId = DeviceRelayInfoPool.Acquire();
     if (!LocalId) {
-        OnNewDeviceRelayInfoErrorCallback(Info);
         return;
     }
     auto & RS                   = DeviceRelayInfoPool[LocalId];
-    RS.Info                     = Info;
+    RS.Context.ServerInfo       = Info;
     RS.LastKeepAliveTimestampMS = Ticker();
     RelayInfoTimeoutList.AddTail(RS);
     DeviceRelayServerIdLocalMap.insert(std::make_pair(Info.ServerId, LocalId));
 
-    OnNewDeviceRelayInfoCallback(RS.Info);
+    OnNewDeviceRelayInfoCallback(RS.Context);
 }
 
-void xRelayInfoObserver::RemoveDeviceRelayInfo(xRelayServerInfo * RSI) {
+void xRelayInfoObserver::RemoveDeviceRelayInfo(xManagedRelayServerInfo * RSI) {
     assert(RSI);
-    assert(RSI->Info.ServerId);
-    assert(RSI->Info.ServerType == eRelayServerType::DEVICE);
+    assert(RSI->Context.ServerInfo.ServerId);
+    assert(RSI->Context.ServerInfo.ServerType == eRelayServerType::DEVICE);
 
-    OnRemoveDeviceRelayInfoCallback(RSI->Info);
+    OnRemoveDeviceRelayInfoCallback(RSI->Context);
 
-    auto ServerId = RSI->Info.ServerId;
+    auto ServerId = RSI->Context.ServerInfo.ServerId;
     auto MapIter  = DeviceRelayServerIdLocalMap.find(ServerId);
     auto LocalId  = MapIter->second;
     assert(RSI == DeviceRelayInfoPool.CheckAndGet(LocalId));

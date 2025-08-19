@@ -24,8 +24,8 @@ int main(int argc, char ** argv) {
     Logger->D("DownloadAddress: %s", ServerListDownloadAddress.ToString().c_str());
 
     X_GUARD(RIO, ServiceIoContext, ServerListDownloadAddress);
-    RIO.OnNewDeviceRelayInfoCallback    = [](const xRelayServerInfoBase & Info) { Logger->D("new device relay: %s", Info.ToString().c_str()); };
-    RIO.OnRemoveDeviceRelayInfoCallback = [](const xRelayServerInfoBase & Info) { Logger->D("remove device relay: %s", Info.ToString().c_str()); };
+    RIO.OnNewDeviceRelayInfoCallback    = [](const xRIO_RelayServerInfoContext & Info) { Logger->D("new device relay: %s", Info.ToString().c_str()); };
+    RIO.OnRemoveDeviceRelayInfoCallback = [](const xRIO_RelayServerInfoContext & Info) { Logger->D("remove device relay: %s", Info.ToString().c_str()); };
 
     // X_GUARD(AADownloader, ServiceIoContext, ServerListDownloadAddress);
     // AADownloader.SetOnUpdateAuditAccountServerListCallback([](uint32_t Version, const std::vector<xServerInfo> & ServerList) {

@@ -3,69 +3,7 @@
 #include "./producer.hpp"
 #include "./service_register.hpp"
 
-// struct xRID_ProducerService : public xService {
-
-// public:
-//     using xRelayServerKeepAliveCallback = std::function<void(const xRelayServerInfoBase &)>;
-//     void SetRelayServerKeepAliveCallback(const xRelayServerKeepAliveCallback & CB) { OnRelayServerKeepAliveCallback = CB; }
-
-//     void OnClientConnected(xServiceClientConnection & Connection) override { ++LocalAudit.TotalRelayConnections; }
-//
-
-// private:
-//     xRelayServerKeepAliveCallback OnRelayServerKeepAliveCallback;
-// };
-
-// struct xRID_ConsumerService : xService {
-
-//     bool OnClientPacket(xServiceClientConnection & Connection, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) override {
-//         if (CommandId != Cmd_RegisterRelayInfoObserver) {
-//             Logger->E("invalid challenge");
-//             return false;
-//         }
-
-//         auto & P = Connection.UserContext.P;
-//         if (P) {
-//             Logger->E("duplicate registration");
-//             return false;
-//         }
-//         auto R = xPP_RegisterRelayInfoObserver();
-//         if (!R.Deserialize(PayloadPtr, PayloadSize)) {
-//             Logger->E("duplicate protocol");
-//             return false;
-//         }
-
-//         auto InsertPoint = std::lower_bound(SortedAvailableObserverConnections.begin(), SortedAvailableObserverConnections.end(), &Connection);
-//         assert(InsertPoint == SortedAvailableObserverConnections.end() || *InsertPoint != &Connection);
-//         SortedAvailableObserverConnections.insert(InsertPoint, &Connection);
-//         P = &Connection;
-
-//         ++LocalAudit.CurrentObserverCount;
-//         return true;
-//     }
-
-//     void OnClientClose(xServiceClientConnection & Connection) override {
-//         auto & P = Connection.UserContext.P;
-//         if (!P) {
-//             return;
-//         }
-
-//         assert(&Connection == P);
-//         auto CheckPoint = std::lower_bound(SortedAvailableObserverConnections.begin(), SortedAvailableObserverConnections.end(), &Connection);
-//         assert(CheckPoint != SortedAvailableObserverConnections.end() || *CheckPoint == &Connection);
-//         SortedAvailableObserverConnections.erase(CheckPoint);
-
-//         --LocalAudit.CurrentObserverCount;
-//     }
-
-// private:
-//     std::vector<xServiceClientConnection *> SortedAvailableObserverConnections;
-// };
-
-static auto RSS = xRID_RegisterServerService();
-// static auto PS  = xRID_ProducerService();
-// static auto OS  = xRID_ConsumerService();
-
+static auto RSS     = xRID_RegisterServerService();
 static bool Enable4 = false;
 static bool Enable6 = false;
 

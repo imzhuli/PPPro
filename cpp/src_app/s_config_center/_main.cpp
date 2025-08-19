@@ -1,6 +1,7 @@
 #include "../lib_server_list/relay_info_observer.hpp"
 #include "../lib_utils/all.hpp"
 #include "./_global.hpp"
+#include "./challenge_service.hpp"
 
 static auto RelayInfoObserver = xRelayInfoObserver();
 
@@ -24,48 +25,34 @@ int main(int argc, char ** argv) {
         Logger->F("neither ipv4 or ipv6 is enabled");
         return 0;
     }
+
+    ChallengeService4.OnPacketCallback = OnTerminalChallenge;
+    ChallengeService6.OnPacketCallback = OnTerminalChallenge;
+
     X_COND_GUARD(Enable4, ChallengeService4, ServiceIoContext, BindAddressForDevice4);
     X_COND_GUARD(Enable6, ChallengeService6, ServiceIoContext, BindAddressForDevice6);
 
     X_GUARD(IpLocationManager, GeoInfoMapFilename, IpLocationDbFilename);
     X_GUARD(RelayInfoObserver, ServiceIoContext, ServerListDownloadAddress);
 
-    RelayInfoObserver.OnNewDeviceRelayInfoCallback = [](const xRelayServerInfoBase & Info) {
-        auto TempRef = xCC_RelayInfoReference{ &Info };
+    RelayInfoObserver.OnNewDeviceRelayInfoCallback = [](const xRIO_RelayServerInfoContext & Context) {
+        DEBUG_LOG("NewDeviceRelayInfo: %s", Context.ServerInfo.ToString().c_str());
+        auto SN = new xCC_RelayScheduleNode();
 
-        auto & List       = TaggedDeviceRelayServerListMap[Info.ForcedPoolId];
-        auto   InsertIter = std::lower_bound(List.begin(), List.end(), TempRef);
-        RuntimeAssert(InsertIter == List.end() || *InsertIter != TempRef);
-        auto NewIter = List.insert(InsertIter, TempRef);
-
-        if (List.size() == 1) {
-            ++LocalAudit.TotalDeviceRelayTags;
+        SN->ServerInfo = &Context.ServerInfo;
+        if (SN->ServerInfo->ExportDeviceAddress4) {
+            RelayV4List.AddTail(*SN);
         }
-        ++LocalAudit.TotalDeviceRelayServerCount;
-        ++LocalAudit.TotalNewDeviceRelayServerCount;
-        DEBUG_LOG("NewDeviceRelayInfo: %s", NewIter->Info->ToString().c_str());
+        if (SN->ServerInfo->ExportDeviceAddress6) {
+            RelayV6List.AddTail(*SN);
+        }
+        Context.MutableUserContext.P = SN;
     };
 
-    // RelayInfoObserver.SetOnRemoveDeviceRelayInfoCallback([](const xRelayServerInfoBase * Info) {
-    //     auto TempRef  = xCC_RelayInfoReference{ Info };
-    //     auto ListIter = TaggedDeviceRelayServerListMap.find(Info->ForcedPoolId);
-    //     assert(ListIter != TaggedDeviceRelayServerListMap.end());
-
-    //     auto & List = ListIter->second;
-    //     auto   Iter = std::lower_bound(List.begin(), List.end(), TempRef);
-
-    //     assert(Iter != List.end() && Iter->Info == Info);
-    //     DEBUG_LOG("RemoveDeviceRelayInfo: %s", Iter->Info->ToString().c_str());
-
-    //     List.erase(Iter);
-    //     if (List.empty()) {
-    //         --LocalAudit.TotalDeviceRelayTags;
-    //         TaggedDeviceRelayServerListMap.erase(ListIter);
-    //     }
-
-    //     --LocalAudit.TotalDeviceRelayServerCount;
-    //     ++LocalAudit.TotalRemoveDeviceRelayServerCount;
-    // });
+    RelayInfoObserver.OnRemoveDeviceRelayInfoCallback = [](const xRIO_RelayServerInfoContext & Context) {
+        auto SN = static_cast<xCC_RelayScheduleNode *>(Steal(Context.MutableUserContext.P));
+        delete SN;
+    };
 
     while (ServiceRunState) {
         ServiceUpdateOnce(RelayInfoObserver, LocalAudit);
