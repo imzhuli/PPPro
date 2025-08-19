@@ -22,10 +22,11 @@ bool xRelayInfoObserver::Init(xIoContext * ICP, const xNetAddress & ServerListDo
             RelayInfoDispatcherClient.UpdateTarget(Info.ObserverAddress6);
         }
     };
-    // RelayInfoDispatcherClient.SetOnConnectedCallback([this]() { RelayInfoDispatcherClient.PostMessage(Cmd_RegisterRelayInfoObserver, 0, XR(xPP_RegisterRelayInfoObserver())); });
-    // RelayInfoDispatcherClient.SetOnPacketCallback([this](xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) {
-    //     return OnRelayInfoDispatcherPacket(CommandId, RequestId, PayloadPtr, PayloadSize);
-    // });
+    RelayInfoDispatcherClient.OnConnectedCallback =
+        [this]() { /* RelayInfoDispatcherClient.PostMessage(Cmd_RegisterRelayInfoObserver, 0, XR(xPP_RegisterRelayInfoObserver())); */ };
+    RelayInfoDispatcherClient.OnPacketCallback = [this](xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) {
+        return OnRelayInfoDispatcherPacket(CommandId, RequestId, PayloadPtr, PayloadSize);
+    };
     return true;
 }
 
@@ -50,7 +51,8 @@ bool xRelayInfoObserver::OnRelayInfoDispatcherPacket(xPacketCommandId CommandId,
     switch (CommandId) {
         case Cmd_BroadcastRelayInfo:
             return OnBroadcastRelayInfo(PayloadPtr, PayloadSize);
-
+        case Cmd_BroadcastRelayOffline:
+            return OnBroadcastRelayOffline(PayloadPtr, PayloadSize);
         default:
             break;
     }
@@ -64,6 +66,24 @@ bool xRelayInfoObserver::OnBroadcastRelayInfo(ubyte * PayloadPtr, size_t Payload
         return false;
     }
     InsertOrKeepAliveDeviceRelayInfo(R.ServerInfo);
+    return true;
+}
+
+bool xRelayInfoObserver::OnBroadcastRelayOffline(ubyte * PayloadPtr, size_t PayloadSize) {
+    auto R = xPP_BroadcastRelayOffline();
+    if (!R.Deserialize(PayloadPtr, PayloadSize)) {
+        return false;
+    }
+    auto MapIter = DeviceRelayServerIdLocalMap.find(R.ServerId);
+    if (MapIter == DeviceRelayServerIdLocalMap.end()) {  // not found:
+        return true;
+    }
+    auto & RS = DeviceRelayInfoPool[MapIter->second];
+    if (R.ServerStartupTimestampMS != RS.Info.StartupTimestampMS) {
+        // relay info conflict, do nothing;
+        return true;
+    }
+    RemoveDeviceRelayInfo(&RS);
     return true;
 }
 
@@ -83,7 +103,7 @@ void xRelayInfoObserver::InsertOrKeepAliveDeviceRelayInfo(const xRelayServerInfo
     // new:
     auto LocalId = DeviceRelayInfoPool.Acquire();
     if (!LocalId) {
-        OnNewDeviceRelayInfoErrorCallback(&Info);
+        OnNewDeviceRelayInfoErrorCallback(Info);
         return;
     }
     auto & RS                   = DeviceRelayInfoPool[LocalId];
@@ -92,7 +112,7 @@ void xRelayInfoObserver::InsertOrKeepAliveDeviceRelayInfo(const xRelayServerInfo
     RelayInfoTimeoutList.AddTail(RS);
     DeviceRelayServerIdLocalMap.insert(std::make_pair(Info.ServerId, LocalId));
 
-    OnNewDeviceRelayInfoCallback(&RS.Info);
+    OnNewDeviceRelayInfoCallback(RS.Info);
 }
 
 void xRelayInfoObserver::RemoveDeviceRelayInfo(xRelayServerInfo * RSI) {
@@ -100,7 +120,7 @@ void xRelayInfoObserver::RemoveDeviceRelayInfo(xRelayServerInfo * RSI) {
     assert(RSI->Info.ServerId);
     assert(RSI->Info.ServerType == eRelayServerType::DEVICE);
 
-    OnRemoveDeviceRelayInfoCallback(&RSI->Info);
+    OnRemoveDeviceRelayInfoCallback(RSI->Info);
 
     auto ServerId = RSI->Info.ServerId;
     auto MapIter  = DeviceRelayServerIdLocalMap.find(ServerId);

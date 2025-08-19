@@ -44,6 +44,7 @@ void OnProducerClientClose(const xTcpServiceClientConnectionHandle & Handle) {
     if (!InfoCopy) {
         return;
     }
+    BroadCastRelayOffline(*InfoCopy);
     delete InfoCopy;
     --LocalAudit.TotalAvailableRelayConnections;
 }

@@ -327,9 +327,18 @@ struct xPP_BroadcastRelayInfo : xBinaryMessage {
     xRelayServerInfoBase ServerInfo = {};
 };
 
+struct xPP_BroadcastRelayOffline : xBinaryMessage {
+    void SerializeMembers() override { W(ServerId, ServerStartupTimestampMS); }
+    void DeserializeMembers() override { R(ServerId, ServerStartupTimestampMS); }
+
+    uint64_t ServerId;
+    uint64_t ServerStartupTimestampMS;
+};
+
 struct xPP_DownloadDeviceSelectorDispatcherList : xBinaryMessage {
-    void     SerializeMembers() override { W(Version); }
-    void     DeserializeMembers() override { R(Version); }
+    void SerializeMembers() override { W(Version); }
+    void DeserializeMembers() override { R(Version); }
+
     uint32_t Version;
 };
 

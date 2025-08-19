@@ -3,6 +3,7 @@
 #include "../lib_server_list/device_selector_dispatcher_list_downloader.hpp"
 #include "../lib_server_list/device_state_relay_server_list_downloader.hpp"
 #include "../lib_server_list/relay_info_dispatcher_server_info_downloader.hpp"
+#include "../lib_server_list/relay_info_observer.hpp"
 #include "../lib_utils/all.hpp"
 #include "./file_dump.hpp"
 
@@ -10,10 +11,9 @@ static auto ServerListDownloadAddress = xNetAddress();
 static auto AADownloader              = xAuditAccountServerListDownloader();
 static auto ACDownloader              = xAuthCacheServerListDownloader();
 static auto DSRDownloader             = xDeviceStateRelayServerListDownloader();
-static auto RIDDownloader             = xRelayInfoDispatcherServerInfoDownloader();
 static auto DSDDownloader             = xDeviceSelectorDispatcherServerListDownloader();
 
-static auto RelayInfoWatcher = xClientWrapper();
+static auto RIO = xRelayInfoObserver();
 
 int main(int argc, char ** argv) {
 
@@ -23,20 +23,9 @@ int main(int argc, char ** argv) {
     CL.Require(ServerListDownloadAddress, "ServerListDownloadAddress");
     Logger->D("DownloadAddress: %s", ServerListDownloadAddress.ToString().c_str());
 
-    X_GUARD(RelayInfoWatcher, ServiceIoContext);
-    RelayInfoWatcher.OnPacketCallback = [](xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) -> bool {
-        if (CommandId != Cmd_BroadcastRelayInfo) {
-            DEBUG_LOG("invalid command id");
-            return true;
-        }
-        auto Msg = xPP_BroadcastRelayInfo();
-        if (!Msg.Deserialize(PayloadPtr, PayloadSize)) {
-            DEBUG_LOG("invalid protocol");
-            return true;
-        }
-        Logger->I("RelayServerInfo: %s", Msg.ServerInfo.ToString().c_str());
-        return true;
-    };
+    X_GUARD(RIO, ServiceIoContext, ServerListDownloadAddress);
+    RIO.OnNewDeviceRelayInfoCallback    = [](const xRelayServerInfoBase & Info) { Logger->D("new device relay: %s", Info.ToString().c_str()); };
+    RIO.OnRemoveDeviceRelayInfoCallback = [](const xRelayServerInfoBase & Info) { Logger->D("remove device relay: %s", Info.ToString().c_str()); };
 
     // X_GUARD(AADownloader, ServiceIoContext, ServerListDownloadAddress);
     // AADownloader.SetOnUpdateAuditAccountServerListCallback([](uint32_t Version, const std::vector<xServerInfo> & ServerList) {
@@ -71,14 +60,6 @@ int main(int argc, char ** argv) {
     //     Logger->D("%s", OS.str().c_str());
     // });
 
-    X_GUARD(RIDDownloader, ServiceIoContext, ServerListDownloadAddress);
-    RIDDownloader.OnUpdateServerInfoCallback = [](const xRelayInfoDispatcherServerInfo & S) {  //
-        Logger->D("%s", S.ToString().c_str());
-        DumpToFile(RuntimeEnv.GetCachePath("dump.relay_info_dispatcher.txt"), S.ToString());
-
-        RelayInfoWatcher.UpdateTarget(S.ObserverAddress4);
-    };
-
     // X_GUARD(DSDDownloader, ServiceIoContext, ServerListDownloadAddress);
     // DSDDownloader.SetOnUpdateDeviceSelectorDispatcherServerListCallback([](uint32_t Version, const std::vector<xDeviceSelectorDispatcherInfo> & SL) {
     //     auto OS = std::ostringstream();
@@ -93,7 +74,7 @@ int main(int argc, char ** argv) {
     while (ServiceRunState) {
         ServiceUpdateOnce(
             // AADownloader, ACDownloader, DSRDownloader,
-            RIDDownloader, RelayInfoWatcher,
+            RIO,
             // DSDDownloader
             DeadTicker
         );

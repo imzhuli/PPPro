@@ -5,7 +5,7 @@
 #include <pp_common/_.hpp>
 #include <pp_protocol/internal/all.hpp>
 
-class xRelayInfoObserver {
+class xRelayInfoObserver final : xel::xNonCopyable {
 
     static constexpr const uint64_t RELAY_INFO_TIMEOUT_MS = 105'000;
 
@@ -16,22 +16,23 @@ class xRelayInfoObserver {
     using xRelayInfoTimeoutList = xList<xRelayServerInfo>;
 
 public:
-    using xOnNewDeviceRelayInfoCallback      = std::function<void(const xRelayServerInfoBase * Info)>;
-    using xOnNewDeviceRelayInfoErrorCallback = std::function<void(const xRelayServerInfoBase * Info)>;
-    using xOnRemoveDeviceRelayInfoCallback   = std::function<void(const xRelayServerInfoBase * Info)>;
+    using xOnNewDeviceRelayInfoCallback      = std::function<void(const xRelayServerInfoBase & Info)>;
+    using xOnNewDeviceRelayInfoErrorCallback = std::function<void(const xRelayServerInfoBase & Info)>;
+    using xOnRemoveDeviceRelayInfoCallback   = std::function<void(const xRelayServerInfoBase & Info)>;
 
 public:
     bool Init(xIoContext * ICP, const xNetAddress & ServerListDownloadAddress);
     void Clean();
     void Tick(uint64_t NowMS);
 
-    xOnNewDeviceRelayInfoCallback      OnNewDeviceRelayInfoCallback      = Ignore<const xRelayServerInfoBase *>;
-    xOnNewDeviceRelayInfoErrorCallback OnNewDeviceRelayInfoErrorCallback = Ignore<const xRelayServerInfoBase *>;
-    xOnRemoveDeviceRelayInfoCallback   OnRemoveDeviceRelayInfoCallback   = Ignore<const xRelayServerInfoBase *>;
+    xOnNewDeviceRelayInfoCallback      OnNewDeviceRelayInfoCallback      = Ignore<const xRelayServerInfoBase &>;
+    xOnNewDeviceRelayInfoErrorCallback OnNewDeviceRelayInfoErrorCallback = Ignore<const xRelayServerInfoBase &>;
+    xOnRemoveDeviceRelayInfoCallback   OnRemoveDeviceRelayInfoCallback   = Ignore<const xRelayServerInfoBase &>;
 
 private:
     bool OnRelayInfoDispatcherPacket(xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize);
     bool OnBroadcastRelayInfo(ubyte * PayloadPtr, size_t PayloadSize);
+    bool OnBroadcastRelayOffline(ubyte * PayloadPtr, size_t PayloadSize);
 
     void InsertOrKeepAliveDeviceRelayInfo(const xRelayServerInfoBase & Info);
     void RemoveDeviceRelayInfo(xRelayServerInfo * RSI);

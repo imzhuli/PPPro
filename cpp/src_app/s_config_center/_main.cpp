@@ -30,10 +30,10 @@ int main(int argc, char ** argv) {
     X_GUARD(IpLocationManager, GeoInfoMapFilename, IpLocationDbFilename);
     X_GUARD(RelayInfoObserver, ServiceIoContext, ServerListDownloadAddress);
 
-    RelayInfoObserver.OnNewDeviceRelayInfoCallback = [](const xRelayServerInfoBase * Info) {
-        auto TempRef = xCC_RelayInfoReference{ Info };
+    RelayInfoObserver.OnNewDeviceRelayInfoCallback = [](const xRelayServerInfoBase & Info) {
+        auto TempRef = xCC_RelayInfoReference{ &Info };
 
-        auto & List       = TaggedDeviceRelayServerListMap[Info->ForcedPoolId];
+        auto & List       = TaggedDeviceRelayServerListMap[Info.ForcedPoolId];
         auto   InsertIter = std::lower_bound(List.begin(), List.end(), TempRef);
         RuntimeAssert(InsertIter == List.end() || *InsertIter != TempRef);
         auto NewIter = List.insert(InsertIter, TempRef);
