@@ -22,7 +22,6 @@
 #include <server_arch/client.hpp>
 #include <server_arch/client_pool.hpp>
 #include <server_arch/message.hpp>
-#include <server_arch/service.hpp>
 #include <server_arch/tcp_service.hpp>
 #include <server_arch/udp_service.hpp>
 
@@ -70,8 +69,6 @@ using xel::xPacketRequestId;
 using xel::xResourceGuard;
 using xel::xScopeCleaner;
 using xel::xScopeGuard;
-using xel::xService;
-using xel::xServiceClientConnection;
 using xel::xSocket;
 using xel::xStreamReader;
 using xel::xStreamWriter;
@@ -305,6 +302,10 @@ struct xMessageChannel {
     virtual void     PostMessageUnchecked(xPacketCommandId CmdId, xPacketRequestId RequestId, xBinaryMessage & Message) const { PostMessage(CmdId, RequestId, Message); }
 };
 
+constexpr const struct final {
+    void Tick(uint64_t) const {}
+} DeadTicker;
+
 namespace __pp_common_detail__ {
     inline void __TickAll__(uint64_t) {  // iteration finishes here
     }
@@ -372,3 +373,7 @@ extern std::string SignAndPackAddress(uint64_t Timestamp, const std::string & Se
 extern xNetAddress ExtractAddressFromPack(const std::string & SignedIp, const std::string & SecretKey);
 
 // clang-format on
+inline std::ostream & operator<<(std::ostream & OS, const xNetAddress & Address) {
+    OS << Address.ToString();
+    return OS;
+}

@@ -4,6 +4,7 @@
 #include "../lib_server_list/device_state_relay_server_list_downloader.hpp"
 #include "../lib_server_list/relay_info_dispatcher_server_info_downloader.hpp"
 #include "../lib_utils/all.hpp"
+#include "./file_dump.hpp"
 
 static auto ServerListDownloadAddress = xNetAddress();
 static auto AADownloader              = xAuditAccountServerListDownloader();
@@ -12,6 +13,8 @@ static auto DSRDownloader             = xDeviceStateRelayServerListDownloader();
 static auto RIDDownloader             = xRelayInfoDispatcherServerInfoDownloader();
 static auto DSDDownloader             = xDeviceSelectorDispatcherServerListDownloader();
 
+static auto RelayInfoWatcher = xClientWrapper();
+
 int main(int argc, char ** argv) {
 
     auto REG = xRuntimeEnvGuard(argc, argv);
@@ -19,6 +22,21 @@ int main(int argc, char ** argv) {
 
     CL.Require(ServerListDownloadAddress, "ServerListDownloadAddress");
     Logger->D("DownloadAddress: %s", ServerListDownloadAddress.ToString().c_str());
+
+    X_GUARD(RelayInfoWatcher, ServiceIoContext);
+    RelayInfoWatcher.OnPacketCallback = [](xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) -> bool {
+        if (CommandId != Cmd_BroadcastRelayInfo) {
+            DEBUG_LOG("invalid command id");
+            return true;
+        }
+        auto Msg = xPP_BroadcastRelayInfo();
+        if (!Msg.Deserialize(PayloadPtr, PayloadSize)) {
+            DEBUG_LOG("invalid protocol");
+            return true;
+        }
+        Logger->I("RelayServerInfo: %s", Msg.ServerInfo.ToString().c_str());
+        return true;
+    };
 
     // X_GUARD(AADownloader, ServiceIoContext, ServerListDownloadAddress);
     // AADownloader.SetOnUpdateAuditAccountServerListCallback([](uint32_t Version, const std::vector<xServerInfo> & ServerList) {
@@ -56,6 +74,9 @@ int main(int argc, char ** argv) {
     X_GUARD(RIDDownloader, ServiceIoContext, ServerListDownloadAddress);
     RIDDownloader.OnUpdateServerInfoCallback = [](const xRelayInfoDispatcherServerInfo & S) {  //
         Logger->D("%s", S.ToString().c_str());
+        DumpToFile(RuntimeEnv.GetCachePath("dump.relay_info_dispatcher.txt"), S.ToString());
+
+        RelayInfoWatcher.UpdateTarget(S.ObserverAddress4);
     };
 
     // X_GUARD(DSDDownloader, ServiceIoContext, ServerListDownloadAddress);
@@ -72,8 +93,9 @@ int main(int argc, char ** argv) {
     while (ServiceRunState) {
         ServiceUpdateOnce(
             // AADownloader, ACDownloader, DSRDownloader,
-            RIDDownloader
+            RIDDownloader, RelayInfoWatcher,
             // DSDDownloader
+            DeadTicker
         );
     }
 }

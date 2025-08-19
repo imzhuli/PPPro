@@ -9,14 +9,13 @@ static xCollectableErrorPrinter ErrorPrinter = { "Failed to allocate server id" 
 static xServerIdManager         ServerIdManager;
 static xNetAddress              BindAddress4;
 static xNetAddress              BindAddress6;
-static xTcpServiceWrapper       Ipv4Service;
+static xTcpService              Ipv4Service;
 static bool                     Ipv4Enabled = false;
-static xTcpServiceWrapper       Ipv6Service;
+static xTcpService              Ipv6Service;
 static bool                     Ipv6Enabled = false;
 
-static bool OnClientPacket(const xTcpServiceMessageChannel & Channel, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) {
-    auto   Connection = static_cast<xServiceClientConnection *>(Channel.GetUnderLayeredObjectUnchecked());
-    auto & ServerId   = Connection->UserContext.U64;
+static bool OnClientPacket(const xTcpServiceClientConnectionHandle & Handle, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) {
+    auto & ServerId = Handle->UserContext.U64;
     if (ServerId) {
         Logger->E("Multiple server id request");
         return false;
@@ -41,13 +40,12 @@ static bool OnClientPacket(const xTcpServiceMessageChannel & Channel, xPacketCom
     auto Resp             = xPP_AcquireServerIdResp();
     Resp.PreviousServerId = Req.PreviousServerId;
     Resp.NewServerId      = ServerId;
-    Channel.PostMessageUnchecked(Cmd_AcquireServerIdResp, RequestId, Resp);
+    Handle.PostMessage(Cmd_AcquireServerIdResp, RequestId, Resp);
     return true;
 }
 
-static void OnClientClose(const xTcpServiceMessageChannel & Poster) {
-    auto   Connection = static_cast<xServiceClientConnection *>(Poster.GetUnderLayeredObjectUnchecked());
-    auto & ServerId   = Connection->UserContext.U64;
+static void OnClientClose(const xTcpServiceClientConnectionHandle & Handle) {
+    auto & ServerId = Handle->UserContext.U64;
     if (ServerId) {
         Logger->I("Releasing ServerId: %" PRIu64 "", ServerId);
         X_RUNTIME_ASSERT(ServerIdManager.ReleaseServerId(ServerId));
@@ -63,16 +61,17 @@ int main(int argc, char ** argv) {
 
     ErrorPrinter.SetLogger(Logger);
 
+    Ipv4Service.OnClientPacket = OnClientPacket;
+    Ipv4Service.OnClientClose  = OnClientClose;
+    Ipv6Service.OnClientPacket = OnClientPacket;
+    Ipv6Service.OnClientClose  = OnClientClose;
+
     X_GUARD(ServerIdManager);
     if (BindAddress4.IsV4() && BindAddress4.Port) {
         Ipv4Enabled = true;
-        Ipv4Service.SetOnClientPacketCallback(OnClientPacket);
-        Ipv4Service.SetOnClientCloseCallback(OnClientClose);
     }
     if (BindAddress6.IsV6() && BindAddress6.Port) {
         Ipv6Enabled = true;
-        Ipv6Service.SetOnClientPacketCallback(OnClientPacket);
-        Ipv6Service.SetOnClientCloseCallback(OnClientClose);
     }
     if (!Ipv4Enabled && !Ipv6Enabled) {
         Logger->F("No bind address enabled");

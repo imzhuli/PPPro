@@ -60,15 +60,17 @@ set(target_list
 
 	r_device_audit_to_backend
 
-	s_pa
+	# s_pa
 	s_address_test
-	s_audit_account
-	s_auth_cache
+	# s_audit_account
+	# s_auth_cache
 	s_config_center
 	s_device_relay
-	s_device_selector
-	s_device_selector_dispatcher
-	s_device_state_relay
+
+	# s_device_selector
+	# s_device_selector_dispatcher
+	# s_device_state_relay
+
 	s_relay_info_dispatcher
 	s_server_id_center
 	s_server_list
@@ -88,7 +90,7 @@ endforeach()
 
 set(LIBRDKAFKA_LIBRARIES librdkafka++.a librdkafka-static.a libssl.a libcrypto.a)
 target_link_libraries(r_device_audit_to_backend PRIVATE ${LIBRDKAFKA_LIBRARIES})
-target_link_libraries(s_audit_account PRIVATE ${LIBRDKAFKA_LIBRARIES})
+# target_link_libraries(s_audit_account PRIVATE ${LIBRDKAFKA_LIBRARIES})
 
 install(TARGETS
 	${target_list}

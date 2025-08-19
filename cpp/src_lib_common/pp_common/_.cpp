@@ -12,17 +12,17 @@ std::string xRelayServerInfoBase::ToString() const {
     O(ServerId);
     O(StartupTimestampMS);
 
-    O(ExportProxyAddress4.ToString());
-    O(ExportProxyAddress6.ToString());
+    O(ExportProxyAddress4);
+    O(ExportProxyAddress6);
 
-    O(ExportDeviceAddress4.ToString());
-    O(ExportDeviceAddress6.ToString());
+    O(ExportDeviceAddress4);
+    O(ExportDeviceAddress6);
 
-    O(ExportStaticIpAddress4.ToString());
-    O(ExportStaticIpAddress6.ToString());
+    O(ExportStaticIpAddress4);
+    O(ExportStaticIpAddress6);
 
-    O(ExportStaticUdpAddress4.ToString());
-    O(ExportStaticUdpAddress6.ToString());
+    O(ExportStaticUdpAddress4);
+    O(ExportStaticUdpAddress6);
 
     O(ForcedPoolId);
 
@@ -32,10 +32,10 @@ std::string xRelayServerInfoBase::ToString() const {
 std::string xRelayInfoDispatcherServerInfo::ToString() const {
     auto OS = std::ostringstream();
     O(ServerId);
-    O(ProducerAddress4.ToString());
-    O(ObserverAddress4.ToString());
-    O(ProducerAddress6.ToString());
-    O(ObserverAddress6.ToString());
+    O(ProducerAddress4);
+    O(ObserverAddress4);
+    O(ProducerAddress6);
+    O(ObserverAddress6);
     return OS.str();
 }
 

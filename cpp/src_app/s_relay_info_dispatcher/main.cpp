@@ -110,12 +110,19 @@ int main(int argc, char ** argv) {
     ProducerService4.OnClientPacket    = OnProducerClientPacket;
     ProducerService4.OnClientKeepAlive = OnProducerClientKeepAlive;
     ProducerService4.OnClientClose     = OnProducerClientClose;
+
+    ObserverService4.OnClientConnected = OnObserverClientConnected;
+    ObserverService4.OnClientClose     = OnObserverClientClose;
+
     X_COND_GUARD(Enable4, ProducerService4, ServiceIoContext, ProducerAddress4, MAX_DEVICE_RELAY_SERVER_SUPPORTED);
     X_COND_GUARD(Enable4, ObserverService4, ServiceIoContext, ObserverAddress4, DEFAULT_MAX_SERVER_CONNECTIONS);
 
     ProducerService6.OnClientPacket    = OnProducerClientPacket;
     ProducerService6.OnClientKeepAlive = OnProducerClientKeepAlive;
     ProducerService6.OnClientClose     = OnProducerClientClose;
+
+    ObserverService6.OnClientConnected = OnObserverClientConnected;
+    ObserverService6.OnClientClose     = OnObserverClientClose;
 
     X_COND_GUARD(Enable6, ProducerService6, ServiceIoContext, ProducerAddress6, MAX_DEVICE_RELAY_SERVER_SUPPORTED);
     X_COND_GUARD(Enable6, ObserverService6, ServiceIoContext, ObserverAddress6, DEFAULT_MAX_SERVER_CONNECTIONS);
