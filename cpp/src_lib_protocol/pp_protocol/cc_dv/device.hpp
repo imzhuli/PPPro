@@ -4,19 +4,19 @@
 struct xCC_DeviceChallenge : xBinaryMessage {
     void SerializeMembers() override {
         W(AppVersion, ChannelId, Timestamp);
-        W(PrimaryIpv4Address);
-        W(PrimaryIpv6Address);
-        W(Ipv4UdpEnabled);
-        W(Ipv6UdpEnabled);
+        W(Tcp4AddressKey);
+        W(Tcp6AddressKey);
+        W(Udp4AddressKey);
+        W(Udp6AddressKey);
         W(Sign);
     };
 
     void DeserializeMembers() override {
         R(AppVersion, ChannelId, Timestamp);
-        R(PrimaryIpv4Address);
-        R(PrimaryIpv6Address);
-        R(Ipv4UdpEnabled);
-        R(Ipv6UdpEnabled);
+        R(Tcp4AddressKey);
+        R(Tcp6AddressKey);
+        R(Udp4AddressKey);
+        R(Udp6AddressKey);
         R(Sign);
     };
 
@@ -24,12 +24,11 @@ struct xCC_DeviceChallenge : xBinaryMessage {
     uint32_t ChannelId  = 0;
     uint64_t Timestamp  = 0;
 
-    xNetAddress PrimaryIpv4Address;
-    xNetAddress PrimaryIpv6Address;
-    bool        Ipv4UdpEnabled = false;
-    bool        Ipv6UdpEnabled = false;
-
-    std::string Sign;
+    std::string Tcp4AddressKey = {};
+    std::string Tcp6AddressKey = {};
+    std::string Udp4AddressKey = {};
+    std::string Udp6AddressKey = {};
+    std::string Sign           = {};
 };
 
 struct xCC_DeviceChallengeResp : xBinaryMessage {
