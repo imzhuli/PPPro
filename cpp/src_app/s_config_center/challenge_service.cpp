@@ -16,12 +16,14 @@ void OnTerminalChallenge(const xUdpServiceChannelHandle & Handle, xPacketCommand
     }
 
     auto RelayAddress = xNetAddress();
-    if (Handle.GetRemoteAddress().IsV4()) {
+    if (DC.Tcp4AddressKey.size()) {
         auto SI = GetRandomDeviceRelayServer4();
         if (SI) {
             RelayAddress = SI->ExportDeviceAddress4;
         }
-    } else if (Handle.GetRemoteAddress().IsV6()) {
+    }
+
+    if (!RelayAddress && DC.Tcp6AddressKey.size()) {
         auto SI = GetRandomDeviceRelayServer6();
         if (SI) {
             RelayAddress = SI->ExportDeviceAddress6;

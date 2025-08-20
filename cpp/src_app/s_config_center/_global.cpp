@@ -56,6 +56,6 @@ const xRelayServerInfoBase * GetRandomDeviceRelayServer6() {
     if (!C) {
         return nullptr;
     }
-    RelayV4List.AddTail(*C);
+    RelayV6List.AddTail(*C);
     return C->ServerInfo;
 }

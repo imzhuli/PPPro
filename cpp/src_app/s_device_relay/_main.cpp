@@ -7,20 +7,20 @@ int main(int argc, char ** argv) {
     auto SEG = xRuntimeEnvGuard(argc, argv);
 
     auto CL = xConfigLoader(RuntimeEnv.DefaultConfigFilePath);
-    CL.Optional(BindAddress4, "BindAddress4");
-    CL.Optional(BindAddress6, "BindAddress6");
+    CL.Optional(DeviceAddress4, "DeviceAddress4");
+    CL.Optional(DeviceAddress6, "DeviceAddress6");
     CL.Optional(ProxyAddress4, "ProxyAddress4");
     CL.Optional(ProxyAddress6, "ProxyAddress6");
-    CL.Optional(ExportAddress4, "ExportAddress4");
-    CL.Optional(ExportAddress6, "ExportAddress6");
+    CL.Optional(ExportDeviceAddress4, "ExportDeviceAddress4");
+    CL.Optional(ExportDeviceAddress6, "ExportDeviceAddress6");
     CL.Optional(ExportProxyAddress4, "ExportProxyAddress4");
     CL.Optional(ExportProxyAddress6, "ExportProxyAddress6");
 
     CL.Require(ServerIdCenterAddress, "ServerIdCenterAddress");
     CL.Require(ServerListDownloadAddress, "ServerListDownloadAddress");
 
-    bool Enable4 = BindAddress4.IsV4() && BindAddress4.Port;
-    bool Enable6 = BindAddress6.IsV6() && BindAddress6.Port;
+    bool Enable4 = DeviceAddress4.IsV4() && DeviceAddress4.Port && ProxyAddress4.IsV4() && ProxyAddress4.Port;
+    bool Enable6 = DeviceAddress6.IsV6() && DeviceAddress6.Port && ProxyAddress6.IsV6() && ProxyAddress6.Port;
     if (!Enable4 && !Enable6) {
         Logger->F("neither ipv4 or ipv6 is enabled");
         return 0;
@@ -37,8 +37,8 @@ int main(int argc, char ** argv) {
         LocalInfo.ExportProxyAddress4 = ExportProxyAddress4;
         LocalInfo.ExportProxyAddress6 = ExportProxyAddress6;
 
-        LocalInfo.ExportDeviceAddress4 = ExportAddress4;
-        LocalInfo.ExportDeviceAddress6 = ExportAddress6;
+        LocalInfo.ExportDeviceAddress4 = ExportDeviceAddress4;
+        LocalInfo.ExportDeviceAddress6 = ExportDeviceAddress6;
 
         RIReporter.UpdateLocalRelayServerInfo(LocalInfo);
     };
@@ -56,6 +56,12 @@ int main(int argc, char ** argv) {
     X_GUARD(ServerIdClient, ServiceIoContext, ServerIdCenterAddress, RuntimeEnv.DefaultLocalServerIdFilePath);
     X_GUARD(RIDDownloader, ServiceIoContext, ServerListDownloadAddress);
     X_GUARD(RIReporter, ServiceIoContext);
+
+    X_GUARD(DeviceManager, 2 * MaxDeviceCount);
+    X_COND_GUARD(Enable4, DeviceService4, ServiceIoContext, DeviceAddress4, MaxDeviceCount);
+    X_COND_GUARD(Enable4, ProxyService4, ServiceIoContext, ProxyAddress4, MaxDeviceCount);
+    X_COND_GUARD(Enable6, DeviceService6, ServiceIoContext, DeviceAddress6, MaxDeviceCount);
+    X_COND_GUARD(Enable6, ProxyService6, ServiceIoContext, ProxyAddress6, MaxDeviceCount);
 
     // DSRDownloader.SetOnUpdateDeviceStateRelayServerListCallback([](uint32_t Version, const std::vector<xDeviceStateRelayServerInfo> & ServerList) {
     //     auto PSL = std::vector<xNetAddress>();
@@ -88,6 +94,12 @@ int main(int argc, char ** argv) {
             // DSRDownloader,            //
             RIReporter
         );
+        if (Enable4) {
+            TickAll(ServiceTicker(), DeviceService4, ProxyService4);
+        }
+        if (Enable6) {
+            TickAll(ServiceTicker(), DeviceService6, ProxyService6);
+        }
     }
 
     return 0;
