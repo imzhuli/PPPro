@@ -34,11 +34,10 @@ extern xRelayInfoReporter                       RIReporter;
 extern xDeviceStateRelayServerListDownloader    DSRDownloader;
 extern xClientPoolWrapper                       DeviceReporter;
 
-extern xDR_DeviceManager DeviceManager;
-extern xTcpService       DeviceService4;
-extern xTcpService       DeviceService6;
-extern xTcpService       ProxyService4;
-extern xTcpService       ProxyService6;
+extern xTcpService DeviceService4;
+extern xTcpService DeviceService6;
+extern xTcpService ProxyService4;
+extern xTcpService ProxyService6;
 
 struct xRD_LocalAudit {
     uint64_t TotalCtrlConnections;

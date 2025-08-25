@@ -1,7 +1,5 @@
 #include "./_global.hpp"
 
-#include <pp_protocol/device_relay/init_ctrl_stream.hpp>
-
 int main(int argc, char ** argv) {
 
     auto SEG = xRuntimeEnvGuard(argc, argv);
@@ -62,6 +60,11 @@ int main(int argc, char ** argv) {
     X_COND_GUARD(Enable4, ProxyService4, ServiceIoContext, ProxyAddress4, MaxDeviceCount);
     X_COND_GUARD(Enable6, DeviceService6, ServiceIoContext, DeviceAddress6, MaxDeviceCount);
     X_COND_GUARD(Enable6, ProxyService6, ServiceIoContext, ProxyAddress6, MaxDeviceCount);
+
+    // DeviceService6.OnClientPacket = DeviceService4.OnClientPacket = III<true, const xTcpServiceClientConnectionHandle &>;
+
+    DeviceService6.OnClientPacket = DeviceService4.OnClientPacket = &OnDeviceConnectionPacket;
+    DeviceService6.OnClientClose = DeviceService4.OnClientClose = &OnDeviceConnectionClose;
 
     // DSRDownloader.SetOnUpdateDeviceStateRelayServerListCallback([](uint32_t Version, const std::vector<xDeviceStateRelayServerInfo> & ServerList) {
     //     auto PSL = std::vector<xNetAddress>();

@@ -92,6 +92,7 @@ using xel::FileToStr;
 using xel::GetTimestampMS;
 using xel::HexShow;
 using xel::HexToStr;
+using xel::Ignore;
 using xel::JoinStr;
 using xel::Md5;
 using xel::Pure;

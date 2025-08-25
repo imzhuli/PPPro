@@ -13,7 +13,7 @@ public:
     void OnServerClose() override;
 
     using xOnUpdateServerInfoCallback                      = std::function<void(const xRelayInfoDispatcherServerInfo &)>;
-    xOnUpdateServerInfoCallback OnUpdateServerInfoCallback = Ignore<const xRelayInfoDispatcherServerInfo &>;
+    xOnUpdateServerInfoCallback OnUpdateServerInfoCallback = NOOP<const xRelayInfoDispatcherServerInfo &>;
 
 private:
     bool OnDownloadRelayInfoDispatcherServerInfo(xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize);

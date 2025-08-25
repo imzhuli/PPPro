@@ -19,11 +19,10 @@ xRelayInfoReporter                       RIReporter;
 xDeviceStateRelayServerListDownloader    DSRDownloader;
 xClientPoolWrapper                       DeviceReporter;
 
-xDR_DeviceManager DeviceManager;
-xTcpService       DeviceService4;
-xTcpService       DeviceService6;
-xTcpService       ProxyService4;
-xTcpService       ProxyService6;
+xTcpService DeviceService4;
+xTcpService DeviceService6;
+xTcpService ProxyService4;
+xTcpService ProxyService6;
 
 xRD_LocalAudit LocalAudit;
 

@@ -115,13 +115,13 @@ static constexpr const xPacketCommandId Cmd_DV_CC_ChallengeResp = Cmd_DV_CC_Base
 
 // device-relay:
 static constexpr const xPacketCommandId Cmd_DV_RL_Base                  = 0x08'000;
-static constexpr const xPacketCommandId Cmd_DV_RL_InitCtrlStream        = Cmd_DV_RL_Base + 0x01;
-static constexpr const xPacketCommandId Cmd_DV_RL_InitCtrlStreamResp    = Cmd_DV_RL_Base + 0x02;
-static constexpr const xPacketCommandId Cmd_DV_RL_InitDataStream        = Cmd_DV_RL_Base + 0x03;
-static constexpr const xPacketCommandId Cmd_DV_RL_InitDataStreamResp    = Cmd_DV_RL_Base + 0x04;
+static constexpr const xPacketCommandId Cmd_DV_RL_Handshake             = Cmd_DV_RL_Base + 0x01;
+static constexpr const xPacketCommandId Cmd_DV_RL_HandshakeResp         = Cmd_DV_RL_Base + 0x02;
+static constexpr const xPacketCommandId Cmd_DV_RL_InitDataStream        = Cmd_DV_RL_Base + 0x03;  // deprecated
+static constexpr const xPacketCommandId Cmd_DV_RL_InitDataStreamResp    = Cmd_DV_RL_Base + 0x04;  // deprecated
 static constexpr const xPacketCommandId Cmd_DV_RL_CreateConnection      = Cmd_DV_RL_Base + 0x05;
-static constexpr const xPacketCommandId Cmd_DV_RL_DestroyConnection     = Cmd_DV_RL_Base + 0x06;
-static constexpr const xPacketCommandId Cmd_DV_RL_NotifyConnectionState = Cmd_DV_RL_Base + 0x07;
+static constexpr const xPacketCommandId Cmd_DV_RL_CreateConnectionHost  = Cmd_DV_RL_Base + 0x06;
+static constexpr const xPacketCommandId Cmd_DV_RL_CreateConnectionResp  = Cmd_DV_RL_Base + 0x07;
 static constexpr const xPacketCommandId Cmd_DV_RL_PostData              = Cmd_DV_RL_Base + 0x08;
 static constexpr const xPacketCommandId Cmd_DV_RL_ProxyClientNotify     = Cmd_DV_RL_Base + 0x09;
 static constexpr const xPacketCommandId Cmd_DV_RL_ForceDetroyConnection = Cmd_DV_RL_Base + 0x0A;

@@ -1,7 +1,7 @@
 #pragma once
 #include <pp_common/_.hpp>
 
-class xTR_CreateConnection : public xBinaryMessage {
+class xPP_CreateConnection : public xBinaryMessage {
 public:
     void SerializeMembers() override { W(RelaySideConnectionId, TargetAddress); }
     void DeserializeMembers() override { R(RelaySideConnectionId, TargetAddress); }
@@ -11,7 +11,29 @@ public:
     xNetAddress TargetAddress;
 };
 
-class xTR_DestroyConnection : public xBinaryMessage {
+class xPP_CreateConnectionHost : public xBinaryMessage {
+public:
+    void SerializeMembers() override { W(RelaySideConnectionId, HostnameView, Port); }
+    void DeserializeMembers() override { R(RelaySideConnectionId, HostnameView, Port); }
+
+public:
+    uint64_t         RelaySideConnectionId;
+    std::string_view HostnameView;
+    uint16_t         Port;
+};
+
+class xPP_CreateConnectionResp : public xBinaryMessage {
+public:
+    void SerializeMembers() override { W(DeviceSideConnectionId, RelaySideConnectionId, Connected); }
+    void DeserializeMembers() override { R(DeviceSideConnectionId, RelaySideConnectionId, Connected); }
+
+public:
+    uint32_t DeviceSideConnectionId;
+    uint64_t RelaySideConnectionId;
+    bool     Connected;
+};
+
+class xPP_DestroyConnection : public xBinaryMessage {
 public:
     void SerializeMembers() override { W(DeviceSideConnectionId, RelaySideConnectionId); }
     void DeserializeMembers() override { R(DeviceSideConnectionId, RelaySideConnectionId); }

@@ -32,8 +32,8 @@ public:
     void Clean();
     void Tick(uint64_t NowMS);
 
-    xOnNewDeviceRelayInfoCallback    OnNewDeviceRelayInfoCallback    = Ignore<const xRIO_RelayServerInfoContext &>;
-    xOnRemoveDeviceRelayInfoCallback OnRemoveDeviceRelayInfoCallback = Ignore<const xRIO_RelayServerInfoContext &>;
+    xOnNewDeviceRelayInfoCallback    OnNewDeviceRelayInfoCallback    = NOOP<const xRIO_RelayServerInfoContext &>;
+    xOnRemoveDeviceRelayInfoCallback OnRemoveDeviceRelayInfoCallback = NOOP<const xRIO_RelayServerInfoContext &>;
 
 private:
     bool OnRelayInfoDispatcherPacket(xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize);
