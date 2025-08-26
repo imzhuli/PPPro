@@ -3,13 +3,15 @@
 #include "../lib_server_list/relay_info_dispatcher_server_info_downloader.hpp"
 #include "../lib_utils/all.hpp"
 #include "./device_manager.hpp"
+#include "./relay_context.hpp"
 #include "./relay_server_info_reporter.hpp"
 
 #include <pp_common/_.hpp>
 
-static constexpr const size32_t MaxDeviceCount          = 10'0000;
-static constexpr const size32_t MaxProxyCount           = 3000;
-static constexpr const size32_t MaxRelayConnectionCount = 30'0000;
+static constexpr const size32_t MaxDeviceCount            = 10'0000;
+static constexpr const size32_t MaxProxyCount             = 3000;
+static constexpr const size32_t MaxRelayContextCount      = 100'0000;
+static constexpr const uint64_t RelayContextIdleTimeoutMS = 180'000;
 
 // config
 

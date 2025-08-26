@@ -61,10 +61,10 @@ int main(int argc, char ** argv) {
     X_COND_GUARD(Enable6, DeviceService6, ServiceIoContext, DeviceAddress6, MaxDeviceCount);
     X_COND_GUARD(Enable6, ProxyService6, ServiceIoContext, ProxyAddress6, MaxDeviceCount);
 
-    // DeviceService6.OnClientPacket = DeviceService4.OnClientPacket = III<true, const xTcpServiceClientConnectionHandle &>;
+    auto X_VAR = xel::xScopeGuard([] { InitRelayContextPool(MaxRelayContextCount); }, CleanRelayContextPool);
 
     DeviceService6.OnClientPacket = DeviceService4.OnClientPacket = &OnDeviceConnectionPacket;
-    DeviceService6.OnClientClose = DeviceService4.OnClientClose = &OnDeviceConnectionClose;
+    DeviceService6.OnClientClean = DeviceService4.OnClientClean = &OnDeviceConnectionClean;
 
     // DSRDownloader.SetOnUpdateDeviceStateRelayServerListCallback([](uint32_t Version, const std::vector<xDeviceStateRelayServerInfo> & ServerList) {
     //     auto PSL = std::vector<xNetAddress>();

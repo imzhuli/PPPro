@@ -9,20 +9,39 @@ xIndexedStorage<xDR_DeviceContext> DeviceManager;
 
 //////
 
+xDR_DeviceContext * GetDeviceContextById(uint64_t Id) {
+    return DeviceManager.CheckAndGet(Id);
+}
+
+static xDR_DeviceContext * CreateDeviceContext(const xTcpServiceClientConnectionHandle & Handle) {
+    auto Id = DeviceManager.Acquire({ 0, Handle });
+    if (!Id) {
+        return nullptr;
+    }
+    auto & Ref = DeviceManager[Id];
+    Ref.Id     = Id;
+    return &Ref;
+}
+
+static void ReleaseDeviceContext(uint64_t Id) {
+    DeviceManager.Release(Id);
+}
+
+static bool OnDevicePacket(xDR_DeviceContext * PDC, xPacketCommandId CmdId, xPacketRequestId ReqId, ubyte * PayloadPtr, size_t PayloadSize) {
+    return true;
+}
+
 static bool OnDeviceHandshake(const xTcpServiceClientConnectionHandle & Handle, ubyte * PayloadPtr, size_t PayloadSize) {
     auto R = xPP_DeviceHandshake();
     if (!R.Deserialize(PayloadPtr, PayloadSize)) {
         Logger->E("invalid protocol");
         return false;
     }
-    auto Id = DeviceManager.Acquire({ 0, Handle });
-    if (!Id) {
+    auto PDC = CreateDeviceContext(Handle);
+    if (!PDC) {
         return false;
     }
-
-    auto & DC = DeviceManager[Id];
-
-    Handle->UserContext.U64 = DC.Id = Id;
+    Handle->UserContext.U64 = PDC->Id;
 
     auto RS     = xPP_DeviceHandshakeResp();
     RS.Accepted = true;
@@ -38,14 +57,14 @@ static bool OnDeviceHandshake(const xTcpServiceClientConnectionHandle & Handle, 
     return true;
 }
 
-void OnDeviceConnectionClose(const xTcpServiceClientConnectionHandle & Handle) {
+void OnDeviceConnectionClean(const xTcpServiceClientConnectionHandle & Handle) {
     auto Id = Handle->UserContext.U64;
     if (!Id) {
         DEBUG_LOG("remove uninited device connection");
         return;
     }
     DEBUG_LOG("remove handshake ready device connection: %" PRIx64 "", Id);
-    DeviceManager.Release(Id);
+    ReleaseDeviceContext(Id);
 }
 
 bool OnDeviceConnectionPacket(const xTcpServiceClientConnectionHandle & Handle, xPacketCommandId CmdId, xPacketRequestId ReqId, ubyte * PayloadPtr, size_t PayloadSize) {
@@ -58,6 +77,8 @@ bool OnDeviceConnectionPacket(const xTcpServiceClientConnectionHandle & Handle, 
         }
         return OnDeviceHandshake(Handle, PayloadPtr, PayloadSize);
     }
-    DeviceManager.Release(Id);
-    return true;
+    auto PDC = GetDeviceContextById(Id);
+    assert(PDC);
+
+    return OnDevicePacket(PDC, CmdId, ReqId, PayloadPtr, PayloadSize);
 }
