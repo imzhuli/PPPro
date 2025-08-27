@@ -1,58 +1,49 @@
 #pragma once
 #include <pp_common/_.hpp>
 
-class xTR_CreateUdpChannel : public xBinaryMessage {
-public:
-    void SerializeMembers() override { W(RelaySideChannelId); }
-    void DeserializeMembers() override { R(RelaySideChannelId); }
-
-public:
-    uint64_t RelaySideChannelId;
-};
-
-class xTR_CreateUdpChannelResp : public xBinaryMessage {
-public:
-    void SerializeMembers() override { W(DeviceSideChannelId, RelaySideChannelId); }
-    void DeserializeMembers() override { R(DeviceSideChannelId, RelaySideChannelId); }
-
-public:
-    uint32_t DeviceSideChannelId;
-    uint64_t RelaySideChannelId;
-};
-
-class xTR_UdpChannelKeepAlive : public xBinaryMessage {
-public:
-    void SerializeMembers() override { W(DeviceSideChannelId, RelaySideChannelId); }
-    void DeserializeMembers() override { R(DeviceSideChannelId, RelaySideChannelId); }
-
-public:
-    uint32_t DeviceSideChannelId;
-    uint64_t RelaySideChannelId;
-};
-
-class xTR_UdpChannelClose : public xBinaryMessage {
-public:
-    void SerializeMembers() override { W(DeviceSideChannelId, RelaySideChannelId); }
-    void DeserializeMembers() override { R(DeviceSideChannelId, RelaySideChannelId); }
-
-public:
-    uint32_t DeviceSideChannelId;
-    uint64_t RelaySideChannelId;
-};
-
-class xTR_PostUdpData : public xBinaryMessage {
+class xPP_CreateUdpChannel : public xBinaryMessage {
 public:
     void SerializeMembers() override {
-        assert(PayloadView.data() && PayloadView.size());
-        W(DeviceSideChannelId, RelaySideChannelId, PayloadView);
+        W(RelaySideContextId);
+        W(Enable4, Enable6);
     }
-    void DeserializeMembers() override { R(DeviceSideChannelId, RelaySideChannelId, PayloadView); }
+    void DeserializeMembers() override {
+        R(RelaySideContextId);
+        R(Enable4, Enable6);
+    }
 
 public:
-    uint32_t         DeviceSideChannelId;
-    uint64_t         RelaySideChannelId;
-    std::string_view PayloadView;
+    uint64_t RelaySideContextId;
+    bool     Enable4;
+    bool     Enable6;
+};
 
-    static constexpr const size32_t MAX_PAYLOAD_SIZE = 4096;
-    static_assert(MAX_PAYLOAD_SIZE <= MaxPacketPayloadSize - 32);
+class xPP_CreateUdpChannelResp : public xBinaryMessage {
+public:
+    void SerializeMembers() override { W(DeviceSideContextId, RelaySideContextId); }
+    void DeserializeMembers() override { R(DeviceSideContextId, RelaySideContextId); }
+
+public:
+    uint32_t DeviceSideContextId;
+    uint64_t RelaySideContextId;
+};
+
+class xPP_UdpChannelKeepAlive : public xBinaryMessage {
+public:
+    void SerializeMembers() override { W(DeviceSideContextId, RelaySideContextId); }
+    void DeserializeMembers() override { R(DeviceSideContextId, RelaySideContextId); }
+
+public:
+    uint32_t DeviceSideContextId;
+    uint64_t RelaySideContextId;
+};
+
+class xPP_DestroyUdpChannel : public xBinaryMessage {
+public:
+    void SerializeMembers() override { W(DeviceSideContextId, RelaySideContextId); }
+    void DeserializeMembers() override { R(DeviceSideContextId, RelaySideContextId); }
+
+public:
+    uint32_t DeviceSideContextId;
+    uint64_t RelaySideContextId;
 };

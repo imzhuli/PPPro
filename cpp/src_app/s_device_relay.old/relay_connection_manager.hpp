@@ -4,9 +4,9 @@
 struct xRD_RelayConnectionContext : xListNode {
     union {
         uint16_t TargetPort;
-        uint64_t DeviceSideConnectionId;
+        uint64_t DeviceSideContextId;
     };
-    uint64_t RelaySideConnectionId;
+    uint64_t RelaySideContextId;
     uint64_t ProxySideConnectionId;
 
     uint64_t DeviceId;
@@ -20,7 +20,7 @@ public:
     void Tick(uint64_t NowMS);
 
     auto Create() -> xRD_RelayConnectionContext *;
-    auto GetConnectionById(uint64_t RelaySideConnectionId) -> xRD_RelayConnectionContext *;
+    auto GetConnectionById(uint64_t RelaySideContextId) -> xRD_RelayConnectionContext *;
     void Destroy(xRD_RelayConnectionContext * RCC);
 
 private:

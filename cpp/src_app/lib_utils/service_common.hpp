@@ -12,10 +12,13 @@ extern xTicker      ServiceTicker;
 extern xRunState    ServiceRunState;
 
 struct xRuntimeEnvGuard final : xNonCopyable {
-    xRuntimeEnvGuard(int argc, char ** argv);
+    xRuntimeEnvGuard(int argc, char ** argv, bool EnableDefaultLogger = true);
     ~xRuntimeEnvGuard();
 
     xRuntimeEnv * operator->() const;
+
+private:
+    const bool EnableLogger;
 };
 
 template <typename... tTickerObserver>

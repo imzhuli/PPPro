@@ -10,7 +10,7 @@ std::string xPR_ConnectionStateNotify::ToString() const {
 
     OP(ProxySideConnectionId);
     OP(NewState);
-    OP(RelaySideConnectionId);
+    OP(RelaySideContextId);
     OP(TotalUploadedBytes);
     OP(TotalDumpedBytes);
 

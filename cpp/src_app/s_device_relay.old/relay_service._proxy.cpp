@@ -78,17 +78,17 @@ bool xDeviceRelayService::OnProxyCreateConnection(xRD_ProxyConnection * Conn, co
     RCC->ProxySideConnectionId = R.ProxySideConnectionId;
     RCC->TargetPort            = R.HostnamePort;
 
-    DEBUG_LOG("RelaySideConnectionId=%" PRIx64 ", TargetPort=%u", RCC->RelaySideConnectionId, (unsigned)RCC->TargetPort);
+    DEBUG_LOG("RelaySideContextId=%" PRIx64 ", TargetPort=%u", RCC->RelaySideContextId, (unsigned)RCC->TargetPort);
 
     if (R.TargetAddress) {
-        auto CC                  = xTR_CreateConnection();
-        CC.RelaySideConnectionId = RCC->RelaySideConnectionId;
-        CC.TargetAddress         = R.TargetAddress;
+        auto CC               = xTR_CreateConnection();
+        CC.RelaySideContextId = RCC->RelaySideContextId;
+        CC.TargetAddress      = R.TargetAddress;
         D->CtrlConnection->PostMessage(Cmd_DV_RL_CreateConnection, 0, CC);
     } else if (R.HostnameView.size()) {
         auto DQ         = xTR_DnsQuery();
         DQ.HostnameView = R.HostnameView;
-        D->CtrlConnection->PostMessage(Cmd_DV_RL_DnsQuery, RCC->RelaySideConnectionId, DQ);
+        D->CtrlConnection->PostMessage(Cmd_DV_RL_DnsQuery, RCC->RelaySideContextId, DQ);
     } else {
         DEBUG_LOG("Invalid create connection request");
         return false;
@@ -103,16 +103,16 @@ bool xDeviceRelayService::OnProxyDestroyConnection(xRD_ProxyConnection * Conn, c
         DEBUG_LOG("invalid protocol");
         return false;
     }
-    DEBUG_LOG("RelaySizeConnectionId=%" PRIx64 "", R.RelaySideConnectionId);
-    auto RC = RelayConnectionManager.GetConnectionById(R.RelaySideConnectionId);
+    DEBUG_LOG("RelaySizeConnectionId=%" PRIx64 "", R.RelaySideContextId);
+    auto RC = RelayConnectionManager.GetConnectionById(R.RelaySideContextId);
     if (!RC) {
         DEBUG_LOG("relay connection not found");
         return true;
     }
 
-    auto RL                   = xTR_DestroyConnection();
-    RL.DeviceSideConnectionId = RC->DeviceSideConnectionId;
-    RL.RelaySideConnectionId  = RC->RelaySideConnectionId;
+    auto RL                = xTR_DestroyConnection();
+    RL.DeviceSideContextId = RC->DeviceSideContextId;
+    RL.RelaySideContextId  = RC->RelaySideContextId;
 
     auto D = DeviceManager.GetDeviceById(RC->DeviceId);
     if (!D) {
@@ -132,9 +132,9 @@ bool xDeviceRelayService::OnProxyPushData(xRD_ProxyConnection * Conn, const ubyt
         DEBUG_LOG("invalid protocol");
         return false;
     }
-    DEBUG_LOG("RelaySideConnectionId=%" PRIx64 ", ProxySideConnectionId=%" PRIx64 ", Data=\n%s", R.RelaySideConnectionId, R.ProxySideConnectionId, HexShow(R.PayloadView).c_str());
+    DEBUG_LOG("RelaySideContextId=%" PRIx64 ", ProxySideConnectionId=%" PRIx64 ", Data=\n%s", R.RelaySideContextId, R.ProxySideConnectionId, HexShow(R.PayloadView).c_str());
 
-    auto RC = RelayConnectionManager.GetConnectionById(R.RelaySideConnectionId);
+    auto RC = RelayConnectionManager.GetConnectionById(R.RelaySideContextId);
     if (!RC) {
         DEBUG_LOG("Connection not found");
         return true;
@@ -150,10 +150,10 @@ bool xDeviceRelayService::OnProxyPushData(xRD_ProxyConnection * Conn, const ubyt
         return true;
     }
 
-    auto Push                   = xTR_PostData();
-    Push.DeviceSideConnectionId = RC->DeviceSideConnectionId;
-    Push.RelaySideConnectionId  = RC->RelaySideConnectionId;
-    Push.PayloadView            = R.PayloadView;
+    auto Push                = xTR_PostData();
+    Push.DeviceSideContextId = RC->DeviceSideContextId;
+    Push.RelaySideContextId  = RC->RelaySideContextId;
+    Push.PayloadView         = R.PayloadView;
 
     DC->DataConnection->PostMessage(Cmd_DV_RL_PostData, 0, Push);
     return true;
@@ -166,7 +166,7 @@ bool xDeviceRelayService::OnProxyNotifyConnectionState(const ubyte * Payload, si
         return false;
     }
 
-    auto RCP = RelayConnectionManager.GetConnectionById(N.RelaySideConnectionId);
+    auto RCP = RelayConnectionManager.GetConnectionById(N.RelaySideContextId);
     if (!RCP) {
         DEBUG_LOG("relay connection not found");
         return true;
@@ -179,12 +179,12 @@ bool xDeviceRelayService::OnProxyNotifyConnectionState(const ubyte * Payload, si
     }
 
     DEBUG_LOG("TotalUpload: %" PRIu64 ", TotalDumped: %" PRIu64 "", N.TotalUploadedBytes, N.TotalDumpedBytes);
-    auto TN                   = xTR_ConnectionStateNotify();
-    TN.DeviceSideConnectionId = RCP->DeviceSideConnectionId;
-    TN.RelaySideConnectionId  = RCP->RelaySideConnectionId;
-    TN.NewState               = xTR_ConnectionStateNotify::STATE_UPDATE_TRANSFER;
-    TN.TotalReadBytes         = N.TotalDumpedBytes;
-    TN.TotalWrittenBytes      = N.TotalUploadedBytes;
+    auto TN                = xTR_ConnectionStateNotify();
+    TN.DeviceSideContextId = RCP->DeviceSideContextId;
+    TN.RelaySideContextId  = RCP->RelaySideContextId;
+    TN.NewState            = xTR_ConnectionStateNotify::STATE_UPDATE_TRANSFER;
+    TN.TotalReadBytes      = N.TotalDumpedBytes;
+    TN.TotalWrittenBytes   = N.TotalUploadedBytes;
     DC->DataConnection->PostMessage(Cmd_DV_RL_ProxyClientNotify, 0, TN);
 
     return true;

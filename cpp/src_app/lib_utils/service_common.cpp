@@ -39,12 +39,14 @@ static void CleanLogger() {
 static auto Instance = (xRuntimeEnvGuard *){};
 static auto EnvMutex = std::mutex();
 
-xRuntimeEnvGuard::xRuntimeEnvGuard(int argc, char ** argv) {
+xRuntimeEnvGuard::xRuntimeEnvGuard(int argc, char ** argv, bool EnableDefaultLogger) : EnableLogger(EnableDefaultLogger) {
     auto G = std::lock_guard(EnvMutex);
     RuntimeAssert(!Instance);
 
     RuntimeEnv = xRuntimeEnv::FromCommandLine(argc, argv);
-    InitLogger();
+    if (EnableLogger) {
+        InitLogger();
+    }
     ServiceIoContext = &ServiceIoContextInstance;
     RuntimeAssert(ServiceIoContext->Init());
     RuntimeAssert(ServiceRunState.Start());
@@ -57,7 +59,9 @@ xRuntimeEnvGuard::~xRuntimeEnvGuard() {
 
     ServiceRunState.Finish();
     Steal(ServiceIoContext)->Clean();
-    CleanLogger();
+    if (EnableLogger) {
+        CleanLogger();
+    }
     Reset(RuntimeEnv);
     Reset(Instance);
 }

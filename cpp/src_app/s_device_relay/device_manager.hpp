@@ -5,7 +5,9 @@ struct xDR_DeviceContext final {
     uint64_t                          Id;
     xTcpServiceClientConnectionHandle Handle;
 };
-extern xIndexedStorage<xDR_DeviceContext> DeviceManager;
+
+extern void InitDeviceContextManager();
+extern void CleanDeviceContextManager();
 
 extern xDR_DeviceContext * GetDeviceContextById(uint64_t Id);
 extern bool OnDeviceConnectionPacket(const xTcpServiceClientConnectionHandle & Handle, xPacketCommandId CmdId, xPacketRequestId ReqId, ubyte * PayloadPtr, size_t PayloadSize);

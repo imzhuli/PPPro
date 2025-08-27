@@ -3,44 +3,44 @@
 
 class xPP_CreateConnection : public xBinaryMessage {
 public:
-    void SerializeMembers() override { W(RelaySideConnectionId, TargetAddress); }
-    void DeserializeMembers() override { R(RelaySideConnectionId, TargetAddress); }
+    void SerializeMembers() override { W(RelaySideContextId, TargetAddress); }
+    void DeserializeMembers() override { R(RelaySideContextId, TargetAddress); }
 
 public:
-    uint64_t    RelaySideConnectionId;
+    uint64_t    RelaySideContextId;
     xNetAddress TargetAddress;
 };
 
 class xPP_CreateConnectionHost : public xBinaryMessage {
 public:
-    void SerializeMembers() override { W(RelaySideConnectionId, HostnameView, Port); }
-    void DeserializeMembers() override { R(RelaySideConnectionId, HostnameView, Port); }
+    void SerializeMembers() override { W(RelaySideContextId, HostnameView, Port); }
+    void DeserializeMembers() override { R(RelaySideContextId, HostnameView, Port); }
 
 public:
-    uint64_t         RelaySideConnectionId;
+    uint64_t         RelaySideContextId;
     std::string_view HostnameView;
     uint16_t         Port;
 };
 
 class xPP_CreateConnectionResp : public xBinaryMessage {
 public:
-    void SerializeMembers() override { W(DeviceSideConnectionId, RelaySideConnectionId, Connected); }
-    void DeserializeMembers() override { R(DeviceSideConnectionId, RelaySideConnectionId, Connected); }
+    void SerializeMembers() override { W(DeviceSideContextId, RelaySideContextId, Connected); }
+    void DeserializeMembers() override { R(DeviceSideContextId, RelaySideContextId, Connected); }
 
 public:
-    uint32_t DeviceSideConnectionId;
-    uint64_t RelaySideConnectionId;
+    uint32_t DeviceSideContextId;
+    uint64_t RelaySideContextId;
     bool     Connected;
 };
 
 class xPP_DestroyConnection : public xBinaryMessage {
 public:
-    void SerializeMembers() override { W(DeviceSideConnectionId, RelaySideConnectionId); }
-    void DeserializeMembers() override { R(DeviceSideConnectionId, RelaySideConnectionId); }
+    void SerializeMembers() override { W(DeviceSideContextId, RelaySideContextId); }
+    void DeserializeMembers() override { R(DeviceSideContextId, RelaySideContextId); }
 
 public:
-    uint32_t DeviceSideConnectionId;
-    uint64_t RelaySideConnectionId;
+    uint32_t DeviceSideContextId;
+    uint64_t RelaySideContextId;
 };
 
 class xTR_ConnectionStateNotify : public xBinaryMessage {
@@ -68,17 +68,17 @@ public:
 
 public:
     void SerializeMembers() override {
-        W(DeviceSideConnectionId, RelaySideConnectionId);
+        W(DeviceSideContextId, RelaySideContextId);
         W(NewState, TotalReadBytes, TotalWrittenBytes);
     }
     void DeserializeMembers() override {
-        R(DeviceSideConnectionId, RelaySideConnectionId);
+        R(DeviceSideContextId, RelaySideContextId);
         R(NewState, TotalReadBytes, TotalWrittenBytes);
     }
 
 public:
-    uint32_t DeviceSideConnectionId;
-    uint64_t RelaySideConnectionId;
+    uint32_t DeviceSideContextId;
+    uint64_t RelaySideContextId;
     uint32_t NewState          = 0;
     uint64_t TotalReadBytes    = 0;
     uint64_t TotalWrittenBytes = 0;

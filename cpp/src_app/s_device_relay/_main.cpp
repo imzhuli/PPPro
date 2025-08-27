@@ -55,7 +55,7 @@ int main(int argc, char ** argv) {
     X_GUARD(RIDDownloader, ServiceIoContext, ServerListDownloadAddress);
     X_GUARD(RIReporter, ServiceIoContext);
 
-    X_GUARD(DeviceManager, 2 * MaxDeviceCount);
+    auto X_VAR = xel::xScopeGuard(InitDeviceContextManager, CleanDeviceContextManager);
     X_COND_GUARD(Enable4, DeviceService4, ServiceIoContext, DeviceAddress4, MaxDeviceCount);
     X_COND_GUARD(Enable4, ProxyService4, ServiceIoContext, ProxyAddress4, MaxDeviceCount);
     X_COND_GUARD(Enable6, DeviceService6, ServiceIoContext, DeviceAddress6, MaxDeviceCount);

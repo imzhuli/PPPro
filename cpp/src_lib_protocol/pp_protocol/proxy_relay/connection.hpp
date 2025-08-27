@@ -16,12 +16,12 @@ public:
 
 class xPR_DestroyConnection : public xBinaryMessage {
 public:
-    void SerializeMembers() override { W(ProxySideConnectionId, RelaySideConnectionId); }
-    void DeserializeMembers() override { R(ProxySideConnectionId, RelaySideConnectionId); }
+    void SerializeMembers() override { W(ProxySideConnectionId, RelaySideContextId); }
+    void DeserializeMembers() override { R(ProxySideConnectionId, RelaySideContextId); }
 
 public:
     uint64_t ProxySideConnectionId;
-    uint64_t RelaySideConnectionId;
+    uint64_t RelaySideContextId;
 };
 
 class xPR_ConnectionStateNotify : public xBinaryMessage {
@@ -49,12 +49,12 @@ public:
 
 public:
     void SerializeMembers() override {
-        W(ProxySideConnectionId, RelaySideConnectionId);
+        W(ProxySideConnectionId, RelaySideContextId);
         W(NewState);
         W(TotalUploadedBytes, TotalDumpedBytes);
     }
     void DeserializeMembers() override {
-        R(ProxySideConnectionId, RelaySideConnectionId);
+        R(ProxySideConnectionId, RelaySideContextId);
         R(NewState);
         R(TotalUploadedBytes, TotalDumpedBytes);
     }
@@ -63,7 +63,7 @@ public:
 
 public:
     uint64_t ProxySideConnectionId;
-    uint64_t RelaySideConnectionId;
+    uint64_t RelaySideContextId;
     uint32_t NewState;
     uint64_t TotalUploadedBytes = 0;
     uint64_t TotalDumpedBytes   = 0;
@@ -71,12 +71,12 @@ public:
 
 class xPR_PushData : public xBinaryMessage {
 public:
-    void SerializeMembers() override { W(ProxySideConnectionId, RelaySideConnectionId, PayloadView); }
-    void DeserializeMembers() override { R(ProxySideConnectionId, RelaySideConnectionId, PayloadView); }
+    void SerializeMembers() override { W(ProxySideConnectionId, RelaySideContextId, PayloadView); }
+    void DeserializeMembers() override { R(ProxySideConnectionId, RelaySideContextId, PayloadView); }
 
 public:
     uint64_t         ProxySideConnectionId;
-    uint64_t         RelaySideConnectionId;
+    uint64_t         RelaySideContextId;
     std::string_view PayloadView;
 
     static constexpr const size_t MAX_PAYLOAD_SIZE = 4096;

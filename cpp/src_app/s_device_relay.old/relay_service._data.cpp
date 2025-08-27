@@ -100,19 +100,19 @@ bool xDeviceRelayService::OnTerminalTargetConnectionUpdate(xRD_DeviceConnection 
 
     DEBUG_LOG(
         "New ConnectionState: %s terminalSideCid=%" PRIx32 ", relaySideCid=%" PRIx64 ", tR=%" PRIu64 ", tW=%" PRIu64 "", xTR_ConnectionStateNotify::GetStateName(S.NewState),
-        S.DeviceSideConnectionId, S.RelaySideConnectionId, S.TotalReadBytes, S.TotalWrittenBytes
+        S.DeviceSideContextId, S.RelaySideContextId, S.TotalReadBytes, S.TotalWrittenBytes
     );
 
-    auto CR = RelayConnectionManager.GetConnectionById(S.RelaySideConnectionId);
-    if (!CR || CR->RelaySideConnectionId != S.RelaySideConnectionId) {
-        DEBUG_LOG("Connection not found: Id=%" PRIx64 "", S.RelaySideConnectionId);
+    auto CR = RelayConnectionManager.GetConnectionById(S.RelaySideContextId);
+    if (!CR || CR->RelaySideContextId != S.RelaySideContextId) {
+        DEBUG_LOG("Connection not found: Id=%" PRIx64 "", S.RelaySideContextId);
         return true;
     }
 
     auto F = xPR_ConnectionStateNotify();
     switch (S.NewState) {
         case xTR_ConnectionStateNotify::STATE_ESTABLISHED:
-            CR->DeviceSideConnectionId = S.DeviceSideConnectionId;
+            CR->DeviceSideContextId = S.DeviceSideContextId;
 
             F.NewState = xPR_ConnectionStateNotify::STATE_ESTABLISHED;
             break;
@@ -127,7 +127,7 @@ bool xDeviceRelayService::OnTerminalTargetConnectionUpdate(xRD_DeviceConnection 
             return false;
     }
     F.ProxySideConnectionId = CR->ProxySideConnectionId;
-    F.RelaySideConnectionId = CR->RelaySideConnectionId;
+    F.RelaySideContextId    = CR->RelaySideContextId;
 
     auto PAConn = ProxyConnectionManager.GetConnectionById(CR->ProxyConnectionId);
     if (!PAConn) {
@@ -145,10 +145,10 @@ bool xDeviceRelayService::OnTerminalPostData(xRD_DeviceConnection * Conn, xPacke
         return false;
     }
 
-    DEBUG_LOG("terminalSideCid=%" PRIx32 ", relaySideCid=%" PRIx64 ", size=%zi", S.DeviceSideConnectionId, S.RelaySideConnectionId, S.PayloadView.size());
-    auto CR = RelayConnectionManager.GetConnectionById(S.RelaySideConnectionId);
-    if (!CR || CR->RelaySideConnectionId != S.RelaySideConnectionId) {
-        DEBUG_LOG("Connection not found: Id=%" PRIx64 "", S.RelaySideConnectionId);
+    DEBUG_LOG("terminalSideCid=%" PRIx32 ", relaySideCid=%" PRIx64 ", size=%zi", S.DeviceSideContextId, S.RelaySideContextId, S.PayloadView.size());
+    auto CR = RelayConnectionManager.GetConnectionById(S.RelaySideContextId);
+    if (!CR || CR->RelaySideContextId != S.RelaySideContextId) {
+        DEBUG_LOG("Connection not found: Id=%" PRIx64 "", S.RelaySideContextId);
         return true;
     }
 
@@ -159,7 +159,7 @@ bool xDeviceRelayService::OnTerminalPostData(xRD_DeviceConnection * Conn, xPacke
     }
 
     auto Push                  = xPR_PushData();
-    Push.RelaySideConnectionId = CR->RelaySideConnectionId;
+    Push.RelaySideContextId    = CR->RelaySideContextId;
     Push.ProxySideConnectionId = CR->ProxySideConnectionId;
     Push.PayloadView           = S.PayloadView;
     PAConn->PostMessage(Cmd_PA_RL_PostData, 0, Push);

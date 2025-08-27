@@ -19,15 +19,15 @@ auto xRD_RelayConnectionManager::Create() -> xRD_RelayConnectionContext * {
     if (!Id) {
         return nullptr;
     }
-    auto & Ref                = ContextPool[Id];
-    Ref.RelaySideConnectionId = Id;
+    auto & Ref             = ContextPool[Id];
+    Ref.RelaySideContextId = Id;
     return &Ref;
 }
 
-auto xRD_RelayConnectionManager::GetConnectionById(uint64_t RelaySideConnectionId) -> xRD_RelayConnectionContext * {
-    return ContextPool.CheckAndGet(RelaySideConnectionId);
+auto xRD_RelayConnectionManager::GetConnectionById(uint64_t RelaySideContextId) -> xRD_RelayConnectionContext * {
+    return ContextPool.CheckAndGet(RelaySideContextId);
 }
 
 void xRD_RelayConnectionManager::Destroy(xRD_RelayConnectionContext * RCC) {
-    ContextPool.CheckAndRelease(RCC->RelaySideConnectionId);
+    ContextPool.CheckAndRelease(RCC->RelaySideContextId);
 }

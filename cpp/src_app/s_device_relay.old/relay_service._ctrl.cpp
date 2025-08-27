@@ -62,8 +62,8 @@ bool xDeviceRelayService::OnTerminalDnsQueryResp(xRD_DeviceConnection * Conn, xP
         return true;
     }
 
-    auto CC                  = xTR_CreateConnection();
-    CC.RelaySideConnectionId = RCC->RelaySideConnectionId;
+    auto CC               = xTR_CreateConnection();
+    CC.RelaySideContextId = RCC->RelaySideContextId;
     if (Resp.PrimaryIpv6 && Resp.PrimaryIpv6.SA6[0]) {
         DEBUG_LOG("using ipv6");
         CC.TargetAddress = Resp.PrimaryIpv6;
