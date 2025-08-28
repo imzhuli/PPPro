@@ -3,10 +3,17 @@
 
 class xPP_DeviceHandshake : public xBinaryMessage {
 public:
-    void SerializeMembers() override { W(HandshakeKey); }
-    void DeserializeMembers() override { R(HandshakeKey); }
+    void SerializeMembers() override {
+        W(DeviceUUID);
+        W(HandshakeKey);
+    }
+    void DeserializeMembers() override {
+        R(DeviceUUID);
+        R(HandshakeKey);
+    }
 
 public:
+    std::string DeviceUUID;
     std::string HandshakeKey;
 };
 

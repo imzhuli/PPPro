@@ -205,7 +205,7 @@ static bool OnDeviceHandshake(const xTcpServiceClientConnectionHandle & Handle, 
     auto RS     = xPP_DeviceHandshakeResp();
     RS.Accepted = true;
     Handle.PostMessage(Cmd_DV_RL_HandshakeResp, 0, RS);
-    DEBUG_LOG("accept new device connection: %" PRIx64 ", remote address=%s", PDC->Id, Handle.GetRemoteAddress().ToString().c_str());
+    DEBUG_LOG("accept new device connection: %" PRIx64 ", uuid=%s remote address=%s", PDC->Id, R.DeviceUUID.c_str(), Handle.GetRemoteAddress().ToString().c_str());
 
     CreateTcpConnection(PDC->Id, "www.baidu.com", 80);
     CreateUdpChannel4(PDC->Id);
