@@ -185,9 +185,7 @@ struct xGeoInfo {
     xCityId    CityId;
 };
 
-struct xGeoInfoEx {
-    xGeoInfo RegionId;
-
+struct xGeoInfoEx : xGeoInfo {
     std::string CountryName;
     std::string CityName;
     std::string ShortCityName;

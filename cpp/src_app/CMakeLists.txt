@@ -57,6 +57,7 @@ endfunction()
 
 
 set(target_list
+	f_auth_cache
 
 	r_device_audit_to_backend
 

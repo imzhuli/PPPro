@@ -81,3 +81,7 @@ private:
 #else
 #define DEBUG_LOG(...)
 #endif
+
+#ifndef XG
+#define XG auto X_VAR =
+#endif
