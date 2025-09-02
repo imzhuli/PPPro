@@ -50,7 +50,42 @@ std::string xRD_LocalAudit::ToString() const {
     O(DeviceClosedConnections);
     O(ProxyClosedConnections);
 
+    O(TotalEnabledTcp4);
+    O(TotalEnabledTcp6);
+    O(TotalEnabledUdp4);
+    O(TotalEnabledUdp6);
+
     return OS.str();
 }
 
 #undef O
+
+void AuditIncDeviceFlag(xDeviceFlag Flags) {
+    if (Flags & DF_ENABLE_TCP4) {
+        ++LocalAudit.TotalEnabledTcp4;
+    }
+    if (Flags & DF_ENABLE_TCP6) {
+        ++LocalAudit.TotalEnabledTcp6;
+    }
+    if (Flags & DF_ENABLE_UDP4) {
+        ++LocalAudit.TotalEnabledUdp4;
+    }
+    if (Flags & DF_ENABLE_UDP6) {
+        ++LocalAudit.TotalEnabledUdp6;
+    }
+}
+
+void AuditDecDeviceFlag(xDeviceFlag Flags) {
+    if (Flags & DF_ENABLE_TCP4) {
+        --LocalAudit.TotalEnabledTcp4;
+    }
+    if (Flags & DF_ENABLE_TCP6) {
+        --LocalAudit.TotalEnabledTcp6;
+    }
+    if (Flags & DF_ENABLE_UDP4) {
+        --LocalAudit.TotalEnabledUdp4;
+    }
+    if (Flags & DF_ENABLE_UDP6) {
+        --LocalAudit.TotalEnabledUdp6;
+    }
+}

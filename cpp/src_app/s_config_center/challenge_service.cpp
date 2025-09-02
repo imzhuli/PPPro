@@ -15,15 +15,17 @@ void OnTerminalChallenge(const xUdpServiceChannelHandle & Handle, xPacketCommand
         return;
     }
 
+    auto Under = DC.Extract();
+
     auto RelayAddress = xNetAddress();
-    if (DC.Tcp4AddressKey.size()) {
+    if (Under.Tcp4Address.Is4()) {
         auto SI = GetRandomDeviceRelayServer4();
         if (SI) {
             RelayAddress = SI->ExportDeviceAddress4;
         }
     }
 
-    if (!RelayAddress && DC.Tcp6AddressKey.size()) {
+    if (!RelayAddress && Under.Tcp6Address.Is6()) {
         auto SI = GetRandomDeviceRelayServer6();
         if (SI) {
             RelayAddress = SI->ExportDeviceAddress6;
@@ -37,7 +39,7 @@ void OnTerminalChallenge(const xUdpServiceChannelHandle & Handle, xPacketCommand
 
         Resp.Accepted      = true;
         Resp.RelayAddress  = RelayAddress;
-        Resp.RelayCheckKey = Key;
+        Resp.RelayCheckKey = MakeChallengeKey(Under);
     } else {
         DEBUG_LOG("no relay server found");
     }

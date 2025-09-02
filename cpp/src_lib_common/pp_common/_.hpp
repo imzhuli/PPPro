@@ -191,6 +191,20 @@ struct xGeoInfoEx : xGeoInfo {
     std::string ShortCityName;
 };
 
+using xDeviceFlag                          = uint32_t;
+constexpr const xDeviceFlag DF_NONE        = 0x00;
+constexpr const xDeviceFlag DF_ENABLE_TCP4 = 0x01 << 0;
+constexpr const xDeviceFlag DF_ENABLE_TCP6 = 0x01 << 1;
+constexpr const xDeviceFlag DF_ENABLE_UDP4 = 0x01 << 2;
+constexpr const xDeviceFlag DF_ENABLE_UDP6 = 0x01 << 3;
+
+struct xDeviceAddressPack {
+    xNetAddress Tcp4Address;
+    xNetAddress Tcp6Address;
+    xNetAddress Udp4Address;
+    xNetAddress Udp6Address;
+};
+
 struct xServerInfo {
     uint64_t    ServerId = {};
     xNetAddress Address  = {};

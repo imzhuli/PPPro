@@ -19,8 +19,8 @@ int main(int argc, char ** argv) {
     CL.Require(GeoInfoMapFilename, "GeoInfoMapFilename");
     CL.Require(IpLocationDbFilename, "IpLocationDbFilename");
 
-    Enable4 = BindAddressForDevice4.IsV4() && BindAddressForDevice4.Port;
-    Enable6 = BindAddressForDevice6.IsV6() && BindAddressForDevice6.Port;
+    Enable4 = BindAddressForDevice4.Is4() && BindAddressForDevice4.Port;
+    Enable6 = BindAddressForDevice6.Is6() && BindAddressForDevice6.Port;
     if (!Enable4 && !Enable6) {
         Logger->F("neither ipv4 or ipv6 is enabled");
         return 0;

@@ -55,7 +55,15 @@ struct xRD_LocalAudit {
 
     uint64_t MissingLostDeviceCount;
 
+    size_t TotalEnabledTcp4;
+    size_t TotalEnabledTcp6;
+    size_t TotalEnabledUdp4;
+    size_t TotalEnabledUdp6;
+
     void ResetPeriodicalValues();
     auto ToString() const -> std::string;
 };
 extern xRD_LocalAudit LocalAudit;
+
+extern void AuditIncDeviceFlag(xDeviceFlag Flags);
+extern void AuditDecDeviceFlag(xDeviceFlag Flags);

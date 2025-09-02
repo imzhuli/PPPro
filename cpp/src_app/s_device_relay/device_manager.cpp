@@ -12,17 +12,22 @@ xIndexedStorage<xDR_DeviceContext> DeviceManager;
 
 //////
 
-static xDR_DeviceContext * CreateDeviceContext(const xTcpServiceClientConnectionHandle & Handle) {
+static xDR_DeviceContext * CreateDeviceContext(const xTcpServiceClientConnectionHandle & Handle, xDeviceFlag Flags) {
     auto Id = DeviceManager.Acquire({ 0, Handle });
     if (!Id) {
         return nullptr;
     }
     auto & Ref = DeviceManager[Id];
     Ref.Id     = Id;
+    Ref.Flags  = Flags;
     return &Ref;
 }
 
 static void ReleaseDeviceContext(uint64_t Id) {
+    assert(DeviceManager.CheckAndGet(Id));
+    auto PDC = &DeviceManager[Id];
+
+    AuditDecDeviceFlag(PDC->Flags);
     DeviceManager.Release(Id);
 }
 
@@ -196,10 +201,31 @@ static bool OnDeviceHandshake(const xTcpServiceClientConnectionHandle & Handle, 
         DEBUG_LOG("invlid protocol");
         return false;
     }
-    auto PDC = CreateDeviceContext(Handle);
+
+    auto        DAP = ExtractChallengeKey(R.HandshakeKey);
+    xDeviceFlag DF  = DF_NONE;
+    if (DAP.Tcp4Address.Is4()) {
+        DF |= DF_ENABLE_TCP4;
+    }
+    if (DAP.Tcp6Address.Is6()) {
+        DF |= DF_ENABLE_TCP6;
+    }
+    if (DAP.Udp4Address.Is4()) {
+        DF |= DF_ENABLE_UDP4;
+    }
+    if (DAP.Udp6Address.Is6()) {
+        DF |= DF_ENABLE_UDP6;
+    }
+    if (!DF) {
+        DEBUG_LOG("invalid device challenge key");
+        return false;
+    }
+
+    auto PDC = CreateDeviceContext(Handle, DF);
     if (!PDC) {
         return false;
     }
+    AuditIncDeviceFlag(DF);
     Handle->UserContext.U64 = PDC->Id;
 
     auto RS     = xPP_DeviceHandshakeResp();
@@ -207,8 +233,6 @@ static bool OnDeviceHandshake(const xTcpServiceClientConnectionHandle & Handle, 
     Handle.PostMessage(Cmd_DV_RL_HandshakeResp, 0, RS);
     DEBUG_LOG("accept new device connection: %" PRIx64 ", uuid=%s remote address=%s", PDC->Id, R.DeviceUUID.c_str(), Handle.GetRemoteAddress().ToString().c_str());
 
-    CreateTcpConnection(PDC->Id, "www.baidu.com", 80);
-    CreateUdpChannel4(PDC->Id);
     return true;
 }
 

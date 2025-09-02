@@ -1,5 +1,5 @@
 #pragma once
-#include "../base.hpp"
+#include <pp_common/_.hpp>
 
 class xPPB_BackendAuthByUserPass final : public xBinaryMessage {
 public:

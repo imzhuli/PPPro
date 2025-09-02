@@ -1,5 +1,5 @@
 #pragma once
-#include "../base.hpp"
+#include <pp_common/_.hpp>
 
 struct xCC_PA_RelayServerInfo {
     uint32_t      RuntimeServerId;
@@ -8,22 +8,14 @@ struct xCC_PA_RelayServerInfo {
 };
 
 struct xCC_PA_GetRelayServerListVersion : xBinaryMessage {
-    void SerializeMembers() override {
-        W(OldVersion);
-    };
-    void DeserializeMembers() override {
-        R(OldVersion);
-    };
+    void     SerializeMembers() override { W(OldVersion); };
+    void     DeserializeMembers() override { R(OldVersion); };
     xVersion OldVersion = 0;
 };
 
 struct xCC_PA_GetRelayServerListVersionResp : xBinaryMessage {
-    void SerializeMembers() override {
-        W(Version);
-    };
-    void DeserializeMembers() override {
-        R(Version);
-    };
+    void     SerializeMembers() override { W(Version); };
+    void     DeserializeMembers() override { R(Version); };
     xVersion Version = 0;
 };
 
@@ -93,9 +85,7 @@ struct xCC_PA_DownloadRelayServerListRespReader : xBinaryMessage {
         }
     };
 
-    uint32_t GetNextStartIndex() const {
-        return StartIndex + Count;
-    }
+    uint32_t GetNextStartIndex() const { return StartIndex + Count; }
 
     xVersion                            Version = 0;
     uint32_t                            Total   = 0;

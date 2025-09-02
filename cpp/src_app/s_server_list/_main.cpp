@@ -486,8 +486,8 @@ int main(int argc, char ** argv) {
     CL.Optional(DownloadServiceBindAddress6, "DownloadServiceBindAddress6");
     CL.Optional(BackendServerListFilename, "BackendServerListFilename");
 
-    bool V4Enabled = RegisterServiceBindAddress4.IsV4() && RegisterServiceBindAddress4.Port && DownloadServiceBindAddress4.IsV4() && DownloadServiceBindAddress4.Port;
-    bool V6Enabled = RegisterServiceBindAddress6.IsV6() && RegisterServiceBindAddress6.Port && DownloadServiceBindAddress6.IsV6() && DownloadServiceBindAddress6.Port;
+    bool V4Enabled = RegisterServiceBindAddress4.Is4() && RegisterServiceBindAddress4.Port && DownloadServiceBindAddress4.Is4() && DownloadServiceBindAddress4.Port;
+    bool V6Enabled = RegisterServiceBindAddress6.Is6() && RegisterServiceBindAddress6.Port && DownloadServiceBindAddress6.Is6() && DownloadServiceBindAddress6.Port;
     if (!V4Enabled && !V6Enabled) {
         Logger->F("invalid config, v4 & v6 are both disabled");
         return 0;

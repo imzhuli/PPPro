@@ -1,5 +1,5 @@
 #pragma once
-#include "../base.hpp"
+#include <pp_common/_.hpp>
 
 struct xPP_AddressChallenge : public xBinaryMessage {  // from proxy_access to relay server
 public:

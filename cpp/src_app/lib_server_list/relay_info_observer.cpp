@@ -11,8 +11,8 @@ bool xRelayInfoObserver::Init(xIoContext * ICP, const xNetAddress & ServerListDo
         return false;
     }
 
-    bool Prefer4 = ServerListDownloadAddress.IsV4();
-    bool Prefer6 = ServerListDownloadAddress.IsV6();
+    bool Prefer4 = ServerListDownloadAddress.Is4();
+    bool Prefer6 = ServerListDownloadAddress.Is6();
     RuntimeAssert(Prefer4 || Prefer6);
 
     DispatcherServerInfoDownloader.OnUpdateServerInfoCallback = [this, Prefer4, Prefer6](const xRelayInfoDispatcherServerInfo & Info) {

@@ -1,5 +1,5 @@
 #pragma once
-#include "../base.hpp"
+#include <pp_common/_.hpp>
 
 struct xThirdAccountUsage {
     std::string ThirdAccountSourceName;  // 第三方账号名,

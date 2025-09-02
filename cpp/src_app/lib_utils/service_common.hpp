@@ -76,6 +76,21 @@ private:
     xOnTimeoutRequestCallback               OnTimeoutRequestCallback = &IgnoreTimeoutRequest;
 };
 
+struct xTickRunner {
+    const uint64_t                          TimeoutMS;
+    const std::function<void(uint64_t Now)> Function;
+
+    uint64_t LastRunTimestampMS = 0;
+
+    void Tick(uint64_t NowMS) {
+        if (NowMS <= LastRunTimestampMS + TimeoutMS) {
+            return;
+        }
+        LastRunTimestampMS = NowMS;
+        Function(NowMS);
+    }
+};
+
 #ifndef NDEBUG
 #define DEBUG_LOG(fmt, ...) Logger->D("%s:%i:%s\n" fmt, __FILE__, __LINE__, __func__, ##__VA_ARGS__)
 #else

@@ -1,5 +1,5 @@
 #pragma once
-#include "../base.hpp"
+#include <pp_common/_.hpp>
 
 /**
  * 接入服信息:
@@ -13,11 +13,9 @@
 
 struct xPA_BK_ServerInfo : xBinaryMessage {
 
-    void SerializeMembers() override {
-    }
+    void SerializeMembers() override {}
 
-    void DeserializeMembers() override {
-    }
+    void DeserializeMembers() override {}
 
     uint64_t FixedServerId;
     uint64_t RuntimeServerId;

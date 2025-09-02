@@ -67,10 +67,10 @@ int main(int argc, char ** argv) {
     Ipv6Service.OnClientClose  = OnClientClose;
 
     X_GUARD(ServerIdManager);
-    if (BindAddress4.IsV4() && BindAddress4.Port) {
+    if (BindAddress4.Is4() && BindAddress4.Port) {
         Ipv4Enabled = true;
     }
-    if (BindAddress6.IsV6() && BindAddress6.Port) {
+    if (BindAddress6.Is6() && BindAddress6.Port) {
         Ipv6Enabled = true;
     }
     if (!Ipv4Enabled && !Ipv6Enabled) {

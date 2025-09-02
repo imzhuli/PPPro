@@ -1,5 +1,5 @@
 #pragma once
-#include "../base.hpp"
+#include <pp_common/_.hpp>
 
 // !!! 总则说明
 // 在服务器发生变更时, 有可能同一UUID的服务器在同一时段的被多次上报,

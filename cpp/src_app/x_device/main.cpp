@@ -36,9 +36,9 @@ bool OnServerPush(xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte 
         return false;
     }
     Logger->I("(tcp)ServerPushedAddress: %s", R.ConnectionAddress.ToString().c_str());
-    if (R.ConnectionAddress.IsV4()) {
+    if (R.ConnectionAddress.Is4()) {
         GainedAddress4 = R.ConnectionAddress;
-    } else if (R.ConnectionAddress.IsV6()) {
+    } else if (R.ConnectionAddress.Is6()) {
         GainedAddress6 = R.ConnectionAddress;
     }
 

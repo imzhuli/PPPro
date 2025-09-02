@@ -1,5 +1,5 @@
 #pragma once
-#include "../base.hpp"
+#include <pp_common/_.hpp>
 
 struct x_AC_CC_AllocServerId : xBinaryMessage {
 
@@ -12,12 +12,8 @@ struct x_AC_CC_AllocServerId : xBinaryMessage {
 
 struct x_AC_CC_AllocServerIdResp : xBinaryMessage {
 
-    void SerializeMembers() override {
-        W(ServerId);
-    }
-    void DeserializeMembers() override {
-        R(ServerId);
-    }
+    void     SerializeMembers() override { W(ServerId); }
+    void     DeserializeMembers() override { R(ServerId); }
     uint32_t ServerId;
     //
 };

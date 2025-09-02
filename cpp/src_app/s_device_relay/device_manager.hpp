@@ -4,6 +4,7 @@
 struct xDR_DeviceContext final {
     uint64_t                          Id;
     xTcpServiceClientConnectionHandle Handle;
+    xDeviceFlag                       Flags;
 };
 
 extern void InitDeviceContextManager();

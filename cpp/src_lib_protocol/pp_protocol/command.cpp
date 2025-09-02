@@ -1,4 +1,4 @@
-#include "./base.hpp"
+#include "./command.hpp"
 
 #include <mbedtls/aes.h>
 #include <mbedtls/base64.h>

@@ -1,5 +1,5 @@
 #pragma once
-#include "../base.hpp"
+#include <pp_common/_.hpp>
 
 struct xCC_DeviceChallenge : xBinaryMessage {
     void SerializeMembers() override {
@@ -29,6 +29,8 @@ struct xCC_DeviceChallenge : xBinaryMessage {
     std::string Udp4AddressKey = {};
     std::string Udp6AddressKey = {};
     std::string Sign           = {};
+
+    xDeviceAddressPack Extract() const;
 };
 
 struct xCC_DeviceChallengeResp : xBinaryMessage {

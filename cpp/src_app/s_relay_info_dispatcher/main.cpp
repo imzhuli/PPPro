@@ -34,8 +34,8 @@ int main(int argc, char ** argv) {
     CL.Optional(ExportProducerAddress6, "ExportProducerAddress6");
     CL.Optional(ExportObserverAddress6, "ExportObserverAddress6");
 
-    Enable4 = ProducerAddress4.IsV4() && ProducerAddress4.Port && ObserverAddress4.IsV4() && ObserverAddress4.Port;
-    Enable6 = ProducerAddress6.IsV6() && ProducerAddress6.Port && ObserverAddress6.IsV6() && ObserverAddress6.Port;
+    Enable4 = ProducerAddress4.Is4() && ProducerAddress4.Port && ObserverAddress4.Is4() && ObserverAddress4.Port;
+    Enable6 = ProducerAddress6.Is6() && ProducerAddress6.Port && ObserverAddress6.Is6() && ObserverAddress6.Port;
     Logger->I("Enable4=%s, Enable6=%s", YN(Enable4), YN(Enable6));
 
     if (!Enable4 && !Enable6) {

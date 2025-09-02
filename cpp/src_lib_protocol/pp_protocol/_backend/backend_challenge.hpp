@@ -1,14 +1,10 @@
 #pragma once
-#include "../base.hpp"
+#include <pp_common/_.hpp>
 
 class xBackendChallenge : public xBinaryMessage {
 public:
-    void SerializeMembers() override {
-        W(AppKey, TimestampMS, ChallengeValue);
-    }
-    void DeserializeMembers() override {
-        R(AppKey, TimestampMS, ChallengeValue);
-    }
+    void SerializeMembers() override { W(AppKey, TimestampMS, ChallengeValue); }
+    void DeserializeMembers() override { R(AppKey, TimestampMS, ChallengeValue); }
 
 public:
     static std::string Sign(const std::string & Source);
@@ -22,12 +18,8 @@ public:
 
 class xBackendChallengeResp : public xBinaryMessage {
 public:
-    void SerializeMembers() override {
-        W(ErrorCode);
-    }
-    void DeserializeMembers() override {
-        R(ErrorCode);
-    }
+    void SerializeMembers() override { W(ErrorCode); }
+    void DeserializeMembers() override { R(ErrorCode); }
 
 public:
     uint32_t ErrorCode;

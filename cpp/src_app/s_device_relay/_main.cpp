@@ -17,8 +17,8 @@ int main(int argc, char ** argv) {
     CL.Require(ServerIdCenterAddress, "ServerIdCenterAddress");
     CL.Require(ServerListDownloadAddress, "ServerListDownloadAddress");
 
-    bool Enable4 = DeviceAddress4.IsV4() && DeviceAddress4.Port && ProxyAddress4.IsV4() && ProxyAddress4.Port;
-    bool Enable6 = DeviceAddress6.IsV6() && DeviceAddress6.Port && ProxyAddress6.IsV6() && ProxyAddress6.Port;
+    bool Enable4 = DeviceAddress4.Is4() && DeviceAddress4.Port && ProxyAddress4.Is4() && ProxyAddress4.Port;
+    bool Enable6 = DeviceAddress6.Is6() && DeviceAddress6.Port && ProxyAddress6.Is6() && ProxyAddress6.Port;
     if (!Enable4 && !Enable6) {
         Logger->F("neither ipv4 or ipv6 is enabled");
         return 0;
@@ -40,11 +40,12 @@ int main(int argc, char ** argv) {
 
         RIReporter.UpdateLocalRelayServerInfo(LocalInfo);
     };
+
     RIDDownloader.OnUpdateServerInfoCallback = [=](const xRelayInfoDispatcherServerInfo & Info) {
         DEBUG_LOG("RelayInfoDispatcher producer address updated: %s", Info.ToString().c_str());
-        if (Enable4 && Info.ProducerAddress4.IsV4()) {
+        if (Enable4 && Info.ProducerAddress4.Is4()) {
             RIReporter.UpdateServerAddress(Info.ProducerAddress4);
-        } else if (Enable6 && Info.ProducerAddress6.IsV6()) {
+        } else if (Enable6 && Info.ProducerAddress6.Is6()) {
             RIReporter.UpdateServerAddress(Info.ProducerAddress6);
         } else {
             Logger->E("invalid relay info dispatcher address support!");
@@ -84,6 +85,7 @@ int main(int argc, char ** argv) {
     //     DEBUG_LOG("%s", OS.str().c_str());
     // });
 
+    auto Auditer = xTickRunner(60'000, [](uint64_t) { AuditLogger->I("%s", LocalAudit.ToString().c_str()); });
     while (true) {
         ServiceUpdateOnce(
             ServerIdClient,  //
@@ -95,7 +97,9 @@ int main(int argc, char ** argv) {
                              // DeviceReporter,           //
             RIDDownloader,   //
             // DSRDownloader,            //
-            RIReporter
+            RIReporter,  //
+            Auditer,     //
+            DeadTicker
         );
         if (Enable4) {
             TickAll(ServiceTicker(), DeviceService4, ProxyService4);

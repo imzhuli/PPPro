@@ -1,5 +1,5 @@
 #pragma once
-#include "../base.hpp"
+#include <pp_common/_.hpp>
 
 struct xAD_BK_UsageByAuditId {
     xAuditId AuditId;

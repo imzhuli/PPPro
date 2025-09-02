@@ -2,7 +2,7 @@
 
 static void OnTcpClientConnected(const xTcpServiceClientConnectionHandle & Handle) {
     auto PeerAddress = Handle.GetRemoteAddress();
-    Logger->I("NewConnectin: Id=%" PRIx64 ", Address=%s", Handle.GetConnectionId(), PeerAddress.ToString().c_str());
+    Logger->I("NewConnection: Id=%" PRIx64 ", Address=%s", Handle.GetConnectionId(), PeerAddress.ToString().c_str());
     auto Push              = xPP_AddressAutoPush();
     Push.ConnectionAddress = PeerAddress.Ip();
     Handle.PostMessage(Cmd_DV_RL_AddressPush, 0, Push);

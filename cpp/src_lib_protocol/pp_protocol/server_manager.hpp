@@ -1,43 +1,30 @@
 #pragma once
-#include "./base.hpp"
-
+#include <pp_common/_.hpp>
 #include <vector>
 
 struct xRegisterAuditServer : xBinaryMessage {
 
-    void SerializeMembers() override {
-        W(ServerUuid, BindAddress);
-    }
+    void SerializeMembers() override { W(ServerUuid, BindAddress); }
 
-    void DeserializeMembers() override {
-        R(ServerUuid, BindAddress);
-    }
+    void DeserializeMembers() override { R(ServerUuid, BindAddress); }
 
     std::string ServerUuid;
     xNetAddress BindAddress;
 };
 
 struct xRegisterAuditServerResp : xBinaryMessage {
-    void SerializeMembers() override {
-        W(Accepted);
-    }
+    void SerializeMembers() override { W(Accepted); }
 
-    void DeserializeMembers() override {
-        R(Accepted);
-    }
+    void DeserializeMembers() override { R(Accepted); }
 
     bool Accepted = false;
 };
 
 struct xRegisterRelayServer : xBinaryMessage {};
 struct xRegisterRelayServerResp : xBinaryMessage {
-    void SerializeMembers() override {
-        W(Accepted);
-    }
+    void SerializeMembers() override { W(Accepted); }
 
-    void DeserializeMembers() override {
-        R(Accepted);
-    }
+    void DeserializeMembers() override { R(Accepted); }
 
     bool Accepted = false;
 };
@@ -46,25 +33,17 @@ struct xQueryRelayServerList : xBinaryMessage {};
 struct xQueryRelayServerListResp : xBinaryMessage {};
 
 struct xSetMaxAuditId : xBinaryMessage {
-    void SerializeMembers() override {
-        W(MaxAuditId);
-    }
+    void SerializeMembers() override { W(MaxAuditId); }
 
-    void DeserializeMembers() override {
-        R(MaxAuditId);
-    }
+    void DeserializeMembers() override { R(MaxAuditId); }
 
     uint32_t MaxAuditId;  // exclusive
 };
 
 struct xSetMaxAuditIdResp : xBinaryMessage {
-    void SerializeMembers() override {
-        W(Accepted);
-    }
+    void SerializeMembers() override { W(Accepted); }
 
-    void DeserializeMembers() override {
-        R(Accepted);
-    }
+    void DeserializeMembers() override { R(Accepted); }
 
     bool Accepted;  // exclusive
 };
@@ -82,9 +61,7 @@ struct xQueryAuditServerListResp : xBinaryMessage {
         xNetAddress ServerBindAddress;
     };
 
-    void SerializeMembers() override {
-        W(Version, TotalServers, FirstServerIndex, LastServerIndex);
-    }
+    void SerializeMembers() override { W(Version, TotalServers, FirstServerIndex, LastServerIndex); }
 
     void DeserializeMembers() override {
         R(Version, TotalServers, FirstServerIndex, LastServerIndex);
@@ -104,13 +81,9 @@ struct xQueryAuditServerListResp : xBinaryMessage {
 
 struct xRegisterErrorReportServer : xBinaryMessage {};
 struct xRegisterErrorReportServerResp : xBinaryMessage {
-    void SerializeMembers() override {
-        W(Accepted);
-    }
+    void SerializeMembers() override { W(Accepted); }
 
-    void DeserializeMembers() override {
-        R(Accepted);
-    }
+    void DeserializeMembers() override { R(Accepted); }
 
     bool Accepted = false;
 };
