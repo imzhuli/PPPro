@@ -5,15 +5,14 @@
 
 #include <pp_common/_.hpp>
 
-struct xAC_AuthService : xService {
+struct xAC_AuthService final {
 
     bool Init(xIoContext * ICP, const xNetAddress & BindAddress);
+    void Tick(uint64_t NowMS);
     void Clean();
-    void OnTick(uint64_t NowMS) override;
 
-    bool OnClientPacket(xServiceClientConnection & Connection, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) override;
-
-    void PostResposne(xServiceClientConnection & Connection, xPacketRequestId RequestId, const xClientAuthResult * CacheNode);
+    bool OnClientPacket(const xTcpServiceClientConnectionHandle & Handle, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize);
+    void PostResposne(const xTcpServiceClientConnectionHandle & Handle, xPacketRequestId RequestId, const xClientAuthResult * CacheNode);
 
     void OnBackendPacket(xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize);
     void OnCmdAuthByUserPassResp(xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize);
@@ -22,6 +21,7 @@ struct xAC_AuthService : xService {
     void UpdateBackendServerList(const std::vector<xNetAddress> & Added, const std::vector<xNetAddress> & Removed);  // server list must be sorted and unique
 
     //
+    xTcpService            TcpService;
     xBackendConnectionPool BackendPool;
     xCacheManager          CacheManager;
 

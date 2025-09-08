@@ -25,8 +25,8 @@ public:
     std::string GetLocalAudit();
     void        ResetLocalAudit();
 
-    using xBackendPacketCallback = std::function<void(xPacketCommandId, xPacketRequestId, ubyte *, size_t)>;
-    void SetBackendPacketCallback(xBackendPacketCallback Callback) { this->BackendPacketCallback = Callback; }
+    using xBackendPacketCallback                 = std::function<void(xPacketCommandId, xPacketRequestId, ubyte *, size_t)>;
+    xBackendPacketCallback BackendPacketCallback = xel::NOOP<xPacketCommandId, xPacketRequestId, ubyte *, size_t>;
 
 public:
     uint64_t AddServer(const xNetAddress & Address, const std::string & AppKey, const std::string & AppSecret);
@@ -46,11 +46,6 @@ private:
     };
     std::vector<xBackendConnectionContext> ContextList;
     std::vector<xBackendServerInfo>        SortedServerList;
-
-    //
-    xBackendPacketCallback BackendPacketCallback = IgnoreBackendPacket;
-
-    static void IgnoreBackendPacket(xPacketCommandId, xPacketRequestId, ubyte *, size_t) {};
 
 private:  // audit
     size_t TotalAddedServer           = 0;

@@ -16,3 +16,10 @@ extern std::string BackendServerAppKey;
 extern std::string BackendServerAppSecret;
 
 extern uint64_t CacheNodeTimeoutMS;
+
+////////////////////
+
+extern xServerIdClient                 ServerIdClient;
+extern xRegisterServerClient           RegisterServerClient;
+extern xAC_BackendServerListDownloader BackendServerListDownloader;
+extern xAC_AuthService                 AuthService;

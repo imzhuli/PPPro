@@ -7,7 +7,7 @@
 static constexpr const uint64_t LOCAL_AUDIT_TIMEOUT_MS = 60'000;
 
 bool xAC_AuthService::Init(xIoContext * ICP, const xNetAddress & BindAddress) {
-    RuntimeAssert(xService::Init(ICP, BindAddress, 10000, true));
+    RuntimeAssert(TcpService.Init(ICP, BindAddress, 10000, true));
     RuntimeAssert(CacheManager.Init(100'000, 100'000));
     RuntimeAssert(BackendPool.Init(ICP, MAX_BACKEND_SERVER_COUNT));
 
@@ -33,9 +33,13 @@ bool xAC_AuthService::Init(xIoContext * ICP, const xNetAddress & BindAddress) {
         R.AutoChangeIp = RD->AutoChangeIpOnDeviceOffline;
         R.PAToken      = RD->ServerToken;
 
-        PostMessage(Context.Value.U64, Cmd_AuthService_QueryAuthCacheResp, Context.ValueEx.U64, Resp);
+        auto Handle = xTcpServiceClientConnectionHandle(static_cast<xTcpService *>(Context.Value.P), Context.ValueEx.U64);
+        if (Handle.operator->()) {
+            Handle.PostMessage(Cmd_AuthService_QueryAuthCacheResp, Context.RequestId, Resp);
+        }
         return;
     });
+
     CacheManager.SetOnAsyncResultCallback([this](const xCacheRequestContext & Context, const void * Data) {
         DEBUG_LOG("AsyncResultCallback");
         auto   RD   = (xPPB_BackendAuthByUserPassResp *)Data;
@@ -51,7 +55,10 @@ bool xAC_AuthService::Init(xIoContext * ICP, const xNetAddress & BindAddress) {
         R.AutoChangeIp = RD->AutoChangeIpOnDeviceOffline;
         R.PAToken      = RD->ServerToken;
 
-        PostMessage(Context.Value.U64, Cmd_AuthService_QueryAuthCacheResp, Context.ValueEx.U64, Resp);
+        auto Handle = xTcpServiceClientConnectionHandle(static_cast<xTcpService *>(Context.Value.P), Context.ValueEx.U64);
+        if (Handle.operator->()) {
+            Handle.PostMessage(Cmd_AuthService_QueryAuthCacheResp, Context.RequestId, Resp);
+        }
         return;
     });
     CacheManager.SetOnReleaseDataCallback([this](uint64_t CacheNodeId, const void * Data) {
@@ -61,9 +68,9 @@ bool xAC_AuthService::Init(xIoContext * ICP, const xNetAddress & BindAddress) {
         return;
     });
 
-    BackendPool.SetBackendPacketCallback([this](xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) {
+    BackendPool.BackendPacketCallback = [this](xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) {
         OnBackendPacket(CommandId, RequestId, PayloadPtr, PayloadSize);
-    });
+    };
 
     return true;
 }
@@ -77,7 +84,9 @@ void xAC_AuthService::Clean() {
     Reset(DeleteCachedResultCount);
 }
 
-void xAC_AuthService::OnTick(uint64_t NowMS) {
+void xAC_AuthService::Tick(uint64_t NowMS) {
+    TcpService.Tick(NowMS);
+
     CacheManager.RemoveTimeoutCacheNodes(NowMS);
     TickAll(NowMS, BackendPool);
 
@@ -89,7 +98,9 @@ void xAC_AuthService::OnTick(uint64_t NowMS) {
     }
 }
 
-bool xAC_AuthService::OnClientPacket(xServiceClientConnection & Connection, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) {
+bool xAC_AuthService::OnClientPacket(
+    const xTcpServiceClientConnectionHandle & Handle, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize
+) {
     DEBUG_LOG("%" PRIx64 ":%" PRIx64 ", \n%s", CommandId, RequestId, HexShow(PayloadPtr, PayloadSize).c_str());
 
     if (CommandId != Cmd_AuthService_QueryAuthCache) {
@@ -103,14 +114,14 @@ bool xAC_AuthService::OnClientPacket(xServiceClientConnection & Connection, xPac
         return true;
     }
 
-    CacheManager.PostAcquireCacheNodeRequest(std::string(Req.UserPass), { { .U64 = Connection.GetConnectionId() }, { .U64 = RequestId } });
+    CacheManager.PostAcquireCacheNodeRequest(std::string(Req.UserPass), { RequestId, { .P = Handle.GetOwner() }, { .U64 = Handle.GetConnectionId() } });
     return true;
 }
 
-void xAC_AuthService::PostResposne(xServiceClientConnection & Connection, xPacketRequestId RequestId, const xClientAuthResult * NP) {
+void xAC_AuthService::PostResposne(const xTcpServiceClientConnectionHandle & Handle, xPacketRequestId RequestId, const xClientAuthResult * NP) {
     auto Resp   = xPP_QueryAuthCacheResp();
     Resp.Result = *NP;
-    PostMessage(Connection, Cmd_AuthService_QueryAuthCacheResp, RequestId, Resp);
+    Handle.PostMessage(Cmd_AuthService_QueryAuthCacheResp, RequestId, Resp);
 }
 
 void xAC_AuthService::OnBackendPacket(xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) {

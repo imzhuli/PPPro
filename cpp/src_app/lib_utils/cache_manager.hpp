@@ -5,8 +5,9 @@ class xCacheNodeBase;
 class xCacheManager;
 
 struct xCacheRequestContext {
-    xVariable Value   = {};
-    xVariable ValueEx = {};
+    uint64_t  RequestId = 0;
+    xVariable Value     = {};
+    xVariable ValueEx   = {};
 };
 class xCacheRequestContextNode : public xListNode {
     friend class xCacheManager;

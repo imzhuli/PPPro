@@ -15,7 +15,7 @@ public:
 
     using xUpdateCallback =
         std::function<void(uint32_t Version, const std::vector<xNetAddress> & FullList, const std::vector<xNetAddress> & Added, const std::vector<xNetAddress> & Removed)>;
-    void SetOnUpdateCallback(xUpdateCallback Callback) { this->UpdateCallback = Callback; }
+    xUpdateCallback UpdateCallback = NOOP<uint32_t, const std::vector<xNetAddress> &, const std::vector<xNetAddress> &, const std::vector<xNetAddress> &>;
 
 protected:
     void OnTick(uint64_t NowMS) override;
@@ -30,5 +30,4 @@ private:
     uint64_t                 LastUpdateTimestampMS    = 0;
     uint32_t                 BackendServerListVersion = 0;
     std::vector<xNetAddress> BackendServerList;
-    xUpdateCallback          UpdateCallback;
 };

@@ -37,11 +37,6 @@
 
 //////////
 
-auto ServerIdClient              = xServerIdClient();
-auto RegisterServerClient        = xRegisterServerClient();
-auto BackendServerListDownloader = xAC_BackendServerListDownloader();
-auto AuthService                 = xAC_AuthService();
-
 auto TA = xNetAddress::Parse("45.202.204.29:20005");
 
 using namespace std::chrono_literals;
@@ -81,7 +76,7 @@ int main(int argc, char ** argv) {
 
     AuthService.UpdateBackendAuthInfo(BackendServerAppKey, BackendServerAppSecret);
 
-    BackendServerListDownloader.SetOnUpdateCallback([](uint32_t V, auto & FL, auto & AL, auto & RL) {
+    BackendServerListDownloader.UpdateCallback = [](uint32_t V, auto & FL, auto & AL, auto & RL) {
         auto OS = std::ostringstream();
         OS << "BackendServerListVersion: " << V << endl;
         OS << "Added: " << endl;
@@ -95,7 +90,7 @@ int main(int argc, char ** argv) {
         OS << "BackendServerList Updated";
         Logger->I("BackendServerListDownloaded: %s", OS.str().c_str());
         AuthService.UpdateBackendServerList(AL, RL);
-    });
+    };
 
     RegisterServerClient.SetServerIdPoster(&AC_RegisterServer);
 

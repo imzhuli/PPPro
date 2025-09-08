@@ -69,7 +69,7 @@ set(target_list
 	s_device_relay
 
 	# s_audit_account
-	# s_auth_cache
+	s_auth_cache
 
 	# s_pa
 	s_config_center
