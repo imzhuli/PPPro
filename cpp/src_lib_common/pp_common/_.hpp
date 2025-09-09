@@ -1,6 +1,7 @@
 #pragma once
 #include <config/config.hpp>
 #include <core/core_min.hpp>
+#include <core/core_noop.hpp>
 #include <core/core_os.hpp>
 #include <core/core_stream.hpp>
 #include <core/core_time.hpp>
@@ -95,6 +96,7 @@ using xel::HexToStr;
 using xel::Ignore;
 using xel::JoinStr;
 using xel::Md5;
+using xel::Noop;
 using xel::Pure;
 using xel::RuntimeAssert;
 using xel::Split;

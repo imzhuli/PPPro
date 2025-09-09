@@ -15,7 +15,7 @@ public:
 
     using xUpdateCallback =
         std::function<void(uint32_t Version, const std::vector<xNetAddress> & FullList, const std::vector<xNetAddress> & Added, const std::vector<xNetAddress> & Removed)>;
-    xUpdateCallback UpdateCallback = NOOP<uint32_t, const std::vector<xNetAddress> &, const std::vector<xNetAddress> &, const std::vector<xNetAddress> &>;
+    xUpdateCallback UpdateCallback = Noop<>;
 
 protected:
     void OnTick(uint64_t NowMS) override;

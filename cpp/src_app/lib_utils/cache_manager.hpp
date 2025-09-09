@@ -67,6 +67,11 @@ public:
 
     void RemoveTimeoutCacheNodes(uint64_t NowMS);
 
+    xAsyncQueryCallback        AsyncQueryCallback        = Noop<false>;
+    xOnImmediateResultCallback OnImmediateResultCallback = Noop<>;
+    xOnAsyncResultCallback     OnAsyncResultCallback     = Noop<>;
+    xOnReleaseDataCallback     OnReleaseDataCallback     = Noop<>;
+
 public:
     void PostAcquireCacheNodeRequest(const std::string & Key, const xCacheRequestContext & Context);
     auto GetLocalAudit() { return LocalAudit; }
@@ -87,15 +92,6 @@ protected:
 
 private:
     void ReleaseCacheNode(xCacheNode * NP);
-
-    xAsyncQueryCallback        AsyncQueryCallback        = IgnoreAsyncQuery;
-    xOnImmediateResultCallback OnImmediateResultCallback = IgnoreResult;
-    xOnAsyncResultCallback     OnAsyncResultCallback     = IgnoreResult;
-    xOnReleaseDataCallback     OnReleaseDataCallback     = IgnoreReleaseData;
-
-    static bool IgnoreAsyncQuery(uint64_t CacheNodeId, const std::string & Key) { return false; }
-    static void IgnoreResult(const xCacheRequestContext & Context, const void * Data) {}
-    static void IgnoreReleaseData(uint64_t CacheNodeId, const void * Data) {}
 
 private:
     xIndexedStorage<xCacheNode>                   CacheNodePool;
