@@ -6,7 +6,6 @@ static void OnTcpClientConnected(const xTcpServiceClientConnectionHandle & Handl
     auto Push              = xPP_AddressAutoPush();
     Push.ConnectionAddress = PeerAddress.Ip();
     Handle.PostMessage(Cmd_DV_RL_AddressPush, 0, Push);
-    Handle.Kill();
 }
 
 static void OnUdpPacket(const xUdpServiceChannelHandle & Handle, xPacketCommandId CommandId, xPacketRequestId, ubyte *, size_t) {

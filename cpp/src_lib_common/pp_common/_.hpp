@@ -1,11 +1,11 @@
 #pragma once
 #include <config/config.hpp>
 #include <core/core_min.hpp>
-#include <core/core_noop.hpp>
 #include <core/core_os.hpp>
 #include <core/core_stream.hpp>
 #include <core/core_time.hpp>
 #include <core/executable.hpp>
+#include <core/functional.hpp>
 #include <core/indexed_storage.hpp>
 #include <core/list.hpp>
 #include <core/logger.hpp>
