@@ -1,7 +1,7 @@
 #pragma once
 #include "../lib_utils/all.hpp"
 
-class xAC_BackendServerListDownloader : xClient {
+class xBackendServerListDownloader : xClient {
 public:
     static constexpr const uint64_t UPDATE_SERVER_LIST_TIMEOUT_MS = 3 * 60'000;
 
@@ -13,9 +13,10 @@ public:
     }
     using xClient::Tick;
 
-    using xUpdateCallback =
+    using xOnUpdateCallback =
         std::function<void(uint32_t Version, const std::vector<xNetAddress> & FullList, const std::vector<xNetAddress> & Added, const std::vector<xNetAddress> & Removed)>;
-    xUpdateCallback UpdateCallback = Noop<>;
+
+    xOnUpdateCallback OnUpdateCallback = Noop<>;
 
 protected:
     void OnTick(uint64_t NowMS) override;

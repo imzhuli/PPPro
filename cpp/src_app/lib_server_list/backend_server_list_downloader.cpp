@@ -1,13 +1,13 @@
 #include "./backend_server_list_downloader.hpp"
 
-void xAC_BackendServerListDownloader::OnTick(uint64_t NowMS) {
+void xBackendServerListDownloader::OnTick(uint64_t NowMS) {
     if (NowMS - LastUpdateTimestampMS >= UPDATE_SERVER_LIST_TIMEOUT_MS) {
         LastUpdateTimestampMS = NowMS;
         PostUpdateServerListRequest();
     }
 }
 
-void xAC_BackendServerListDownloader::PostUpdateServerListRequest() {
+void xBackendServerListDownloader::PostUpdateServerListRequest() {
     if (!IsOpen()) {
         return;
     }
@@ -16,30 +16,27 @@ void xAC_BackendServerListDownloader::PostUpdateServerListRequest() {
     PostMessage(Cmd_DownloadBackendServerList, 0, R);
 }
 
-void xAC_BackendServerListDownloader::OnServerConnected() {
+void xBackendServerListDownloader::OnServerConnected() {
     PostUpdateServerListRequest();
 }
 
-bool xAC_BackendServerListDownloader::OnServerPacket(xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) {
+bool xBackendServerListDownloader::OnServerPacket(xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) {
     switch (CommandId) {
         case Cmd_DownloadBackendServerListResp:
             return OnDownloadBackendServerListResp(PayloadPtr, PayloadSize);
         default:
-            Logger->E("Invalid command");
             return false;
     }
     return true;
 }
 
-void xAC_BackendServerListDownloader::OnServerClose() {
+void xBackendServerListDownloader::OnServerClose() {
     Reset(BackendServerListVersion);
 }
 
-bool xAC_BackendServerListDownloader::OnDownloadBackendServerListResp(ubyte * PayloadPtr, size_t PayloadSize) {
-    Logger->I("OnDownloadBackendServerListResp");
+bool xBackendServerListDownloader::OnDownloadBackendServerListResp(ubyte * PayloadPtr, size_t PayloadSize) {
     auto R = xPP_DownloadBackendServerListResp();
     if (!R.Deserialize(PayloadPtr, PayloadSize)) {
-        Logger->E("Invalid protocol");
         return false;
     }
     if (R.Version == BackendServerListVersion) {
@@ -49,10 +46,6 @@ bool xAC_BackendServerListDownloader::OnDownloadBackendServerListResp(ubyte * Pa
     auto OldList             = std::move(BackendServerList);
     BackendServerList        = std::move(R.ServerAddressList);
     BackendServerListVersion = R.Version;
-
-    if (!UpdateCallback) {
-        return true;
-    }
 
     auto Add = std::vector<xNetAddress>();
     auto Rem = std::vector<xNetAddress>();
@@ -82,7 +75,7 @@ bool xAC_BackendServerListDownloader::OnDownloadBackendServerListResp(ubyte * Pa
         Rem.push_back(OldList[IOld]);
     }
 
-    UpdateCallback(BackendServerListVersion, BackendServerList, Add, Rem);
+    OnUpdateCallback(BackendServerListVersion, BackendServerList, Add, Rem);
     return true;
     //
 }

@@ -6,8 +6,9 @@ class xDeviceStateRelayServerListDownloader : public xClient {
 public:
     static constexpr const uint64_t UpdateTimeoutMS = 5 * 60'000;
 
-    using xUpdateDeviceStateRelayServerListCallback = std::function<void(uint32_t Version, const std::vector<xDeviceStateRelayServerInfo> & ServerList)>;
-    void SetOnUpdateDeviceStateRelayServerListCallback(const xUpdateDeviceStateRelayServerListCallback & CB) { this->UpdateDeviceStateRelayServerListCallback = CB; }
+    using xOnUpdateDeviceStateRelayServerListCallback = std::function<void(uint32_t Version, const std::vector<xDeviceStateRelayServerInfo> & ServerList)>;
+
+    xOnUpdateDeviceStateRelayServerListCallback OnUpdateDeviceStateRelayServerListCallback = Noop<>;
 
 private:
     void OnTick(uint64_t NowMS) override;
@@ -22,9 +23,6 @@ private:
     xTicker  Ticker;
     uint64_t LastUpdateTimestampMS = 0;
 
-    uint32_t                                  DeviceStateRelayServerListVersion = 0;
-    std::vector<xDeviceStateRelayServerInfo>  DeviceStateRelaySortedServerInfoList;
-    xUpdateDeviceStateRelayServerListCallback UpdateDeviceStateRelayServerListCallback;
-
-    static void IgnoreUpdateDeviceStateRelayServerListCallback(uint32_t Version, const std::vector<xDeviceStateRelayServerInfo> & ServerList) {}
+    uint32_t                                 DeviceStateRelayServerListVersion = 0;
+    std::vector<xDeviceStateRelayServerInfo> DeviceStateRelaySortedServerInfoList;
 };

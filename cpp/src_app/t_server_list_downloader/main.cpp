@@ -1,5 +1,6 @@
 #include "../lib_server_list/audit_account_server_list_downloader.hpp"
 #include "../lib_server_list/auth_cache_server_list_downloader.hpp"
+#include "../lib_server_list/backend_server_list_downloader.hpp"
 #include "../lib_server_list/device_selector_dispatcher_list_downloader.hpp"
 #include "../lib_server_list/device_state_relay_server_list_downloader.hpp"
 #include "../lib_server_list/relay_info_dispatcher_server_info_downloader.hpp"
@@ -12,6 +13,7 @@ static auto AADownloader              = xAuditAccountServerListDownloader();
 static auto ACDownloader              = xAuthCacheServerListDownloader();
 static auto DSRDownloader             = xDeviceStateRelayServerListDownloader();
 static auto DSDDownloader             = xDeviceSelectorDispatcherServerListDownloader();
+static auto BSDownloader              = xBackendServerListDownloader();
 
 static auto RIO = xRelayInfoObserver();
 
@@ -27,55 +29,69 @@ int main(int argc, char ** argv) {
     RIO.OnNewDeviceRelayInfoCallback    = [](const xRIO_RelayServerInfoContext & Info) { Logger->D("new device relay: %s", Info.ToString().c_str()); };
     RIO.OnRemoveDeviceRelayInfoCallback = [](const xRIO_RelayServerInfoContext & Info) { Logger->D("remove device relay: %s", Info.ToString().c_str()); };
 
-    // X_GUARD(AADownloader, ServiceIoContext, ServerListDownloadAddress);
-    // AADownloader.SetOnUpdateAuditAccountServerListCallback([](uint32_t Version, const std::vector<xServerInfo> & ServerList) {
-    //     auto OS = std::ostringstream();
-    //     OS << "updated audit account server list: version=" << Version << endl;
-    //     for (auto S : ServerList) {
-    //         OS << "ServerId: " << S.ServerId << endl;
-    //         OS << "ServerAddress: " << S.Address.ToString() << endl;
-    //     }
-    //     Logger->D("%s", OS.str().c_str());
-    // });
+    X_GUARD(AADownloader, ServiceIoContext, ServerListDownloadAddress);
+    AADownloader.OnUpdateAuditAccountServerListCallback = [](uint32_t Version, const std::vector<xServerInfo> & ServerList) {
+        auto OS = std::ostringstream();
+        OS << "updated audit account server list: version=" << Version << endl;
+        for (auto S : ServerList) {
+            OS << "ServerId: " << S.ServerId << endl;
+            OS << "ServerAddress: " << S.Address.ToString() << endl;
+        }
+        Logger->D("%s", OS.str().c_str());
+    };
 
-    // X_GUARD(ACDownloader, ServiceIoContext, ServerListDownloadAddress);
-    // ACDownloader.SetOnUpdateAuthCacheServerListCallback([](uint32_t Version, const std::vector<xServerInfo> & ServerList) {
-    //     auto OS = std::ostringstream();
-    //     OS << "updated auth cache server list: version=" << Version << endl;
-    //     for (auto S : ServerList) {
-    //         OS << "ServerId: " << S.ServerId << endl;
-    //         OS << "ServerAddress: " << S.Address.ToString() << endl;
-    //     }
-    //     Logger->D("%s", OS.str().c_str());
-    // });
+    X_GUARD(ACDownloader, ServiceIoContext, ServerListDownloadAddress);
+    ACDownloader.OnUpdateAuthCacheServerListCallback = [](uint32_t Version, const std::vector<xServerInfo> & ServerList) {
+        auto OS = std::ostringstream();
+        OS << "updated auth cache server list: version=" << Version << endl;
+        for (auto S : ServerList) {
+            OS << "ServerId: " << S.ServerId << endl;
+            OS << "ServerAddress: " << S.Address.ToString() << endl;
+        }
+        Logger->D("%s", OS.str().c_str());
+    };
 
-    // X_GUARD(DSRDownloader, ServiceIoContext, ServerListDownloadAddress);
-    // DSRDownloader.SetOnUpdateDeviceStateRelayServerListCallback([](uint32_t Version, const std::vector<xDeviceStateRelayServerInfo> & ServerList) {
-    //     auto OS = std::ostringstream();
-    //     OS << "updated device state relay server list: version=" << Version << endl;
-    //     for (auto S : ServerList) {
-    //         OS << "ServerId: " << S.ServerId << endl;
-    //         OS << "ServerAddress: P:" << S.ProducerAddress.ToString() << ", O: " << S.ObserverAddress.ToString() << endl;
-    //     }
-    //     Logger->D("%s", OS.str().c_str());
-    // });
+    X_GUARD(DSRDownloader, ServiceIoContext, ServerListDownloadAddress);
+    DSRDownloader.OnUpdateDeviceStateRelayServerListCallback = [](uint32_t Version, const std::vector<xDeviceStateRelayServerInfo> & ServerList) {
+        auto OS = std::ostringstream();
+        OS << "updated device state relay server list: version=" << Version << endl;
+        for (auto S : ServerList) {
+            OS << "ServerId: " << S.ServerId << endl;
+            OS << "ServerAddress: P:" << S.ProducerAddress.ToString() << ", O: " << S.ObserverAddress.ToString() << endl;
+        }
+        Logger->D("%s", OS.str().c_str());
+    };
 
-    // X_GUARD(DSDDownloader, ServiceIoContext, ServerListDownloadAddress);
-    // DSDDownloader.SetOnUpdateDeviceSelectorDispatcherServerListCallback([](uint32_t Version, const std::vector<xDeviceSelectorDispatcherInfo> & SL) {
-    //     auto OS = std::ostringstream();
-    //     OS << "updated device selector dispatcher server: version=" << Version << endl;
-    //     for (auto & S : SL) {
-    //         OS << "ServerId: " << S.ServerId << endl;
-    //         OS << "ServerAddress: P:" << S.ExportAddressForClient.ToString() << ", O: " << S.ExportAddressForServiceProvider.ToString() << endl;
-    //     }
-    //     Logger->D("%s", OS.str().c_str());
-    // });
+    X_GUARD(DSDDownloader, ServiceIoContext, ServerListDownloadAddress);
+    DSDDownloader.OnUpdateDeviceSelectorDispatcherServerListCallback = [](uint32_t Version, const std::vector<xDeviceSelectorDispatcherInfo> & SL) {
+        auto OS = std::ostringstream();
+        OS << "updated device selector dispatcher server: version=" << Version << endl;
+        for (auto & S : SL) {
+            OS << "ServerId: " << S.ServerId << endl;
+            OS << "ServerAddress: P:" << S.ExportAddressForClient.ToString() << ", O: " << S.ExportAddressForServiceProvider.ToString() << endl;
+        }
+        Logger->D("%s", OS.str().c_str());
+    };
+
+    X_GUARD(BSDownloader, ServiceIoContext, ServerListDownloadAddress);
+    BSDownloader.OnUpdateCallback = [](uint32_t Version, const std::vector<xNetAddress> & FullList, const std::vector<xNetAddress> & Added,
+                                       const std::vector<xNetAddress> & Removed) {
+        auto OS = std::ostringstream();
+        OS << "updated backend server list, version=" << Version << endl;
+        for (auto & S : FullList) {
+            OS << "Address: " << S.ToString() << endl;
+        }
+        Logger->D("%s", OS.str().c_str());
+    };
 
     while (ServiceRunState) {
         ServiceUpdateOnce(
-            // AADownloader, ACDownloader, DSRDownloader,
-            RIO,
-            // DSDDownloader
+            AADownloader,   //
+            ACDownloader,   //
+            DSRDownloader,  //
+            RIO,            //
+            DSDDownloader,  //
+            BSDownloader,   //
             DeadTicker
         );
     }

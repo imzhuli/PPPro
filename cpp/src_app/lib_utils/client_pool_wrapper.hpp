@@ -19,13 +19,12 @@ public:
     void PostMessage(xPacketCommandId CmdId, xPacketRequestId RequestId, xBinaryMessage & Message);
 
     using xOnUpdateServerListCallback = std::function<void(const std::vector<xNetAddress> & Added, const std::vector<xNetAddress> & Removed)>;
-    void SetOnUpdateServerListCallback(const xOnUpdateServerListCallback & Callback) { OnUpdateServerListCallback = Callback; }
-
-    using xOnConnectedCallback = std::function<void(const xMessageChannel & Source)>;
-    void SetOnConnectedCallback(const xOnConnectedCallback & CB) { OnConnectedCallback = CB; }
-
+    using xOnConnectedCallback        = std::function<void(const xMessageChannel & Source)>;
     using xOnPacketCallback = std::function<bool(const xMessageChannel & Source, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize)>;
-    void SetOnPacketCallback(const xOnPacketCallback & CB) { OnPacketCallback = CB; }
+
+    xOnUpdateServerListCallback OnUpdateServerListCallback = Noop<>;
+    xOnConnectedCallback        OnConnectedCallback        = Noop<>;
+    xOnPacketCallback           OnPacketCallback           = Noop<true>;
 
 private:
     void OnServerConnected(xClientConnection & CC) override;
@@ -62,12 +61,4 @@ private:
     };
 
     std::vector<xCPW_InternalServerInfo> SortedServerList;
-    xOnUpdateServerListCallback          OnUpdateServerListCallback = IgnoreUpdateServerList;
-    xOnConnectedCallback                 OnConnectedCallback        = IgnoreConnected;
-    xOnPacketCallback                    OnPacketCallback           = IgnorePacket;
-
-private:
-    static void IgnoreUpdateServerList(const std::vector<xNetAddress> & Added, const std::vector<xNetAddress> & Removed) {}
-    static void IgnoreConnected(const xMessageChannel & Source) {}
-    static bool IgnorePacket(const xMessageChannel & Source, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) { return true; }
 };

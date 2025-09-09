@@ -1,7 +1,7 @@
 #pragma once
+#include "../lib_server_list/backend_server_list_downloader.hpp"
 #include "../lib_utils/all.hpp"
 #include "./auth_service.hpp"
-#include "./backend_server_list_downloader.hpp"
 
 #include <pp_common/_.hpp>
 
@@ -19,7 +19,7 @@ extern uint64_t CacheNodeTimeoutMS;
 
 ////////////////////
 
-extern xServerIdClient                 ServerIdClient;
-extern xRegisterServerClient           RegisterServerClient;
-extern xAC_BackendServerListDownloader BackendServerListDownloader;
-extern xAC_AuthService                 AuthService;
+extern xServerIdClient              ServerIdClient;
+extern xRegisterServerClient        RegisterServerClient;
+extern xBackendServerListDownloader BackendServerListDownloader;
+extern xAC_AuthService              AuthService;

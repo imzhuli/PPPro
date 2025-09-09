@@ -50,7 +50,7 @@ bool xDeviceSelectorDispatcherServerListDownloader::OnDeviceSelectorDispatcherSe
     });
     DeviceSelectorDispatcherServerListVersion = R.Version;
 
-    UpdateDeviceSelectorDispatcherServerListCallback(DeviceSelectorDispatcherServerListVersion, DeviceSelectorDispatcherSortedServerInfoList);
+    OnUpdateDeviceSelectorDispatcherServerListCallback(DeviceSelectorDispatcherServerListVersion, DeviceSelectorDispatcherSortedServerInfoList);
     return true;
 }
 

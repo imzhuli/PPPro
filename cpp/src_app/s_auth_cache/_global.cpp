@@ -14,7 +14,7 @@ uint64_t CacheNodeTimeoutMS = 10 * 60'000;
 
 ///////////////
 
-xServerIdClient                 ServerIdClient              = {};
-xRegisterServerClient           RegisterServerClient        = {};
-xAC_BackendServerListDownloader BackendServerListDownloader = {};
-xAC_AuthService                 AuthService                 = {};
+xServerIdClient              ServerIdClient              = {};
+xRegisterServerClient        RegisterServerClient        = {};
+xBackendServerListDownloader BackendServerListDownloader = {};
+xAC_AuthService              AuthService                 = {};
