@@ -3,155 +3,99 @@
 #include "../lib_utils/service_common.hpp"
 #include "_global.hpp"
 
-bool xPA_ClientConnectionManager::Init(xIoContext * ICP) {
-    assert(ICP);
-    this->ICP = ICP;
-    if (!this->ConnectionIdPool.Init(MAX_CLIENT_CONNECTION_ID_COUNT)) {
-        Reset(this->ICP);
-        return false;
+struct xPA_ClientConnectionKillNode : xListNode {};
+static xList<xPA_ClientConnectionKillNode> ClientConnectionKillList;
+struct xPA_ClientConnectionIdleNode : xListNode {
+    uint64_t LastActiveTimestampMS = 0;
+};
+static xList<xPA_ClientConnectionIdleNode> ClientConnectionIdleList;
+static xList<xPA_ClientConnectionIdleNode> ClientConnectionClosingList;
+
+class xPA_ClientConnection
+    : public xel::xTcpConnection
+    , public xPA_ClientConnectionKillNode
+    , public xPA_ClientConnectionIdleNode {
+public:
+    xIndexId Id;
+    bool     ClosingMark = false;
+    bool     DeleteMark  = false;
+};
+
+static auto ClientConnectionIdPool      = xel::xIndexedStorage<xPA_ClientConnection *>();
+static auto ClientConnectionIdPoolGuard = xel::xScopeGuard([] { RuntimeAssert(ClientConnectionIdPool.Init(20'0000)); }, [] { ClientConnectionIdPool.Clean(); });
+
+void xPA_ClientConnectionManager::OnNewConnection(xTcpServer * TcpServerPtr, xSocket && NativeHandle) {
+    auto Id = ClientConnectionIdPool.Acquire();
+    if (!Id) {
+        XelCloseSocket(std::move(NativeHandle));
+        return;
     }
-    return true;
+    auto P = new (std::nothrow) xPA_ClientConnection;
+    if (!P) {
+        ClientConnectionIdPool.Release(Id);
+        return;
+    }
+    if (!P->Init(TcpServerPtr->GetIoContextPtr(), std::move(NativeHandle), this)) {
+        ClientConnectionIdPool.Release(Id);
+        delete P;
+        return;
+    }
+    ClientConnectionIdPool[Id] = P;
+    P->Id                      = Id;
+    KeepAliveClientConnection(P);
 }
 
-void xPA_ClientConnectionManager::Clean() {
-    //
-    while (auto P = UpCast(AuthConnectionList.PopHead())) {
-        DoDeleteConnection(P);
-    }
-    while (auto P = UpCast(IdleConnectionList.PopHead())) {
-        DoDeleteConnection(P);
-    }
-    while (auto P = UpCast(KillConnectionList.PopHead())) {
-        DoDeleteConnection(P);
-    }
-    Reset(ICP);
+static void DestroyClientConnection(xPA_ClientConnection * ClientConnection) {
+    ClientConnectionIdPool.Release(ClientConnection->Id);
+    ClientConnection->Clean();
+    delete ClientConnection;
 }
 
-auto xPA_ClientConnectionManager::GetConnectionById(uint64_t ConnectionId) -> xPA_ClientConnection * {
-    auto PP = ConnectionIdPool.CheckAndGet(ConnectionId);
+void xPA_ClientConnectionManager::Tick(uint64_t NowMS) {
+    RemoveIdleClientConnections();
+    while (auto P = (xPA_ClientConnection *)ClientConnectionKillList.PopHead()) {
+        DestroyClientConnection(P);
+    }
+}
+
+xPA_ClientConnection * GetClientConnection(uint64_t ClientConnectionId) {
+    auto PP = ClientConnectionIdPool.CheckAndGet(ClientConnectionId);
     if (!PP) {
         return nullptr;
     }
     return *PP;
 }
 
-void xPA_ClientConnectionManager::KeepAlive(xPA_ClientConnection * CP) {
-    CP->LastActiveTimestampMS = Ticker();
-    IdleConnectionList.GrabTail(*CP);
-}
-
-void xPA_ClientConnectionManager::Tick(uint64_t NowMS) {
-    Ticker.Update(NowMS);
-
-    auto AuthTimepoint = Ticker() - MAX_CLIENT_CONNECTION_AUTH_TIMEOUT_MS;
-    while (auto P = UpCast(AuthConnectionList.PopHead([AuthTimepoint](auto & C) { return C.LastActiveTimestampMS <= AuthTimepoint; }))) {
-        DoDeleteConnection(P);
-    }
-
-    auto IdleTimepoint = Ticker() - MAX_CLIENT_CONNECTION_IDLE_TIMEOUT_MS;
-    while (auto P = UpCast(IdleConnectionList.PopHead([IdleTimepoint](auto & C) { return C.LastActiveTimestampMS <= IdleTimepoint; }))) {
-        DoDeleteConnection(P);
-    }
-
-    while (auto P = UpCast(KillConnectionList.PopHead())) {
-        DoDeleteConnection(P);
-    }
-}
-
-void xPA_ClientConnectionManager::KillConnection(xPA_ClientConnection * CP) {
-    KillConnectionList.GrabTail(*CP);
-}
-
-void xPA_ClientConnectionManager::DoCreateConnection(xSocket && NativeHandle) {
-    auto CP = new (std::nothrow) xPA_ClientConnection;
-    if (!CP) {
+void KeepAliveClientConnection(xPA_ClientConnection * ClientConnection) {
+    if (ClientConnection->DeleteMark || ClientConnection->ClosingMark) {
         return;
     }
-    if (!CP->Init(ICP, std::move(NativeHandle), this)) {
-        delete CP;
+    ClientConnection->LastActiveTimestampMS = ServiceTicker();
+    ClientConnectionIdleList.GrabTail(*ClientConnection);
+}
+
+void CloseClientConnection(xPA_ClientConnection * ClientConnection) {
+    if (ClientConnection->DeleteMark) {
         return;
     }
-    InitClientState(CP);
-
-    auto Id = ConnectionIdPool.Acquire(CP);
-    if (!Id) {
-        CP->Clean();
-        delete CP;
+    if (!ClientConnection->HasPendingWrites()) {
+        DeferKillClientConnection(ClientConnection);
         return;
     }
-
-    CP->Owner        = this;
-    CP->ConnectionId = Id;
-
-    CP->LastActiveTimestampMS = Ticker();
-    AuthConnectionList.AddTail(*CP);
-
-    Logger->I("Create new connection: id=%" PRIu64 "", CP->ConnectionId);
+    ClientConnection->ClosingMark           = true;
+    ClientConnection->LastActiveTimestampMS = ServiceTicker();
+    ClientConnectionClosingList.GrabTail(*ClientConnection);
 }
 
-void xPA_ClientConnectionManager::DoDeleteConnection(xPA_ClientConnection * CP) {
-    Logger->I("Delete connection: id=%" PRIu64 "", CP->ConnectionId);
-
-    if (CP->Audit.AuditId) {  // do collect audit
-        DEBUG_LOG("AuditId=%" PRIx64 "", CP->Audit.AuditId);
-        auto AI              = xAuditAccountInfo();
-        AI.AuditId           = CP->Audit.AuditId;
-        AI.TotalUploadSize   = CP->Audit.UploadSize;
-        AI.TotalDownloadSize = CP->Audit.DownloadSize;
-        AI.TotalTcpCount     = 1;
-        AuditAccountLocalServer.CollectAuditAccountInfo(AI);
-    }
-
-    assert(ConnectionIdPool.Check(CP->ConnectionId) && ConnectionIdPool[CP->ConnectionId] == CP);
-    assert(CP->IsOpen());
-
-    ScheduleClientStateChange(CP, CloseClientStateHandler);
-    FinalClientState(CP);
-
-    CP->Clean();
-    ConnectionIdPool.Release(CP->ConnectionId);
-    delete CP;
-}
-
-void xPA_ClientConnectionManager::OnNewConnection(xTcpServer * TcpServerPtr, xSocket && NativeHandle) {
-    DoCreateConnection(std::move(NativeHandle));
-}
-
-void xPA_ClientConnectionManager::OnPeerClose(xTcpConnection * TcpConnectionPtr) {
-    auto CP = UpCast(TcpConnectionPtr);
-    KillConnection(CP);
-}
-
-size_t xPA_ClientConnectionManager::OnData(xTcpConnection * TcpConnectionPtr, ubyte * DataPtr, size_t DataSize) {
-    DEBUG_LOG("OnData: \n%s", HexShow(DataPtr, DataSize).c_str());
-    auto Client = UpCast(TcpConnectionPtr);
-
-    size_t TotalConsumed = 0;
-    while (true) {
-        auto Consumed = GetClientStateHandler(Client)->OnDataEvent(Client, DataPtr, DataSize);
-        auto Updated  = UpdateClientState(Client);
-
-        if (Consumed == InvalidDataSize) {
-            return InvalidDataSize;
-        }
-        if (Consumed == 0 && !Updated) {
-            return TotalConsumed;
-        }
-
-        Client->Audit.UploadSize += Consumed;
-        DataPtr                  += Consumed;
-        DataSize                 -= Consumed;
-        TotalConsumed            += Consumed;
+void RemoveIdleClientConnections() {
+    auto KillTimepoint = ServiceTicker() - MAX_CLIENT_CONNECTION_IDLE_TIMEOUT_MS;
+    auto IdlePred      = [KillTimepoint](const xPA_ClientConnectionIdleNode & C) { return C.LastActiveTimestampMS <= KillTimepoint; };
+    while (auto P = (xPA_ClientConnection *)ClientConnectionIdleList.PopHead(IdlePred)) {
+        DestroyClientConnection(P);
     }
 }
 
-void xPA_ClientConnectionManager::OnAuthResult(uint64_t RequestContextId, const xClientAuthResult & AuthResult) {
-    auto Conn = GetConnectionById(RequestContextId);
-    if (!Conn) {
-        DEBUG_LOG("missing connection info");
-        return;
-    }
-    Conn->Audit.AuditId = AuthResult.AuditId;
-    DEBUG_LOG("update audit result: ConnectionId=%" PRIx64 ", AuditId=%" PRIx64 "", RequestContextId, AuthResult.AuditId);
-    return;
+void DeferKillClientConnection(xPA_ClientConnection * ClientConnection) {
+    ClientConnection->DeleteMark = true;
+    ClientConnectionKillList.GrabTail(*ClientConnection);
 }

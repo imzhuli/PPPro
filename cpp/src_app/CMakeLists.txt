@@ -71,7 +71,7 @@ set(target_list
 	# s_audit_account
 	s_auth_cache
 
-	# s_pa
+	s_pa
 	s_config_center
 
 	# s_device_selector

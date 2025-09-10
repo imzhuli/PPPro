@@ -1,4 +1,5 @@
 #pragma once
 #include "../lib_utils/all.hpp"
 
-class xPA_RelayServerManager {};
+void AddRelayConnection(uint64_t RelayServerId, const xNetAddress & Address);
+void RemoveRelayConnection(uint64_t RelayServerId);

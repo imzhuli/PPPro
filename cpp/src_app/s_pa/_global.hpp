@@ -13,6 +13,5 @@ extern xNetAddress ConfigServerListDownloadAddress;
 
 extern xAuditAccountServerListDownloader AuditAccountServerListDownloader;
 extern xAuthCacheServerListDownloader    AuthCacheServerListDownloader;
-extern xPA_ClientConnectionManager       ClientConnectionManager;
-extern xPA_AuthCacheLocalServer          AuthCacheLocalServer;
-extern xPA_AuditAccountLocalServer       AuditAccountLocalServer;
+
+extern xPA_ClientConnectionManager ClientConnectionManager;
