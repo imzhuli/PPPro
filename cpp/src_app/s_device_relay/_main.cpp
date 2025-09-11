@@ -54,7 +54,9 @@ int main(int argc, char ** argv) {
 
     X_GUARD(ServerIdClient, ServiceIoContext, ServerIdCenterAddress, RuntimeEnv.DefaultLocalServerIdFilePath);
     X_GUARD(RIDDownloader, ServiceIoContext, ServerListDownloadAddress);
+    X_GUARD(DSRDownloader, ServiceIoContext, ServerListDownloadAddress);
     X_GUARD(RIReporter, ServiceIoContext);
+    X_GUARD(DeviceReporter, ServiceIoContext);
 
     auto X_VAR = xel::xScopeGuard(InitDeviceContextManager, CleanDeviceContextManager);
     X_COND_GUARD(Enable4, DeviceService4, ServiceIoContext, DeviceAddress4, MaxDeviceCount);
@@ -67,23 +69,23 @@ int main(int argc, char ** argv) {
     DeviceService6.OnClientPacket = DeviceService4.OnClientPacket = &OnDeviceConnectionPacket;
     DeviceService6.OnClientClean = DeviceService4.OnClientClean = &OnDeviceConnectionClean;
 
-    // DSRDownloader.SetOnUpdateDeviceStateRelayServerListCallback([](uint32_t Version, const std::vector<xDeviceStateRelayServerInfo> & ServerList) {
-    //     auto PSL = std::vector<xNetAddress>();
-    //     for (auto & S : ServerList) {
-    //         PSL.push_back(S.ProducerAddress);
-    //     }
-    //     DeviceReporter.UpdateServerList(PSL);
-    // });
-    // DeviceReporter.SetOnUpdateServerListCallback([](const std::vector<xNetAddress> & Added, const std::vector<xNetAddress> & Removed) {
-    //     auto OS = std::ostringstream();
-    //     for (const auto & A : Added) {
-    //         OS << "A:" << A.ToString() << " ";
-    //     }
-    //     for (const auto & R : Removed) {
-    //         OS << "R:" << R.ToString() << " ";
-    //     }
-    //     DEBUG_LOG("%s", OS.str().c_str());
-    // });
+    DSRDownloader.OnUpdateDeviceStateRelayServerListCallback = [](uint32_t Version, const std::vector<xDeviceStateRelayServerInfo> & ServerList) {
+        auto PSL = std::vector<xNetAddress>();
+        for (auto & S : ServerList) {
+            PSL.push_back(S.ProducerAddress);
+        }
+        DeviceReporter.UpdateServerList(PSL);
+    };
+    DeviceReporter.OnUpdateServerListCallback = [](const std::vector<xNetAddress> & Added, const std::vector<xNetAddress> & Removed) {
+        auto OS = std::ostringstream();
+        for (const auto & A : Added) {
+            OS << "A:" << A.ToString() << " ";
+        }
+        for (const auto & R : Removed) {
+            OS << "R:" << R.ToString() << " ";
+        }
+        DEBUG_LOG("%s", OS.str().c_str());
+    };
 
     auto Auditer = xTickRunner(60'000, [](uint64_t) { AuditLogger->I("%s", LocalAudit.ToString().c_str()); });
     while (true) {
@@ -94,11 +96,11 @@ int main(int argc, char ** argv) {
                              // DeviceRelayService,       //
                              // ProxyConnectionManager,   //
                              // RelayConnectionManager,   //
-                             // DeviceReporter,           //
             RIDDownloader,   //
-            // DSRDownloader,            //
-            RIReporter,  //
-            Auditer,     //
+            DSRDownloader,   //
+            RIReporter,      //
+            DeviceReporter,  //
+            Auditer,         //
             DeadTicker
         );
         if (Enable4) {
