@@ -5,9 +5,8 @@ struct xAudit_AuthCache {
 
     const char * AuditName = "xAudit_AuthCache";
 
-    std::string ServerUuid;
-    uint64_t    ServerLocalTimestampMS;
-    uint64_t    AuditDuration;
+    uint64_t ServerLocalTimestampMS;
+    uint64_t AuditDuration;
 
     uint64_t AuthQueryCount;
     uint64_t CacheHitCount;

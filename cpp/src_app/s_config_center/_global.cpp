@@ -21,10 +21,6 @@ xCC_LocalAudit LocalAudit;
 std::string xCC_LocalAudit::ToString() {
     auto OS = std::ostringstream();
     OS << "TotalDRSCount:" << TotalDeviceRelayServerCount << " ";
-    OS << "TotalNewDRSCount:" << TotalNewDeviceRelayServerCount << " ";
-    OS << "TotalRemoveDRSCount:" << TotalRemoveDeviceRelayServerCount << " ";
-    OS << "TotalRemoveDRSCount:" << TotalRemoveDeviceRelayServerCount << " ";
-    OS << "TotalRemoveDRSTagCount:" << TotalDeviceRelayTags << " ";
     return OS.str();
 }
 

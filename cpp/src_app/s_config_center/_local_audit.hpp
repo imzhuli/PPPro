@@ -9,10 +9,7 @@ struct xCC_RelayInfoReference {
 };
 
 struct xCC_LocalAudit {
-    uint64_t TotalDeviceRelayServerCount       = 0;
-    uint64_t TotalNewDeviceRelayServerCount    = 0;
-    uint64_t TotalRemoveDeviceRelayServerCount = 0;
-    uint32_t TotalDeviceRelayTags              = 0;
+    uint64_t TotalDeviceRelayServerCount = 0;
 
     std::string ToString();
 

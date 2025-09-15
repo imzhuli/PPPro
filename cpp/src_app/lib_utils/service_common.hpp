@@ -93,8 +93,10 @@ struct xTickRunner {
 
 #ifndef NDEBUG
 #define DEBUG_LOG(fmt, ...) Logger->D("%s:%i:%s\n" fmt, __FILE__, __LINE__, __func__, ##__VA_ARGS__)
+#define DEBUG_ADT(fmt, ...) AuditLogger->D("%s:%i:%s\n" fmt, __FILE__, __LINE__, __func__, ##__VA_ARGS__)
 #else
 #define DEBUG_LOG(...)
+#define DEBUG_ADT(...)
 #endif
 
 #ifndef XG

@@ -2,6 +2,7 @@
 
 #include "../lib_utils/all.hpp"
 #include "./_global.hpp"
+#include "./device_reporter.hpp"
 #include "pp_protocol/device_relay/connection.hpp"
 #include "pp_protocol/device_relay/post_data.hpp"
 #include "pp_protocol/device_relay/udp_channel.hpp"
@@ -26,6 +27,8 @@ static xDR_DeviceContext * CreateDeviceContext(const xTcpServiceClientConnection
 static void ReleaseDeviceContext(uint64_t Id) {
     assert(DeviceManager.CheckAndGet(Id));
     auto PDC = &DeviceManager[Id];
+
+    ReportDeviceDrop(PDC);
 
     AuditDecDeviceFlag(PDC->Flags);
     DeviceManager.Release(Id);
@@ -227,12 +230,17 @@ static bool OnDeviceHandshake(const xTcpServiceClientConnectionHandle & Handle, 
     }
     AuditIncDeviceFlag(DF);
     Handle->UserContext.U64 = PDC->Id;
+    PDC->Uuid               = R.DeviceUUID;
+    PDC->StartupTimestampMS = ServiceTicker();
+    PDC->Version            = DAP.Version;
+    PDC->ChannelId          = DAP.ChannelId;
 
     auto RS     = xPP_DeviceHandshakeResp();
     RS.Accepted = true;
     Handle.PostMessage(Cmd_DV_RL_HandshakeResp, 0, RS);
-    DEBUG_LOG("accept new device connection: %" PRIx64 ", uuid=%s remote address=%s", PDC->Id, R.DeviceUUID.c_str(), Handle.GetRemoteAddress().ToString().c_str());
+    DEBUG_ADT("accept new device connection: %" PRIx64 ", uuid=%s remote address=%s", PDC->Id, R.DeviceUUID.c_str(), Handle.GetRemoteAddress().ToString().c_str());
 
+    ReportNewDevice(PDC);
     return true;
 }
 
@@ -254,7 +262,7 @@ void OnDeviceConnectionClean(const xTcpServiceClientConnectionHandle & Handle) {
         DEBUG_LOG("remove uninited device connection");
         return;
     }
-    DEBUG_LOG("remove handshake ready device connection: %" PRIx64 "", Id);
+    DEBUG_ADT("remove handshake ready device connection: %" PRIx64 "", Id);
     ReleaseDeviceContext(Id);
 }
 

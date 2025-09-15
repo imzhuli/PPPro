@@ -28,8 +28,10 @@ struct xODI_DeviceInfo : xODI_DeviceKeepAliveNode {
     uint64_t    LastKeepAliveTimestampMS = 0;
 
     uint32_t    Version;
-    xNetAddress PrimaryIpv4Address;
-    xNetAddress PrimaryIpv6Address;
+    xNetAddress Tcp4Address;
+    xNetAddress Udp4Address;
+    xNetAddress Tcp6Address;
+    xNetAddress Udp6Address;
     uint64_t    TotalUploadSizeSinceOnline;    // 指发向目标的数据
     uint64_t    TotalDownloadSizeSinceOnline;  // 下载数据
     uint32_t    CurrentConnectionCount;
@@ -52,7 +54,7 @@ static auto DeviceObserver    = xClientPoolWrapper();
 static auto DSRDownloader     = xDeviceStateRelayServerListDownloader();
 
 static void PostDeviceInfo(const xODI_DeviceInfo * DP, bool Online) {
-    DEBUG_LOG("DeviceId: %s, Online=%s, Ip=%s, Ipv6=%s", DP->DeviceUuid.c_str(), YN(Online), DP->PrimaryIpv4Address.ToString().c_str(), DP->PrimaryIpv6Address.ToString().c_str());
+    DEBUG_LOG("DeviceId: %s, Online=%s, Ip=%s, Ipv6=%s", DP->DeviceUuid.c_str(), YN(Online), DP->Tcp4Address.ToString().c_str(), DP->Tcp6Address.ToString().c_str());
 
     auto   Req   = xAD_BK_ReportDeviceInfoSingle();
     auto & ReqDI = Req.DeviceInfo;
@@ -61,10 +63,12 @@ static void PostDeviceInfo(const xODI_DeviceInfo * DP, bool Online) {
 
     Req.LocalAuditTimestampMS = NowMS;
 
-    ReqDI.Version            = DP->Version;
-    ReqDI.DeviceUuid         = DP->DeviceUuid;
-    ReqDI.PrimaryIpv4Address = DP->PrimaryIpv4Address;
-    ReqDI.PrimaryIpv6Address = DP->PrimaryIpv6Address;
+    ReqDI.Version     = DP->Version;
+    ReqDI.DeviceUuid  = DP->DeviceUuid;
+    ReqDI.Tcp4Address = DP->Tcp4Address;
+    ReqDI.Udp4Address = DP->Udp4Address;
+    ReqDI.Tcp6Address = DP->Tcp6Address;
+    ReqDI.Udp6Address = DP->Udp6Address;
 
     ReqDI.IsOffline          = !Online;
     ReqDI.SupportUdpChannel  = DP->SupportUdpChannel;
@@ -106,9 +110,11 @@ static void OnDeviceUpdate(ubyte * PayloadPtr, size_t PayloadSize) {
     DI.DeviceUuid        = PP.DeviceUuid;
     DI.OnlineTimestampMS = NowMS;
 
-    DI.Version            = PP.Version;
-    DI.PrimaryIpv4Address = PP.PrimaryIpv4Address;
-    DI.PrimaryIpv6Address = PP.PrimaryIpv6Address;
+    DI.Version     = PP.Version;
+    DI.Tcp4Address = PP.Tcp4Address;
+    DI.Udp4Address = PP.Udp4Address;
+    DI.Tcp6Address = PP.Tcp6Address;
+    DI.Udp6Address = PP.Udp6Address;
 
     DI.SupportUdpChannel  = PP.SupportUdpChannel;
     DI.SupportDnsRequests = PP.SupportDnsRequests;

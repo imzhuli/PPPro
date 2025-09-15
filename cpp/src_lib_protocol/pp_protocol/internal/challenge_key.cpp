@@ -1,8 +1,10 @@
 #include "./challenge_key.hpp"
 
-struct xDeviceAddressPackMessage_W : xBinaryMessage {
+struct xDeviceChallengePackMessage_W : xBinaryMessage {
 
     void SerializeMembers() override {
+        W(Pack->Version);
+        W(Pack->ChannelId);
         W(Pack->Tcp4Address);
         W(Pack->Tcp6Address);
         W(Pack->Udp4Address);
@@ -10,23 +12,25 @@ struct xDeviceAddressPackMessage_W : xBinaryMessage {
     }
     void DeserializeMembers() override {}
 
-    const xDeviceAddressPack * Pack = nullptr;
+    const xDeviceChallengePack * Pack = nullptr;
 };
 
-struct xDeviceAddressPackMessage_R : xBinaryMessage {
+struct xDeviceChallengePackMessage_R : xBinaryMessage {
 
     void DeserializeMembers() override {
+        R(Pack->Version);
+        R(Pack->ChannelId);
         R(Pack->Tcp4Address);
         R(Pack->Tcp6Address);
         R(Pack->Udp4Address);
         R(Pack->Udp6Address);
     }
 
-    xDeviceAddressPack * Pack = nullptr;
+    xDeviceChallengePack * Pack = nullptr;
 };
 
-std::string MakeChallengeKey(const xDeviceAddressPack & AddressPack) {
-    auto M = xDeviceAddressPackMessage_W();
+std::string MakeChallengeKey(const xDeviceChallengePack & AddressPack) {
+    auto M = xDeviceChallengePackMessage_W();
     M.Pack = &AddressPack;
 
     ubyte  B[MaxPacketSize];
@@ -37,9 +41,9 @@ std::string MakeChallengeKey(const xDeviceAddressPack & AddressPack) {
     return H;
 }
 
-xDeviceAddressPack ExtractChallengeKey(const std::string & Key) {
-    auto R  = xDeviceAddressPack();
-    auto RM = xDeviceAddressPackMessage_R();
+xDeviceChallengePack ExtractChallengeKey(const std::string & Key) {
+    auto R  = xDeviceChallengePack();
+    auto RM = xDeviceChallengePackMessage_R();
     RM.Pack = &R;
 
     auto S = xel::HexToStr(Key);

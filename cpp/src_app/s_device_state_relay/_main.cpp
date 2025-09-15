@@ -1,52 +1,59 @@
 #include "../lib_utils/all.hpp"
 #include "./_global.hpp"
 
+#include <pp_common/_.hpp>
 #include <pp_protocol/command.hpp>
-#include <server_arch/service.hpp>
 
 using namespace xel;
 
 class xObserverService;
 class xProducerService;
 
-class xObserverService : xService {
-public:
-    using xService::Init;
-    void Clean() {
-        xService::Clean();
-        Reset(Connections);
+static std::vector<std::unique_ptr<xTcpServiceClientConnectionHandle>> Connections;
+static xTcpService                                                     OS;  // observer
+static xTcpService                                                     PS;  // producer
+
+static void DispatchData(const void * DataPtr, size_t DataSize) {
+    DEBUG_LOG("Dispatching data:\n%s", HexShow(DataPtr, DataSize).c_str());
+    for (auto & H : Connections) {
+        DEBUG_LOG("ToConnection:%" PRIx64 "", H->GetConnectionId());
+        H->PostData(DataPtr, DataSize);
     }
-    using xService::Tick;
+}
 
-    void OnClientConnected(xServiceClientConnection & Connection) override { Connections.push_back(&Connection); }
-
-    void OnClientClose(xServiceClientConnection & Connection) override {
-        auto I = Connections.begin();
-        auto E = Connections.end();
-        while (I != E) {
-            if (*I == &Connection) {
-                Connections.erase(I);
-                break;
+static auto ServiceGuard = xScopeGuard(
+    [] {
+        OS.OnClientConnected = [](const xTcpServiceClientConnectionHandle & H) { Connections.push_back(std::make_unique<xTcpServiceClientConnectionHandle>(H)); };
+        OS.OnClientClose     = [](const xTcpServiceClientConnectionHandle & H) {
+            auto I = Connections.begin();
+            auto E = Connections.end();
+            auto T = H.operator->();
+            while (I != E) {
+                if (I->get()->operator->() == T) {
+                    Connections.erase(I);
+                    break;
+                }
+                ++I;
             }
-            ++I;
-        }
-    }
-
-    void DispatchData(const void * DataPtr, size_t DataSize) {
-        DEBUG_LOG("Dispatching data:\n%s", HexShow(DataPtr, DataSize).c_str());
-        for (auto PC : Connections) {
-            DEBUG_LOG("ToConnection:%" PRIx64 "", PC->GetConnectionId());
-            PC->PostData(DataPtr, DataSize);
-        }
-    }
-
-private:
-    std::vector<xServiceClientConnection *> Connections;
-
-    //
-};
-
-static xObserverService OS;
+        };
+        PS.OnClientPacket = [](const xTcpServiceClientConnectionHandle Handle, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) {
+            DEBUG_LOG("CommandId: %" PRIx32 ", RequestId:%" PRIx64 ":  \n%s", CommandId, RequestId, HexShow(PayloadPtr, PayloadSize).c_str());
+            switch (CommandId) {
+                case Cmd_DSR_DS_DeviceUpdate: {
+                    ubyte  B[MaxPacketSize];
+                    size_t RS = BuildPacket(B, CommandId, 0, PayloadPtr, PayloadSize);
+                    assert(RS);
+                    DispatchData(B, RS);
+                } break;
+                default: {
+                    DEBUG_LOG("CommandId: %" PRIx32 ", RequestId:%" PRIx64 ":  \n%s", CommandId, RequestId, HexShow(PayloadPtr, PayloadSize).c_str());
+                } break;
+            }
+            return true;
+        };
+    },
+    xPass()
+);
 
 static void DSR_RegisterServer(const xMessageChannel & Poster, uint64_t LocalServerId) {
     auto Req            = xPP_RegisterDeviceStateRelayServer();
@@ -56,35 +63,6 @@ static void DSR_RegisterServer(const xMessageChannel & Poster, uint64_t LocalSer
     Poster.PostMessage(Cmd_RegisterDeviceStateRelayServer, 0, Req);
 }
 
-class xProducerService : xService {
-public:
-    using xService::Clean;
-    using xService::Init;
-    using xService::Tick;
-
-    bool OnClientPacket(xServiceClientConnection & Connection, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) {
-        DEBUG_LOG("CommandId: %" PRIx32 ", RequestId:%" PRIx64 ":  \n%s", CommandId, RequestId, HexShow(PayloadPtr, PayloadSize).c_str());
-        switch (CommandId) {
-            case Cmd_DSR_DS_DeviceUpdate: {
-                ubyte  B[MaxPacketSize];
-                size_t RS = BuildPacket(B, CommandId, 0, PayloadPtr, PayloadSize);
-                assert(RS);
-                OS.DispatchData(B, RS);
-            } break;
-
-            default: {
-                DEBUG_LOG("CommandId: %" PRIx32 ", RequestId:%" PRIx64 ":  \n%s", CommandId, RequestId, HexShow(PayloadPtr, PayloadSize).c_str());
-                break;
-            }
-        }
-
-        return true;
-    }
-
-    //
-};
-
-static xProducerService      PS;
 static xServerIdClient       ServerIdClient;
 static xRegisterServerClient RegisterServerClient;
 

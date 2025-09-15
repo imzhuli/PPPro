@@ -47,11 +47,13 @@ int main(int argc, char ** argv) {
             RelayV6List.AddTail(*SN);
         }
         Context.MutableUserContext.P = SN;
+        ++LocalAudit.TotalDeviceRelayServerCount;
     };
 
     RelayInfoObserver.OnRemoveDeviceRelayInfoCallback = [](const xRIO_RelayServerInfoContext & Context) {
         auto SN = static_cast<xCC_RelayScheduleNode *>(Steal(Context.MutableUserContext.P));
         delete SN;
+        --LocalAudit.TotalDeviceRelayServerCount;
     };
 
     while (ServiceRunState) {

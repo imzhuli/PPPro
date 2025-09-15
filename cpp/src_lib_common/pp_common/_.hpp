@@ -200,7 +200,9 @@ constexpr const xDeviceFlag DF_ENABLE_TCP6 = 0x01 << 1;
 constexpr const xDeviceFlag DF_ENABLE_UDP4 = 0x01 << 2;
 constexpr const xDeviceFlag DF_ENABLE_UDP6 = 0x01 << 3;
 
-struct xDeviceAddressPack {
+struct xDeviceChallengePack {
+    uint32_t    Version;
+    uint32_t    ChannelId;
     xNetAddress Tcp4Address;
     xNetAddress Tcp6Address;
     xNetAddress Udp4Address;

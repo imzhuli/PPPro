@@ -30,7 +30,7 @@ struct xCC_DeviceChallenge : xBinaryMessage {
     std::string Udp6AddressKey = {};
     std::string Sign           = {};
 
-    xDeviceAddressPack Extract() const;
+    xDeviceChallengePack Extract() const;
 };
 
 struct xCC_DeviceChallengeResp : xBinaryMessage {

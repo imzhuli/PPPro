@@ -4,7 +4,13 @@
 struct xDR_DeviceContext final {
     uint64_t                          Id;
     xTcpServiceClientConnectionHandle Handle;
-    xDeviceFlag                       Flags;
+
+    // runtime:
+    std::string Uuid;
+    uint64_t    StartupTimestampMS;
+    uint32_t    Version;
+    uint32_t    ChannelId;
+    xDeviceFlag Flags;
 };
 
 extern void InitDeviceContextManager();
