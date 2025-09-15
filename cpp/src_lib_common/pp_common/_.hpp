@@ -193,6 +193,13 @@ struct xGeoInfoEx : xGeoInfo {
     std::string ShortCityName;
 };
 
+struct xDeviceId final {
+    uint64_t RelayServerRuntimeId;
+    uint64_t RelayServerSideDeviceId;
+
+    std::strong_ordering operator<=>(const xDeviceId &) const = default;
+};
+
 using xDeviceFlag                          = uint32_t;
 constexpr const xDeviceFlag DF_NONE        = 0x00;
 constexpr const xDeviceFlag DF_ENABLE_TCP4 = 0x01 << 0;

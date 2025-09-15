@@ -28,7 +28,7 @@ void xDS_DeviceContextManager::UpdateDevice(const xDR_DeviceInfoBase & InfoBase)
         auto PD = Iter->second;
         DEBUG_LOG("UpdateDevice: %s, %u/%u/%u", InfoBase.DeviceId.c_str(), InfoBase.CountryId, InfoBase.StateId, InfoBase.CityId);
 
-        if (InfoBase.ReleayServerRuntimeId != PD->InfoBase.ReleayServerRuntimeId || InfoBase.RelaySideDeviceId != PD->InfoBase.RelaySideDeviceId) {
+        if (InfoBase.ReleayServerRuntimeId != PD->InfoBase.ReleayServerRuntimeId || InfoBase.RelayServerSideDeviceId != PD->InfoBase.RelayServerSideDeviceId) {
             if (!--PD->ResisterCounter) {
                 DEBUG_LOG("ReplaceDevice with new info");
                 ++LocalAudit.ReplacedDeviceCount;
@@ -56,7 +56,7 @@ void xDS_DeviceContextManager::UpdateDevice(const xDR_DeviceInfoBase & InfoBase)
     ++LocalAudit.NewDeviceCount;
     ++LocalAudit.TotalDeviceCount;
 
-    DEBUG_LOG("UpdateDevice: %s,%" PRIx64 ": %u/%u/%u", InfoBase.DeviceId.c_str(), InfoBase.RelaySideDeviceId, InfoBase.CountryId, InfoBase.StateId, InfoBase.CityId);
+    DEBUG_LOG("UpdateDevice: %s,%" PRIx64 ": %u/%u/%u", InfoBase.DeviceId.c_str(), InfoBase.RelayServerSideDeviceId, InfoBase.CountryId, InfoBase.StateId, InfoBase.CityId);
 }
 
 void xDS_DeviceContextManager::RemoveDevice(xDS_DeviceContext * Device) {
@@ -70,7 +70,7 @@ void xDS_DeviceContextManager::RemoveDeviceById(const std::string & DeviceId) {
         return;
     }
     auto DP = Iter->second;
-    DEBUG_LOG("DeviceId=%s, DeviceRuntimeKey=%" PRIx64 "", DeviceId.c_str(), DP->InfoBase.RelaySideDeviceId);
+    DEBUG_LOG("DeviceId=%s, DeviceRuntimeKey=%" PRIx64 "", DeviceId.c_str(), DP->InfoBase.RelayServerSideDeviceId);
 
     delete DP;
     DeviceMap.erase(Iter);

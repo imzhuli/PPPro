@@ -14,7 +14,7 @@ static xTcpService                                                     OS;  // o
 static xTcpService                                                     PS;  // producer
 
 static void DispatchData(const void * DataPtr, size_t DataSize) {
-    DEBUG_LOG("Dispatching data:\n%s", HexShow(DataPtr, DataSize).c_str());
+    // DEBUG_LOG("Dispatching data:\n%s", HexShow(DataPtr, DataSize).c_str());
     for (auto & H : Connections) {
         DEBUG_LOG("ToConnection:%" PRIx64 "", H->GetConnectionId());
         H->PostData(DataPtr, DataSize);
@@ -37,7 +37,6 @@ static auto ServiceGuard = xScopeGuard(
             }
         };
         PS.OnClientPacket = [](const xTcpServiceClientConnectionHandle Handle, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) {
-            DEBUG_LOG("CommandId: %" PRIx32 ", RequestId:%" PRIx64 ":  \n%s", CommandId, RequestId, HexShow(PayloadPtr, PayloadSize).c_str());
             switch (CommandId) {
                 case Cmd_DSR_DS_DeviceUpdate: {
                     ubyte  B[MaxPacketSize];
@@ -46,7 +45,8 @@ static auto ServiceGuard = xScopeGuard(
                     DispatchData(B, RS);
                 } break;
                 default: {
-                    DEBUG_LOG("CommandId: %" PRIx32 ", RequestId:%" PRIx64 ":  \n%s", CommandId, RequestId, HexShow(PayloadPtr, PayloadSize).c_str());
+                    DEBUG_LOG("invalid command");
+                    Pass();
                 } break;
             }
             return true;

@@ -98,7 +98,7 @@ bool xDS_DeviceSelectorServiceProvider::OnSelectDevice(const xMessageChannel & S
 //     auto Resp = xPP_AcquireDeviceResp();
 //     if (PD) {
 //         Resp.DeviceRelayServerRuntimeId = PD->InfoBase.ReleayServerRuntimeId;
-//         Resp.DeviceRelaySideId          = PD->InfoBase.RelaySideDeviceId;
+//         Resp.DeviceRelaySideId          = PD->InfoBase.RelayServerSideDeviceId;
 //         DEBUG_LOG("DeviceSelected: ServerId=%" PRIx64 ", DeviceId=%" PRIx64 "", Resp.DeviceRelayServerRuntimeId, Resp.DeviceRelaySideId);
 //     } else {
 //         DEBUG_LOG("No device found!");
@@ -134,10 +134,10 @@ bool xDS_DeviceObserver::OnServerPacket(xClientConnection & CC, xPacketCommandId
             }
 
             if (!PP.IsOffline) {
-                auto LocalDevInfo                  = xDR_DeviceInfoBase{};
-                LocalDevInfo.DeviceId              = PP.DeviceUuid;
-                LocalDevInfo.ReleayServerRuntimeId = PP.RelayServerRuntimeId;
-                LocalDevInfo.RelaySideDeviceId     = PP.RelaySideDeviceKey;
+                auto LocalDevInfo                    = xDR_DeviceInfoBase{};
+                LocalDevInfo.DeviceId                = PP.DeviceUuid;
+                LocalDevInfo.ReleayServerRuntimeId   = PP.RelayServerRuntimeId;
+                LocalDevInfo.RelayServerSideDeviceId = PP.RelayServerSideDeviceId;
 
                 LocalDevInfo.CountryId = PP.CountryId;
                 LocalDevInfo.StateId   = PP.StateId;

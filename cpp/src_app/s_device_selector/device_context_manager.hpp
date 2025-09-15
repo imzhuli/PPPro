@@ -14,7 +14,7 @@ struct xDR_CityNode : xListNode {};
 
 struct xDR_DeviceInfoBase {
     uint64_t    ReleayServerRuntimeId;
-    uint64_t    RelaySideDeviceId;
+    uint64_t    RelayServerSideDeviceId;
     std::string DeviceId;
 
     xCountryId CountryId;

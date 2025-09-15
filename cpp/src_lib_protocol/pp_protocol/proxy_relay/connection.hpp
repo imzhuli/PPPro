@@ -3,11 +3,11 @@
 
 class xPR_CreateConnection : public xBinaryMessage {
 public:
-    void SerializeMembers() override { W(RelaySideDeviceId, ProxySideConnectionId, TargetAddress, HostnameView, HostnamePort); }
-    void DeserializeMembers() override { R(RelaySideDeviceId, ProxySideConnectionId, TargetAddress, HostnameView, HostnamePort); }
+    void SerializeMembers() override { W(RelayServerSideDeviceId, ProxySideConnectionId, TargetAddress, HostnameView, HostnamePort); }
+    void DeserializeMembers() override { R(RelayServerSideDeviceId, ProxySideConnectionId, TargetAddress, HostnameView, HostnamePort); }
 
 public:
-    uint64_t         RelaySideDeviceId;
+    uint64_t         RelayServerSideDeviceId;
     uint64_t         ProxySideConnectionId;
     xNetAddress      TargetAddress;
     std::string_view HostnameView;

@@ -37,10 +37,10 @@ int main(int argc, char ** argv) {
                 }
 
                 if (!PP.IsOffline) {
-                    auto LocalDevInfo                  = xDR_DeviceInfoBase{};
-                    LocalDevInfo.DeviceId              = PP.DeviceUuid;
-                    LocalDevInfo.ReleayServerRuntimeId = PP.RelayServerRuntimeId;
-                    LocalDevInfo.RelaySideDeviceId     = PP.RelaySideDeviceKey;
+                    auto LocalDevInfo                    = xDR_DeviceInfoBase{};
+                    LocalDevInfo.DeviceId                = PP.DeviceUuid;
+                    LocalDevInfo.ReleayServerRuntimeId   = PP.RelayServerRuntimeId;
+                    LocalDevInfo.RelayServerSideDeviceId = PP.RelayServerSideDeviceId;
 
                     LocalDevInfo.CountryId = PP.CountryId;
                     LocalDevInfo.StateId   = PP.StateId;

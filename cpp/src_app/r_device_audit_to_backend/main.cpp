@@ -32,14 +32,12 @@ struct xODI_DeviceInfo : xODI_DeviceKeepAliveNode {
     xNetAddress Udp4Address;
     xNetAddress Tcp6Address;
     xNetAddress Udp6Address;
-    uint64_t    TotalUploadSizeSinceOnline;    // 指发向目标的数据
-    uint64_t    TotalDownloadSizeSinceOnline;  // 下载数据
-    uint32_t    CurrentConnectionCount;
-    uint32_t    CurrentUdpChannelCount;
+    bool        SpeedLimitEnabled;
 
-    bool SupportUdpChannel;
-    bool SupportDnsRequests;
-    bool SpeedLimitEnabled;
+    uint64_t TotalUploadSizeSinceOnline;    // 指发向目标的数据
+    uint64_t TotalDownloadSizeSinceOnline;  // 下载数据
+    uint32_t CurrentConnectionCount;
+    uint32_t CurrentUdpChannelCount;
 
     uint32_t TotalNewConnectionsSinceLastPost;
     uint32_t TotalClosedConnectionSinceLastPost;
@@ -70,10 +68,8 @@ static void PostDeviceInfo(const xODI_DeviceInfo * DP, bool Online) {
     ReqDI.Tcp6Address = DP->Tcp6Address;
     ReqDI.Udp6Address = DP->Udp6Address;
 
-    ReqDI.IsOffline          = !Online;
-    ReqDI.SupportUdpChannel  = DP->SupportUdpChannel;
-    ReqDI.SupportDnsRequests = DP->SupportDnsRequests;
-    ReqDI.SpeedLimitEnabled  = DP->SpeedLimitEnabled;
+    ReqDI.IsOffline         = !Online;
+    ReqDI.SpeedLimitEnabled = DP->SpeedLimitEnabled;
 
     ReqDI.TotalOnlineTimeMS = NowMS - DP->OnlineTimestampMS;
 
@@ -83,7 +79,7 @@ static void PostDeviceInfo(const xODI_DeviceInfo * DP, bool Online) {
     auto MsgKey = DP->DeviceUuid;
     KR.Post(MsgKey, Buffer, MSize);
 
-    DEBUG_LOG("\n%s", HexShow(Buffer, MSize).c_str());
+    // DEBUG_LOG("\n%s", HexShow(Buffer, MSize).c_str());
 }
 
 static void OnDeviceUpdate(ubyte * PayloadPtr, size_t PayloadSize) {
@@ -116,9 +112,7 @@ static void OnDeviceUpdate(ubyte * PayloadPtr, size_t PayloadSize) {
     DI.Tcp6Address = PP.Tcp6Address;
     DI.Udp6Address = PP.Udp6Address;
 
-    DI.SupportUdpChannel  = PP.SupportUdpChannel;
-    DI.SupportDnsRequests = PP.SupportDnsRequests;
-    DI.SpeedLimitEnabled  = PP.SpeedLimitEnabled;
+    DI.SpeedLimitEnabled = PP.SpeedLimitEnabled;
 
     // KeepAlive
     PostDeviceInfo(&DI, true);
@@ -127,8 +121,7 @@ static void OnDeviceUpdate(ubyte * PayloadPtr, size_t PayloadSize) {
 }
 
 static bool OnServerPacket(const xMessageChannel & Source, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) {
-
-    DEBUG_LOG("CommandId=% " PRIx32 "\n%s", CommandId, HexShow(PayloadPtr, PayloadSize).c_str());
+    // DEBUG_LOG("CommandId=% " PRIx32 "\n%s", CommandId, HexShow(PayloadPtr, PayloadSize).c_str());
     switch (CommandId) {
         case Cmd_DSR_DS_DeviceUpdate:
             OnDeviceUpdate(PayloadPtr, PayloadSize);

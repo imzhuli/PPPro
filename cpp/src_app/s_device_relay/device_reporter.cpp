@@ -42,8 +42,8 @@
 //     //
 // };
 
-static xAD_BK_DeviceInfo PrepareReport(const xDR_DeviceContext * PDC) {
-    auto DI       = xAD_BK_DeviceInfo();
+static xPP_DeviceInfoUpdate PrepareReport(const xDR_DeviceContext * PDC) {
+    auto DI       = xPP_DeviceInfoUpdate();
     DI.Version    = PDC->Version;
     DI.ChannelId  = PDC->ChannelId;
     DI.DeviceUuid = PDC->Uuid;
@@ -51,38 +51,21 @@ static xAD_BK_DeviceInfo PrepareReport(const xDR_DeviceContext * PDC) {
     DI.RelayServerRuntimeId    = ServerIdClient.GetLocalServerId();
     DI.RelayServerSideDeviceId = PDC->Id;
 
-    DI.TotalOnlineTimeMS = ServiceTicker() - PDC->StartupTimestampMS;
     return DI;
 }
 
 void ReportNewDevice(const xDR_DeviceContext * PDC) {
-    auto Report                  = xAD_BK_ReportDeviceInfoSingle();
-    Report.LocalAuditTimestampMS = ServiceTicker();
-
-    auto & DI = Report.DeviceInfo;
-    DI        = PrepareReport(PDC);
-
-    DeviceReporter.PostMessageByHash(DI.RelayServerRuntimeId, Cmd_AuditTerminalInfo2, 0, Report);
+    auto DI = PrepareReport(PDC);
+    DeviceReporter.PostMessageByHash(DI.RelayServerRuntimeId, Cmd_DSR_DS_DeviceUpdate, 0, DI);
 }
 
 void ReportKeepAliveDevice(const xDR_DeviceContext * PDC) {
-    auto Report                  = xAD_BK_ReportDeviceInfoSingle();
-    Report.LocalAuditTimestampMS = ServiceTicker();
-
-    auto & DI = Report.DeviceInfo;
-    DI        = PrepareReport(PDC);
-
-    DeviceReporter.PostMessageByHash(DI.RelayServerRuntimeId, Cmd_AuditTerminalInfo2, 0, Report);
+    auto DI = PrepareReport(PDC);
+    DeviceReporter.PostMessageByHash(DI.RelayServerRuntimeId, Cmd_DSR_DS_DeviceUpdate, 0, DI);
 }
 
 void ReportDeviceDrop(const xDR_DeviceContext * PDC) {
-    auto Report                  = xAD_BK_ReportDeviceInfoSingle();
-    Report.LocalAuditTimestampMS = ServiceTicker();
-
-    auto & DI = Report.DeviceInfo;
-    DI        = PrepareReport(PDC);
-
-    DeviceReporter.PostMessageByHash(DI.RelayServerRuntimeId, Cmd_AuditTerminalInfo2, 0, Report);
-
-    // offline specific:
+    auto DI      = PrepareReport(PDC);
+    DI.IsOffline = true;
+    DeviceReporter.PostMessageByHash(DI.RelayServerRuntimeId, Cmd_DSR_DS_DeviceUpdate, 0, DI);
 }
