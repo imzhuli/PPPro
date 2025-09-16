@@ -80,6 +80,7 @@ set(target_list
 
 	s_udp_printer
 	t_base
+	t_direct_auth
 	t_server_list_downloader
 
 	x_device

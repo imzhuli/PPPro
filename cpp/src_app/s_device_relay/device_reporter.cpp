@@ -51,6 +51,11 @@ static xPP_DeviceInfoUpdate PrepareReport(const xDR_DeviceContext * PDC) {
     DI.RelayServerRuntimeId    = ServerIdClient.GetLocalServerId();
     DI.RelayServerSideDeviceId = PDC->Id;
 
+    DI.Tcp4Address = PDC->Tcp4Address;
+    DI.Udp4Address = PDC->Udp4Address;
+    DI.Tcp6Address = PDC->Tcp6Address;
+    DI.Udp6Address = PDC->Udp6Address;
+
     return DI;
 }
 

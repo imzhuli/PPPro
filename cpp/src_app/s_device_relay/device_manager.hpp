@@ -11,6 +11,11 @@ struct xDR_DeviceContext final {
     uint32_t    Version;
     uint32_t    ChannelId;
     xDeviceFlag Flags;
+
+    xNetAddress Tcp4Address;
+    xNetAddress Udp4Address;
+    xNetAddress Tcp6Address;
+    xNetAddress Udp6Address;
 };
 
 extern void InitDeviceContextManager();

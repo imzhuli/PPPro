@@ -11,7 +11,7 @@ public:
         W(RelayServerSideDeviceId);
         W(DeviceUuid);
 
-        W(Tcp4Address, Udp4Address, Tcp6Address, Tcp6Address);
+        W(Tcp4Address, Udp4Address, Tcp6Address, Udp6Address);
         W(CountryId, StateId, CityId);
         W(IsOffline, SpeedLimitEnabled);
     }
@@ -22,7 +22,7 @@ public:
         R(RelayServerSideDeviceId);
         R(DeviceUuid);
 
-        R(Tcp4Address, Udp4Address, Tcp6Address, Tcp6Address);
+        R(Tcp4Address, Udp4Address, Tcp6Address, Udp6Address);
         R(CountryId, StateId, CityId);
         R(IsOffline, SpeedLimitEnabled);
     }

@@ -28,6 +28,7 @@ struct xODI_DeviceInfo : xODI_DeviceKeepAliveNode {
     uint64_t    LastKeepAliveTimestampMS = 0;
 
     uint32_t    Version;
+    uint32_t    ChannelId;
     xNetAddress Tcp4Address;
     xNetAddress Udp4Address;
     xNetAddress Tcp6Address;
@@ -52,7 +53,11 @@ static auto DeviceObserver    = xClientPoolWrapper();
 static auto DSRDownloader     = xDeviceStateRelayServerListDownloader();
 
 static void PostDeviceInfo(const xODI_DeviceInfo * DP, bool Online) {
-    DEBUG_LOG("DeviceId: %s, Online=%s, Ip=%s, Ipv6=%s", DP->DeviceUuid.c_str(), YN(Online), DP->Tcp4Address.ToString().c_str(), DP->Tcp6Address.ToString().c_str());
+    DEBUG_LOG(
+        "DeviceId: %s, Online=%s, Version=%u, ChannelId=%u, Ip=%s/%s, Ipv6=%s/%s", DP->DeviceUuid.c_str(), YN(Online),  //
+        (unsigned)DP->Version, (unsigned)DP->ChannelId, DP->Tcp4Address.ToString().c_str(), DP->Udp4Address.ToString().c_str(), DP->Tcp6Address.ToString().c_str(),
+        DP->Udp6Address.ToString().c_str()
+    );
 
     auto   Req   = xAD_BK_ReportDeviceInfoSingle();
     auto & ReqDI = Req.DeviceInfo;
@@ -62,6 +67,7 @@ static void PostDeviceInfo(const xODI_DeviceInfo * DP, bool Online) {
     Req.LocalAuditTimestampMS = NowMS;
 
     ReqDI.Version     = DP->Version;
+    ReqDI.ChannelId   = DP->ChannelId;
     ReqDI.DeviceUuid  = DP->DeviceUuid;
     ReqDI.Tcp4Address = DP->Tcp4Address;
     ReqDI.Udp4Address = DP->Udp4Address;
@@ -107,6 +113,7 @@ static void OnDeviceUpdate(ubyte * PayloadPtr, size_t PayloadSize) {
     DI.OnlineTimestampMS = NowMS;
 
     DI.Version     = PP.Version;
+    DI.ChannelId   = PP.ChannelId;
     DI.Tcp4Address = PP.Tcp4Address;
     DI.Udp4Address = PP.Udp4Address;
     DI.Tcp6Address = PP.Tcp6Address;

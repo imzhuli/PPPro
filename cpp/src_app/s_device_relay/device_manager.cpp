@@ -235,6 +235,11 @@ static bool OnDeviceHandshake(const xTcpServiceClientConnectionHandle & Handle, 
     PDC->Version            = DAP.Version;
     PDC->ChannelId          = DAP.ChannelId;
 
+    PDC->Tcp4Address = DAP.Tcp4Address;
+    PDC->Udp4Address = DAP.Udp4Address;
+    PDC->Tcp6Address = DAP.Tcp6Address;
+    PDC->Udp6Address = DAP.Udp6Address;
+
     auto RS     = xPP_DeviceHandshakeResp();
     RS.Accepted = true;
     Handle.PostMessage(Cmd_DV_RL_HandshakeResp, 0, RS);
