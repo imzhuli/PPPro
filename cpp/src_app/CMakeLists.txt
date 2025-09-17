@@ -76,7 +76,7 @@ set(target_list
 	s_config_center
 
 	# s_device_selector
-	# s_device_selector_dispatcher
+	s_device_selector_dispatcher
 	s_device_state_relay
 
 	s_udp_printer

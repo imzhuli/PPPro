@@ -8,8 +8,8 @@ xNetAddress ExportBindAddressForServer;
 xNetAddress ServerIdCenterAddress;
 xNetAddress ServerListRegisterAddress;
 
-xDSD_ClientSideService ClientSideService;
-xDSD_ServerSideService ServerSideService;
+xTcpService ClientSideService;
+xTcpService ServerSideService;
 
 xServiceRequestContextPool RequestContextPool;
 

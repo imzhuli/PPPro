@@ -9,7 +9,14 @@
 
 #include <pp_common/_.hpp>
 
-extern xNetAddress ConfigTcpBindAddress;
+extern xNetAddress ConfigTcpBindAddress4;
+extern xNetAddress ConfigTcpBindAddress6;
+extern xNetAddress ConfigUdpBindAddress4;
+extern xNetAddress ConfigUdpBindAddress6;
+
+extern xNetAddress ConfigExportUdpServerAddress4;
+extern xNetAddress ConfigExportUdpServerAddress6;
+
 extern xNetAddress ConfigServerListDownloadAddress;
 
 extern xAuditAccountServerListDownloader AuditAccountServerListDownloader;

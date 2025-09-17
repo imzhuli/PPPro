@@ -14,8 +14,8 @@ extern xNetAddress ExportBindAddressForServer;
 extern xNetAddress ServerIdCenterAddress;
 extern xNetAddress ServerListRegisterAddress;
 
-extern xDSD_ClientSideService ClientSideService;
-extern xDSD_ServerSideService ServerSideService;
+extern xTcpService ClientSideService;
+extern xTcpService ServerSideService;
 
 extern xServiceRequestContextPool RequestContextPool;
 

@@ -1,22 +1,7 @@
 #pragma once
 #include <pp_common/_.hpp>
 
-class xDSD_ServerSideService
-    : xService
-    , xSingleton<xDSD_ServerSideService> {
-public:
-    using xService::Clean;
-    using xService::Init;
-    using xService::Tick;
+bool OnDSDServerSidePacket(const xTcpServiceClientConnectionHandle & Handle, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize);
+void OnDSDServerSideClose(const xTcpServiceClientConnectionHandle & Handle);
 
-    //
-    //
-private:
-    bool OnClientPacket(xServiceClientConnection & Connection, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) override;
-    void OnClientClose(xServiceClientConnection & Connection) override;
-
-private:
-    bool OnRegisterServiceProvider(xServiceClientConnection & Connection, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize);
-
-    //
-};
+bool OnRegisterServiceProvider(const xTcpServiceClientConnectionHandle & Handle, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize);
