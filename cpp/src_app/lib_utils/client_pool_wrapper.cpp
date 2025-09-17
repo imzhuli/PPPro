@@ -101,6 +101,14 @@ void xClientPoolWrapper::OnServerConnected(xClientConnection & CC) {
     OnConnectedCallback(Poster);
 }
 
+void xClientPoolWrapper::OnServerClose(xClientConnection & CC) {
+    auto Poster = xCPW_MessageChannel{
+        this,
+        &CC,
+    };
+    OnDisonnectedCallback(Poster);
+}
+
 bool xClientPoolWrapper::OnServerPacket(xClientConnection & CC, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) {
     auto Poster = xCPW_MessageChannel{
         this,

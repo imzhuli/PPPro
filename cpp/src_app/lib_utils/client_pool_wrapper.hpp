@@ -20,14 +20,17 @@ public:
 
     using xOnUpdateServerListCallback = std::function<void(const std::vector<xNetAddress> & Added, const std::vector<xNetAddress> & Removed)>;
     using xOnConnectedCallback        = std::function<void(const xMessageChannel & Source)>;
+    using xOnDisonnectedCallback      = std::function<void(const xMessageChannel & Source)>;
     using xOnPacketCallback = std::function<bool(const xMessageChannel & Source, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize)>;
 
     xOnUpdateServerListCallback OnUpdateServerListCallback = Noop<>;
     xOnConnectedCallback        OnConnectedCallback        = Noop<>;
+    xOnDisonnectedCallback      OnDisonnectedCallback      = Noop<>;
     xOnPacketCallback           OnPacketCallback           = Noop<true>;
 
 private:
     void OnServerConnected(xClientConnection & CC) override;
+    void OnServerClose(xClientConnection & CC) override;
     bool OnServerPacket(xClientConnection & CC, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) override;
 
 private:

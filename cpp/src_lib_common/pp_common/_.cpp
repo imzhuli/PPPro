@@ -57,7 +57,7 @@ uint32_t HashString(const char * S, size_t Len) {
     return H;
 }
 
-uint32_t HashString(const std::string & S) {
+uint32_t HashString(const std::string_view & S) {
     return HashString(S.data(), S.size());
 }
 

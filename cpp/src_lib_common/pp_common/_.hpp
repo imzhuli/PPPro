@@ -378,14 +378,12 @@ static inline uint64_t Make64_H16L48(uint16_t H16, uint64_t L48) { return (stati
 
 // clang-format off
 
-#define CASE_PRINT(x) case x: X_DEBUG_PRINTF("%s", X_STRINGIFY(x)); break
-
 template<typename T>
 std::unique_ptr<T> P2U(T * && Ptr) { return std::unique_ptr<T>(std::move(Ptr)); }
 
 extern uint32_t HashString(const char * S);
 extern uint32_t HashString(const char * S, size_t Len);
-extern uint32_t HashString(const std::string & S);
+extern uint32_t HashString(const std::string_view & S);
 
 extern std::string AppSign(uint64_t Timestamp, const std::string & SecretKey, const void * DataPtr, size_t Size);
 static inline std::string AppSign(uint64_t Timestamp, const std::string & SecretKey, const std::string_view& V) { return AppSign(Timestamp, SecretKey, V.data(), V.size()); }
@@ -401,3 +399,7 @@ inline std::ostream & operator<<(std::ostream & OS, const xNetAddress & Address)
     OS << Address.ToString();
     return OS;
 }
+
+#define X_AT_EXIT(v) auto X_CONCAT_FORCE_EXPAND(__X_AtExit__, __LINE__) = ::xel::xScopeGuard(v);
+// dismissable guard:
+#define XDG(name, v) auto name = xScopeGuard(v)

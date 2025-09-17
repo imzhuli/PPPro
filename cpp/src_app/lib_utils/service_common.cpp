@@ -5,23 +5,22 @@
 
 /// @brief Common code in ////////
 
-static xIoContext ServiceIoContextInstance;
+static xIoContext      ServiceIoContextInstance;
+static xel::xNonLogger NonLogger;
 
 xRuntimeEnv  RuntimeEnv                 = {};
-xLogger *    Logger                     = nullptr;
-xLogger *    AuditLogger                = nullptr;
+xLogger *    Logger                     = &NonLogger;
+xLogger *    AuditLogger                = &NonLogger;
 xIoContext * ServiceIoContext           = nullptr;
 uint64_t     ServiceIoLoopOnceTimeoutMS = 10;
 xTicker      ServiceTicker              = {};
 xRunState    ServiceRunState            = {};
 
 static void InitLogger() {
-    RuntimeAssert(!Logger);
     Logger = new xBaseLogger();
     RuntimeAssert(static_cast<xBaseLogger *>(Logger)->Init(std::string(RuntimeEnv.DefaultLoggerFilePath).c_str(), false));
     Logger->SetLogLevel(eLogLevel::Debug);
 
-    RuntimeAssert(!AuditLogger);
     AuditLogger = new xBaseLogger();
     RuntimeAssert(static_cast<xBaseLogger *>(AuditLogger)->Init(std::string(RuntimeEnv.DefaultAuditLoggerFilePath).c_str(), false));
 }
@@ -29,11 +28,11 @@ static void InitLogger() {
 static void CleanLogger() {
     RuntimeAssert(AuditLogger);
     static_cast<xBaseLogger *>(AuditLogger)->Clean();
-    delete Steal(AuditLogger);
+    delete Steal(AuditLogger, &NonLogger);
 
     RuntimeAssert(Logger);
     static_cast<xBaseLogger *>(Logger)->Clean();
-    delete Steal(Logger);
+    delete Steal(Logger, &NonLogger);
 }
 
 static auto Instance = (xRuntimeEnvGuard *){};

@@ -57,7 +57,7 @@ public:
         std::string ToString() const;
     };
 
-    using xAsyncQueryCallback        = std::function<bool(uint64_t CacheNodeId, const std::string & Key)>;
+    using xAsyncQueryProcedure       = std::function<bool(uint64_t CacheNodeId, const std::string & Key)>;
     using xOnImmediateResultCallback = std::function<void(const xCacheRequestContext & Context, const void * Data)>;
     using xOnAsyncResultCallback     = std::function<void(const xCacheRequestContext & Context, const void * Data)>;
     using xOnReleaseDataCallback     = std::function<void(uint64_t CacheNodeId, const void * Data)>;
@@ -67,7 +67,7 @@ public:
 
     void RemoveTimeoutCacheNodes(uint64_t NowMS);
 
-    xAsyncQueryCallback        AsyncQueryCallback        = Noop<false>;
+    xAsyncQueryProcedure       AsyncQueryProcedure       = Noop<false>;
     xOnImmediateResultCallback OnImmediateResultCallback = Noop<>;
     xOnAsyncResultCallback     OnAsyncResultCallback     = Noop<>;
     xOnReleaseDataCallback     OnReleaseDataCallback     = Noop<>;
@@ -76,16 +76,10 @@ public:
     void PostAcquireCacheNodeRequest(const std::string & Key, const xCacheRequestContext & Context);
     auto GetLocalAudit() { return LocalAudit; }
     auto GetAndResetLocalAudit() { return Steal(LocalAudit); }
-
-    void SetAsyncQueryCallback(const xAsyncQueryCallback & CB) { AsyncQueryCallback = CB; }
-    void SetOnImmediateResultCallback(const xOnImmediateResultCallback & CB) { OnImmediateResultCallback = CB; }
-    void SetOnAsyncResultCallback(const xOnAsyncResultCallback & CB) { OnAsyncResultCallback = CB; }
-    void SetOnReleaseDataCallback(const xOnReleaseDataCallback & CB) { OnReleaseDataCallback = CB; }
-
     void SetAsyncResultData(uint64_t CacheNodeId, const void * Data);
 
 protected:
-    bool MakeAsyncQuery(uint64_t CacheNodeId, const std::string & Key) { return AsyncQueryCallback(CacheNodeId, Key); }
+    bool MakeAsyncQuery(uint64_t CacheNodeId, const std::string & Key) { return AsyncQueryProcedure(CacheNodeId, Key); }
     void OnImmediateResult(const xCacheRequestContext & Context, const void * Data) { OnImmediateResultCallback(Context, Data); }
     void OnAsyncResultData(const xCacheRequestContext & Context, const void * Data) { OnAsyncResultCallback(Context, Data); }
     void OnReleaseData(uint64_t CacheNodeId, const void * Data) { OnReleaseDataCallback(CacheNodeId, Data); }

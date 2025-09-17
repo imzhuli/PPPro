@@ -1,15 +1,22 @@
-#include "../lib_backend_connection/backend_connection_pool.hpp"
+#include "./class.hpp"
 
 #include <pp_common/_.hpp>
 
 auto IC  = xel::xIoContext();
 auto ICG = xel::xResourceGuard(IC);
-auto BC  = xBackendConnectionPool();
-auto BCG = xResourceGuard(BC, &IC, 10);
-auto RS  = xel::xRunState();
+auto AC  = xAuthClient();
+
+auto BackendServerAppKey    = "apitest";
+auto BackendServerAppSecret = "123456";
+auto TestAccount            = "C_he_US_1001__5_78758832:1234567";
+
+auto Ticker    = xTicker();
+auto StartTime = Ticker();
+auto Request   = false;
 
 int main(int argc, char ** argv) {
-    auto CL = xel::xCommandLine(
+    auto REG = xRuntimeEnvGuard(argc, argv, false);
+    auto CL  = xel::xCommandLine(
         argc, argv,
         {
             { 'a', nullptr, "address", true },
@@ -22,12 +29,32 @@ int main(int argc, char ** argv) {
     auto OU = CL["username"];
     auto OP = CL["password"];
 
-    if (!OA || !OU || !OP) {
+    if (!OA) {
+        cerr << "invalid params" << endl;
+        return -1;
     }
 
-    RS.Start();
-    while (RS) {
-        IC.LoopOnce();
+    X_GUARD(AC, ServiceIoContext, xNetAddress::Parse(*OA));
+    AC.OnEnabled = []() {
+        cout << "enabled" << endl;
+        if (!AC.Request(TestAccount, 1024)) {
+            cerr << "failed to post auth request" << endl;
+        }
+    };
+    AC.OnAuthCacheResultCallback = [](uint64_t RequestContextId, const xClientAuthResult * AuthResult) {
+        cout << "RequestId: " << RequestContextId << endl;
+        X_AT_EXIT([] { ServiceRunState.Stop(); });
+
+        if (!AuthResult) {
+            cout << "no result" << endl;
+            return;
+        }
+        cout << "AuditId: " << AuthResult->AuditId << endl;
+        return;
+    };
+
+    while (ServiceRunState) {
+        ServiceUpdateOnce(AC);
     }
 
     return 0;

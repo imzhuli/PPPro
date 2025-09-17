@@ -11,15 +11,17 @@ bool xAC_AuthService::Init(xIoContext * ICP, const xNetAddress & BindAddress) {
     RuntimeAssert(CacheManager.Init(100'000, 100'000));
     RuntimeAssert(BackendPool.Init(ICP, MAX_BACKEND_SERVER_COUNT));
 
-    CacheManager.SetAsyncQueryCallback([this](uint64_t CacheNodeId, const std::string & Key) {
+    CacheManager.AsyncQueryProcedure = [this](uint64_t CacheNodeId, const std::string & Key) {
+        DEBUG_LOG("Request: %s", Key.c_str());
+
         auto T     = xPPB_BackendAuthByUserPass();
         T.UserPass = Key;
         BackendPool.PostMessage(Cmd_BackendAuthByUserPass, CacheNodeId, T);
         return true;
-    });
+    };
 
-    CacheManager.SetOnImmediateResultCallback([this](const xCacheRequestContext & Context, const void * Data) {
-        DEBUG_LOG("ImmediateResultCallback");
+    CacheManager.OnImmediateResultCallback = [this](const xCacheRequestContext & Context, const void * Data) {
+        DEBUG_LOG("");
         auto   RD   = (xPPB_BackendAuthByUserPassResp *)Data;
         auto   Resp = xPP_QueryAuthCacheResp();
         auto & R    = Resp.Result;
@@ -38,40 +40,36 @@ bool xAC_AuthService::Init(xIoContext * ICP, const xNetAddress & BindAddress) {
             Handle.PostMessage(Cmd_AuthService_QueryAuthCacheResp, Context.RequestId, Resp);
         }
         return;
-    });
+    };
 
-    CacheManager.SetOnAsyncResultCallback([this](const xCacheRequestContext & Context, const void * Data) {
-        DEBUG_LOG("AsyncResultCallback");
-        auto   RD   = (xPPB_BackendAuthByUserPassResp *)Data;
-        auto   Resp = xPP_QueryAuthCacheResp();
-        auto & R    = Resp.Result;
-
-        R.AuditId      = RD->AuditId;
-        R.CountryId    = RD->CountryId;
-        R.StateId      = RD->StateId;
-        R.CityId       = RD->CityId;
-        R.RequireIpv6  = RD->Ipv6Prefered;
-        R.RequireUdp   = RD->EnableUdp;
-        R.AutoChangeIp = RD->AutoChangeIpOnDeviceOffline;
-        R.PAToken      = RD->ServerToken;
-
+    CacheManager.OnAsyncResultCallback = [this](const xCacheRequestContext & Context, const void * Data) {
+        DEBUG_LOG("AsyncResultCallback, Data=%p", Data);
+        auto Resp = xPP_QueryAuthCacheResp();
+        if (auto RD = (xPPB_BackendAuthByUserPassResp *)Data) {
+            auto & R       = Resp.Result;
+            R.AuditId      = RD->AuditId;
+            R.CountryId    = RD->CountryId;
+            R.StateId      = RD->StateId;
+            R.CityId       = RD->CityId;
+            R.RequireIpv6  = RD->Ipv6Prefered;
+            R.RequireUdp   = RD->EnableUdp;
+            R.AutoChangeIp = RD->AutoChangeIpOnDeviceOffline;
+            R.PAToken      = RD->ServerToken;
+        }
         auto Handle = xTcpServiceClientConnectionHandle(static_cast<xTcpService *>(Context.Value.P), Context.ValueEx.U64);
         if (Handle.operator->()) {
             Handle.PostMessage(Cmd_AuthService_QueryAuthCacheResp, Context.RequestId, Resp);
         }
         return;
-    });
-    CacheManager.SetOnReleaseDataCallback([this](uint64_t CacheNodeId, const void * Data) {
+    };
+    CacheManager.OnReleaseDataCallback = [this](uint64_t CacheNodeId, const void * Data) {
         DEBUG_LOG("ReleaseDataCallback");
         delete (xPPB_BackendAuthByUserPassResp *)Data;
         ++DeleteCachedResultCount;
         return;
-    });
-
-    BackendPool.BackendPacketCallback = [this](xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) {
-        OnBackendPacket(CommandId, RequestId, PayloadPtr, PayloadSize);
     };
 
+    TcpService.OnClientPacket = Delegate(&xAC_AuthService::OnClientPacket, this);
     return true;
 }
 
@@ -85,10 +83,8 @@ void xAC_AuthService::Clean() {
 }
 
 void xAC_AuthService::Tick(uint64_t NowMS) {
-    TcpService.Tick(NowMS);
-
     CacheManager.RemoveTimeoutCacheNodes(NowMS);
-    TickAll(NowMS, BackendPool);
+    TickAll(NowMS, TcpService, BackendPool);
 
     // do local audit:
     if (NowMS - LastOutputLocalAuditTimestampMS >= LOCAL_AUDIT_TIMEOUT_MS) {

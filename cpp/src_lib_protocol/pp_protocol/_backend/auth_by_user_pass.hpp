@@ -13,8 +13,8 @@ public:
     }
 
 public:
-    std::string UserPass;
-    xNetAddress ClientIp;
+    std::string_view UserPass;
+    xNetAddress      ClientIp;
 };
 
 class xPPB_BackendAuthByUserPassResp final : public xBinaryMessage {
