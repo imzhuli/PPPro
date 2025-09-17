@@ -34,11 +34,23 @@ void xDS_DeviceContextManager::UpdateDevice(const xDR_DeviceInfoBase & InfoBase)
                 ++LocalAudit.ReplacedDeviceCount;
                 PD->InfoBase = InfoBase;
                 Reset(PD->ResisterCounter, DEVICE_INFO_RESIST_COUNTER);
+
+                Reset(PD->EnableCounter);
+                xDR_CoutryList::Remove(*PD);
+                xDR_StateList::Remove(*PD);
+                xDR_CityList::Remove(*PD);
             }
         } else {
             Reset(PD->ResisterCounter, DEVICE_INFO_RESIST_COUNTER);
+            if (PD->EnableCounter < DEVICE_INFO_ENABLE_COUNTER_TARGET) {
+                ++PD->EnableCounter;
+                if (PD->EnableCounter == DEVICE_INFO_ENABLE_COUNTER_TARGET) {
+                    CountryDeviceList[InfoBase.CountryId].AddTail(*PD);
+                    StateDeviceList[InfoBase.StateId].AddTail(*PD);
+                    CityDeviceList[InfoBase.CityId].AddTail(*PD);
+                }
+            }
         }
-
         KeepAlive(PD);
         return;
     }
@@ -46,10 +58,6 @@ void xDS_DeviceContextManager::UpdateDevice(const xDR_DeviceInfoBase & InfoBase)
     // add new device:
     auto PD      = new xDS_DeviceContext();
     PD->InfoBase = InfoBase;
-
-    CountryDeviceList[InfoBase.CountryId].AddTail(*PD);
-    StateDeviceList[InfoBase.StateId].AddTail(*PD);
-    CityDeviceList[InfoBase.CityId].AddTail(*PD);
 
     DeviceMap[InfoBase.DeviceId] = PD;
     KeepAlive(PD);

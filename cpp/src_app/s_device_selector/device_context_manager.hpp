@@ -4,7 +4,7 @@
 
 static constexpr const uint64_t DEVICE_KEEPALIVE_TIMEOUT_MS       = 180'000;  // normally device is removed by request from dispatcher
 static constexpr const size_t   DEVICE_INFO_RESIST_COUNTER        = 2;        // normally device is removed by request from dispatcher
-static constexpr const size_t   DEVICE_INFO_ENABLE_COUNTER_TARGET = 3;
+static constexpr const size_t   DEVICE_INFO_ENABLE_COUNTER_TARGET = 2;
 
 struct xDR_TimeoutNode : xListNode {
     uint64_t TimestampMS;
@@ -12,6 +12,9 @@ struct xDR_TimeoutNode : xListNode {
 struct xDR_CountryNode : xListNode {};
 struct xDR_StateNode : xListNode {};
 struct xDR_CityNode : xListNode {};
+using xDR_CoutryList = xList<xDR_CountryNode>;
+using xDR_StateList  = xList<xDR_StateNode>;
+using xDR_CityList   = xList<xDR_CityNode>;
 
 struct xDR_DeviceInfoBase {
     uint64_t    ReleayServerRuntimeId;
@@ -53,8 +56,8 @@ protected:
 private:
     xTicker                                              Ticker;
     xList<xDR_TimeoutNode>                               TimeoutDeviceList;
-    std::unordered_map<uint32_t, xList<xDR_CountryNode>> CountryDeviceList;
-    std::unordered_map<uint32_t, xList<xDR_StateNode>>   StateDeviceList;
-    std::unordered_map<uint32_t, xList<xDR_CityNode>>    CityDeviceList;
+    std::unordered_map<uint32_t, xDR_CoutryList>         CountryDeviceList;
+    std::unordered_map<uint32_t, xDR_StateList>          StateDeviceList;
+    std::unordered_map<uint32_t, xDR_CityList>           CityDeviceList;
     std::unordered_map<std::string, xDS_DeviceContext *> DeviceMap;
 };
