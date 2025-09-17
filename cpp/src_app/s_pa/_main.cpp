@@ -11,7 +11,7 @@ int main(int argc, char ** argv) {
     CL.Require(ConfigServerListDownloadAddress, "ServerListDownloadAddress");
 
     X_GUARD(AuditAccountServerListDownloader, ServiceIoContext, ConfigServerListDownloadAddress);
-    X_GUARD(AuthCacheServerListDownloader, ServiceIoContext, ConfigServerListDownloadAddress);
+    X_GUARD(AuthClient, ServiceIoContext, ConfigServerListDownloadAddress);
     X_GUARD(TcpServer, ServiceIoContext, ConfigTcpBindAddress, &ClientConnectionManager);
 
     AuditAccountServerListDownloader.OnUpdateAuditAccountServerListCallback = [](uint32_t Version, const std::vector<xServerInfo> & List) {
@@ -20,19 +20,13 @@ int main(int argc, char ** argv) {
         }
         // TODO
     };
-    AuthCacheServerListDownloader.OnUpdateAuthCacheServerListCallback = [](uint32_t Version, const std::vector<xServerInfo> & List) {
-        for (auto & I : List) {
-            Logger->I("AC_ServerId=%" PRIi64 ", Address=%s", I.ServerId, I.Address.ToString().c_str());
-        }
-        // TODO
-    };
 
+    auto CMTicker = xTickRunner(ClientManagerTick);
     while (true) {
         ServiceUpdateOnce(
             AuditAccountServerListDownloader,  //
-            AuthCacheServerListDownloader,     //
-            ClientConnectionManager,           //
-            DeadTicker
+            AuthClient,                        //
+            CMTicker
         );
     }
 

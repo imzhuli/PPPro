@@ -4,6 +4,6 @@ xNetAddress ConfigTcpBindAddress;
 xNetAddress ConfigServerListDownloadAddress;
 
 xAuditAccountServerListDownloader AuditAccountServerListDownloader;
-xAuthCacheServerListDownloader    AuthCacheServerListDownloader;
 
 xPA_ClientConnectionManager ClientConnectionManager;
+xAuthClient                 AuthClient;

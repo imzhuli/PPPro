@@ -18,6 +18,7 @@ public:
     void Tick(uint64_t NowMS);
     void Clean();
 
+    bool HasValidBackend() { return ACCConnections; }
     bool Request(const std::string_view & UserPassword, uint64_t SourceRequestId);
 
     // callback types

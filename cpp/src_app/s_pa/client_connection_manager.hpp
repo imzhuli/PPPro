@@ -25,3 +25,4 @@ extern void                   KeepAliveClientConnection(xPA_ClientConnection * C
 extern void                   CloseClientConnection(xPA_ClientConnection * ClientConnection);
 extern void                   RemoveIdleClientConnections();
 extern void                   DeferKillClientConnection(xPA_ClientConnection * ClientConnection);
+extern void                   ClientManagerTick(uint64_t /* ignored */);

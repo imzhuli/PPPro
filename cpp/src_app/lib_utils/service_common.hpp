@@ -76,11 +76,13 @@ private:
     xOnTimeoutRequestCallback               OnTimeoutRequestCallback = &IgnoreTimeoutRequest;
 };
 
-struct xTickRunner {
+class xTickRunner {
+public:
     const uint64_t                          TimeoutMS;
     const std::function<void(uint64_t Now)> Function;
 
-    uint64_t LastRunTimestampMS = 0;
+    xTickRunner(auto && F) : xTickRunner(0, std::forward<decltype(F)>(F)) {}
+    xTickRunner(uint64_t TimeoutMS, auto && F) : TimeoutMS(TimeoutMS), Function(std::forward<decltype(F)>(F)) {}
 
     void Tick(uint64_t NowMS) {
         if (NowMS <= LastRunTimestampMS + TimeoutMS) {
@@ -89,6 +91,9 @@ struct xTickRunner {
         LastRunTimestampMS = NowMS;
         Function(NowMS);
     }
+
+private:
+    uint64_t LastRunTimestampMS = 0;
 };
 
 #ifndef NDEBUG

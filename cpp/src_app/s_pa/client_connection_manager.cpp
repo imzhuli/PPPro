@@ -51,7 +51,7 @@ static void DestroyClientConnection(xPA_ClientConnection * ClientConnection) {
     delete ClientConnection;
 }
 
-void xPA_ClientConnectionManager::Tick(uint64_t NowMS) {
+void ClientManagerTick(uint64_t) {
     RemoveIdleClientConnections();
     while (auto P = (xPA_ClientConnection *)ClientConnectionKillList.PopHead()) {
         DestroyClientConnection(P);
