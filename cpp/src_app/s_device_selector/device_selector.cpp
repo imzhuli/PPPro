@@ -7,8 +7,8 @@
 
 bool xDS_DeviceSelectorServiceProvider::Init(xIoContext * ICP) {
     RuntimeAssert(ClientPool.Init(ICP));
-    ClientPool.SetOnConnectedCallback([this](const xMessageChannel & Poster) { RegisterServiceProvider(Poster); });
-    ClientPool.SetOnPacketCallback([this](const xMessageChannel & Source, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) -> bool {
+    ClientPool.OnConnectedCallback = [this](const xMessageChannel & Poster) { RegisterServiceProvider(Poster); };
+    ClientPool.OnPacketCallback = [this](const xMessageChannel & Source, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) -> bool {
         switch (CommandId) {
             case Cmd_RegisterServerResp:
                 return OnRegisterServerResp(PayloadPtr, PayloadSize);
@@ -19,7 +19,7 @@ bool xDS_DeviceSelectorServiceProvider::Init(xIoContext * ICP) {
                 return false;
         }
         return true;
-    });
+    };
 
     return true;
 }
@@ -66,12 +66,6 @@ bool xDS_DeviceSelectorServiceProvider::OnSelectDevice(const xMessageChannel & S
     Source.PostMessage(Cmd_DeviceSelector_AcquireDeviceResp, RequestId, Resp);
     return true;
 }
-
-// void xDS_DeviceSelectorService::OnClientClose(xServiceClientConnection & Connection) {
-// }
-
-// void xDS_DeviceSelectorService::OnCleanupClientConnection(const xServiceClientConnection & Connection) {
-// }
 
 // bool xDS_DeviceSelectorService::OnSelectDevice(xServiceClientConnection & CC, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) {
 //     auto Req = xPP_AcquireDevice();

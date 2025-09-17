@@ -17,17 +17,17 @@ int main(int argc, char ** argv) {
     X_GUARD(DSDDownloader, ServiceIoContext, ServerListDownloadAddress);
     X_GUARD(DeviceObserver, ServiceIoContext);
 
-    DSRDownloader.SetOnUpdateDeviceStateRelayServerListCallback([](uint32_t Version, const std::vector<xDeviceStateRelayServerInfo> & DSRInfo) {
+    DSRDownloader.OnUpdateDeviceStateRelayServerListCallback = [](uint32_t Version, const std::vector<xDeviceStateRelayServerInfo> & DSRInfo) {
         auto OSL = std::vector<xNetAddress>();
         for (auto & S : DSRInfo) {
             OSL.push_back(S.ObserverAddress);
         }
         DeviceObserver.UpdateServerList(OSL);
-    });
-    DSDDownloader.SetOnUpdateDeviceSelectorDispatcherServerListCallback([](uint32_t Version, const std::vector<xDeviceSelectorDispatcherInfo> & ServerList) {
+    };
+    DSDDownloader.OnUpdateDeviceSelectorDispatcherServerListCallback = [](uint32_t Version, const std::vector<xDeviceSelectorDispatcherInfo> & ServerList) {
         DeviceSelectorService.UpdateDispatcherList(ServerList);
-    });
-    DeviceObserver.SetOnPacketCallback([](const xMessageChannel & Source, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) -> bool {
+    };
+    DeviceObserver.OnPacketCallback = [](const xMessageChannel & Source, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) -> bool {
         switch (CommandId) {
             case Cmd_DSR_DS_DeviceUpdate: {
                 auto PP = xPP_DeviceInfoUpdate();
@@ -58,7 +58,7 @@ int main(int argc, char ** argv) {
                 break;
         }
         return true;
-    });
+    };
 
     auto AuditTimestampMS = ServiceTicker();
     while (true) {

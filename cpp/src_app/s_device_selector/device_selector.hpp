@@ -11,10 +11,8 @@ public:
     void Tick(uint64_t NowMS);
     void Clean();
 
-    // void OnClientConnected(xServiceClientConnection & Connection) override;
-    // void OnClientClose(xServiceClientConnection & Connection) override;
-    // bool OnClientPacket(xServiceClientConnection & Connection, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) override;
-    // void OnCleanupClientConnection(const xServiceClientConnection & Connection) override;
+    void OnClientConnected(const xMessageChannel & Source);
+    bool OnClientPacket(const xMessageChannel & Source, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize);
 
     void UpdateDispatcherList(const std::vector<xDeviceSelectorDispatcherInfo> & ServerList);
 
