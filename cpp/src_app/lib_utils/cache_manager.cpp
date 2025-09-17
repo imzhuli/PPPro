@@ -36,14 +36,19 @@ void xCacheManager::Clean() {
     CacheNodePool.Clean();
 }
 
-void xCacheManager::RemoveTimeoutCacheNodes(uint64_t NowMS) {
-    auto QuickReleaseTimepoint = NowMS - CacheQuickReleaseTimeoutMS;
-    while (auto P = CacheQuickReleaseTimeoutList.PopHead([QuickReleaseTimepoint](auto & C) { return C.TimestampMS < QuickReleaseTimepoint; })) {
+void xCacheManager::Tick(uint64_t NowMS) {
+    Ticker.Update(NowMS);
+    RemoveTimeoutCacheNodes();
+}
+
+void xCacheManager::RemoveTimeoutCacheNodes() {
+    auto NowMS             = Ticker();
+    auto QuickReleaseCheck = [QuickReleaseTimepoint = NowMS - CacheQuickReleaseTimeoutMS](const xCacheNode & C) { return C.TimestampMS < QuickReleaseTimepoint; };
+    while (auto P = CacheQuickReleaseTimeoutList.PopHead(QuickReleaseCheck)) {
         ReleaseCacheNode(P);
     }
-
-    auto ReleaseTimepoint = NowMS - CacheTimeoutMS;
-    while (auto P = CacheTimeoutList.PopHead([ReleaseTimepoint](auto & C) { return C.TimestampMS < ReleaseTimepoint; })) {
+    auto ReleaseCheck = [ReleaseTimepoint = NowMS - CacheTimeoutMS](const xCacheNode & C) { return C.TimestampMS < ReleaseTimepoint; };
+    while (auto P = CacheTimeoutList.PopHead(ReleaseCheck)) {
         ReleaseCacheNode(P);
     }
 }
@@ -62,7 +67,7 @@ void xCacheManager::PostAcquireCacheNodeRequest(const std::string & Key, const x
         NP->Key         = Key;
         CacheMap[Key]   = NP;
 
-        NP->TimestampMS = ServiceTicker();
+        NP->TimestampMS = Ticker();
         CacheQuickReleaseTimeoutList.AddTail(*NP);
 
         ++LocalAudit.CacheNew;
@@ -114,6 +119,7 @@ void xCacheManager::SetAsyncResultData(uint64_t CacheNodeId, const void * Data) 
     NP->DataPtr = Data;
     NP->State   = xCacheNode::CACHE_STATE_RESULT;
     if (Data) {
+        NP->TimestampMS = Ticker();
         CacheTimeoutList.GrabTail(*NP);
         ++LocalAudit.ValidResult;
     } else {

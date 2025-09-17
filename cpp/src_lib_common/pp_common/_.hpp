@@ -88,6 +88,7 @@ using xel::Base64Decode;
 using xel::Base64Encode;
 using xel::BuildPacket;
 using xel::Daemonize;
+using xel::Delegate;
 using xel::FileToLines;
 using xel::FileToStr;
 using xel::GetTimestampMS;

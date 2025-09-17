@@ -1,3 +1,4 @@
+#include "../lib_client/auth_client.hpp"
 #include "./class.hpp"
 
 #include <pp_common/_.hpp>
@@ -6,9 +7,7 @@ auto IC  = xel::xIoContext();
 auto ICG = xel::xResourceGuard(IC);
 auto AC  = xAuthClient();
 
-auto BackendServerAppKey    = "apitest";
-auto BackendServerAppSecret = "123456";
-auto TestAccount            = "C_he_US_1001__5_78758832:1234567";
+auto TestAccount = "C_he_US_1001__5_78758832:1234567";
 
 auto Ticker    = xTicker();
 auto StartTime = Ticker();
@@ -37,7 +36,7 @@ int main(int argc, char ** argv) {
     X_GUARD(AC, ServiceIoContext, xNetAddress::Parse(*OA));
     AC.OnEnabled = []() {
         cout << "enabled" << endl;
-        if (!AC.Request(TestAccount, 1024)) {
+        if (!AC.Request(TestAccount, time(nullptr))) {
             cerr << "failed to post auth request" << endl;
         }
     };

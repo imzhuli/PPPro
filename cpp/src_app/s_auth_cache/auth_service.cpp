@@ -20,30 +20,8 @@ bool xAC_AuthService::Init(xIoContext * ICP, const xNetAddress & BindAddress) {
         return true;
     };
 
-    CacheManager.OnImmediateResultCallback = [this](const xCacheRequestContext & Context, const void * Data) {
-        DEBUG_LOG("");
-        auto   RD   = (xPPB_BackendAuthByUserPassResp *)Data;
-        auto   Resp = xPP_QueryAuthCacheResp();
-        auto & R    = Resp.Result;
-
-        R.AuditId      = RD->AuditId;
-        R.CountryId    = RD->CountryId;
-        R.StateId      = RD->StateId;
-        R.CityId       = RD->CityId;
-        R.RequireIpv6  = RD->Ipv6Prefered;
-        R.RequireUdp   = RD->EnableUdp;
-        R.AutoChangeIp = RD->AutoChangeIpOnDeviceOffline;
-        R.PAToken      = RD->ServerToken;
-
-        auto Handle = xTcpServiceClientConnectionHandle(static_cast<xTcpService *>(Context.Value.P), Context.ValueEx.U64);
-        if (Handle.operator->()) {
-            Handle.PostMessage(Cmd_AuthService_QueryAuthCacheResp, Context.RequestId, Resp);
-        }
-        return;
-    };
-
-    CacheManager.OnAsyncResultCallback = [this](const xCacheRequestContext & Context, const void * Data) {
-        DEBUG_LOG("AsyncResultCallback, Data=%p", Data);
+    CacheManager.OnAsyncResultCallback = CacheManager.OnImmediateResultCallback = [this](const xCacheRequestContext & Context, const void * Data) {
+        DEBUG_LOG("ResultCallback, Data=%p", Data);
         auto Resp = xPP_QueryAuthCacheResp();
         if (auto RD = (xPPB_BackendAuthByUserPassResp *)Data) {
             auto & R       = Resp.Result;
@@ -62,6 +40,7 @@ bool xAC_AuthService::Init(xIoContext * ICP, const xNetAddress & BindAddress) {
         }
         return;
     };
+
     CacheManager.OnReleaseDataCallback = [this](uint64_t CacheNodeId, const void * Data) {
         DEBUG_LOG("ReleaseDataCallback");
         delete (xPPB_BackendAuthByUserPassResp *)Data;
@@ -69,7 +48,9 @@ bool xAC_AuthService::Init(xIoContext * ICP, const xNetAddress & BindAddress) {
         return;
     };
 
-    TcpService.OnClientPacket = Delegate(&xAC_AuthService::OnClientPacket, this);
+    TcpService.OnClientPacket           = Delegate(&xAC_AuthService::OnClientPacket, this);
+    BackendPool.OnBackendPacketCallback = Delegate(&xAC_AuthService::OnBackendPacket, this);
+
     return true;
 }
 
@@ -83,8 +64,7 @@ void xAC_AuthService::Clean() {
 }
 
 void xAC_AuthService::Tick(uint64_t NowMS) {
-    CacheManager.RemoveTimeoutCacheNodes(NowMS);
-    TickAll(NowMS, TcpService, BackendPool);
+    TickAll(NowMS, TcpService, BackendPool, CacheManager);
 
     // do local audit:
     if (NowMS - LastOutputLocalAuditTimestampMS >= LOCAL_AUDIT_TIMEOUT_MS) {

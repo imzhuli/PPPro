@@ -64,8 +64,7 @@ public:
 
     bool Init(size_t MaxCacheNodeCount = 1024, size_t RequestPoolSize = 1024);
     void Clean();
-
-    void RemoveTimeoutCacheNodes(uint64_t NowMS);
+    void Tick(uint64_t NowMS);
 
     xAsyncQueryProcedure       AsyncQueryProcedure       = Noop<false>;
     xOnImmediateResultCallback OnImmediateResultCallback = Noop<>;
@@ -79,6 +78,7 @@ public:
     void SetAsyncResultData(uint64_t CacheNodeId, const void * Data);
 
 protected:
+    void RemoveTimeoutCacheNodes();
     bool MakeAsyncQuery(uint64_t CacheNodeId, const std::string & Key) { return AsyncQueryProcedure(CacheNodeId, Key); }
     void OnImmediateResult(const xCacheRequestContext & Context, const void * Data) { OnImmediateResultCallback(Context, Data); }
     void OnAsyncResultData(const xCacheRequestContext & Context, const void * Data) { OnAsyncResultCallback(Context, Data); }
@@ -88,6 +88,7 @@ private:
     void ReleaseCacheNode(xCacheNode * NP);
 
 private:
+    xTicker                                       Ticker;
     xIndexedStorage<xCacheNode>                   CacheNodePool;
     xMemoryPool<xCacheRequestContextNode>         CacheRequestPool;
     std::unordered_map<std::string, xCacheNode *> CacheMap;

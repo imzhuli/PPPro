@@ -32,8 +32,9 @@ elseif (CMAKE_SYSTEM_NAME MATCHES "Darwin")
 endif()
 
 aux_source_directory("./lib_backend_connection"      LIB_SRC)
-aux_source_directory("./lib_utils"             LIB_SRC)
-aux_source_directory("./lib_server_list"  LIB_SRC)
+aux_source_directory("./lib_client"                  LIB_SRC)
+aux_source_directory("./lib_server_list"             LIB_SRC)
+aux_source_directory("./lib_utils"                   LIB_SRC)
 
 add_library(server ${LIB_SRC})
 target_compile_definitions(server PRIVATE X_OPTION_STATIC)

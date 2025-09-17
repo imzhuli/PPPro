@@ -89,7 +89,7 @@ bool xBackendConnectionPool::OnServerPacket(xClientConnection & CC, xPacketComma
         return false;
     }
 
-    BackendPacketCallback(CommandId, RequestId, PayloadPtr, PayloadSize);
+    OnBackendPacketCallback(CommandId, RequestId, PayloadPtr, PayloadSize);
     return true;
 }
 
