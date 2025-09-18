@@ -8,7 +8,6 @@ int main(int argc, char ** argv) {
     auto REG = xRuntimeEnvGuard(argc, argv);
     auto CL  = RuntimeEnv.LoadConfig();
 
-    CL.Require(BindAddress, "BindAddress");
     CL.Require(ServerListRegisterAddress, "ServerListRegisterAddress");
     CL.Require(ServerListDownloadAddress, "ServerListDownloadAddress");
 
@@ -60,16 +59,12 @@ int main(int argc, char ** argv) {
         return true;
     };
 
-    auto AuditTimestampMS = ServiceTicker();
+    auto AuditTickRunner = xTickRunner(6'000, [](uint64_t) {
+        AuditLogger->I("%s", LocalAudit.ToString().c_str());
+        LocalAudit.ResetPeriodCount();
+    });
     while (true) {
-        ServiceUpdateOnce(DeviceSelectorService, DSRDownloader, DSDDownloader, DeviceObserver, DeviceContextManager);
-
-        LocalAudit.DurationMS = ServiceTicker() - AuditTimestampMS;
-        if (LocalAudit.DurationMS >= 60'000) {
-            AuditLogger->I("%s", LocalAudit.ToString().c_str());
-            LocalAudit.ResetPeriodCount();
-            AuditTimestampMS = ServiceTicker();
-        }
+        ServiceUpdateOnce(DeviceSelectorService, DSRDownloader, DSDDownloader, DeviceObserver, DeviceContextManager, AuditTickRunner);
     }
     return 0;
 }

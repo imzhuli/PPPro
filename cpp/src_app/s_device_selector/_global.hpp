@@ -7,7 +7,6 @@
 
 #include <pp_common/_.hpp>
 
-extern xNetAddress BindAddress;
 extern xNetAddress ServerListRegisterAddress;
 extern xNetAddress ServerListDownloadAddress;
 

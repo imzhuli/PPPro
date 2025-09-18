@@ -2,7 +2,6 @@
 
 #include <config/config.hpp>
 
-xNetAddress BindAddress;
 xNetAddress ServerListRegisterAddress;
 xNetAddress ServerListDownloadAddress;
 
@@ -33,7 +32,7 @@ std::string xDS_LocalAudit::ToString() const {
     O(RemovedDeviceCount);
     O(TimeoutDeviceCount);
 
-    O(TotalDeviceCount);
+    Ignore(TotalDeviceCount);
 
     return OS.str();
 }
