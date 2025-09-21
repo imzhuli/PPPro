@@ -59,7 +59,7 @@ int main(int argc, char ** argv) {
         return true;
     };
 
-    auto AuditTickRunner = xTickRunner(6'000, [](uint64_t) {
+    auto AuditTickRunner = xTickRunner(60'000, [](uint64_t) {
         AuditLogger->I("%s", LocalAudit.ToString().c_str());
         LocalAudit.ResetPeriodCount();
     });

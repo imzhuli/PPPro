@@ -32,6 +32,10 @@ void xDS_DeviceContextManager::UpdateDevice(const xDR_DeviceInfoBase & InfoBase)
             if (!--PD->ResisterCounter) {
                 DEBUG_LOG("ReplaceDevice with new info");
                 ++LocalAudit.ReplacedDeviceCount;
+                if (PD->EnableCounter == DEVICE_INFO_ENABLE_COUNTER_TARGET) {
+                    --LocalAudit.EnabledDeviceCount;
+                }
+
                 PD->InfoBase = InfoBase;
                 Reset(PD->ResisterCounter, DEVICE_INFO_RESIST_COUNTER);
 
@@ -48,6 +52,7 @@ void xDS_DeviceContextManager::UpdateDevice(const xDR_DeviceInfoBase & InfoBase)
                     CountryDeviceList[InfoBase.CountryId].AddTail(*PD);
                     StateDeviceList[InfoBase.StateId].AddTail(*PD);
                     CityDeviceList[InfoBase.CityId].AddTail(*PD);
+                    ++LocalAudit.EnabledDeviceCount;
                 }
             }
         }
@@ -61,6 +66,7 @@ void xDS_DeviceContextManager::UpdateDevice(const xDR_DeviceInfoBase & InfoBase)
 
     DeviceMap[InfoBase.DeviceId] = PD;
     KeepAlive(PD);
+
     ++LocalAudit.NewDeviceCount;
     ++LocalAudit.TotalDeviceCount;
 
@@ -77,10 +83,13 @@ void xDS_DeviceContextManager::RemoveDeviceById(const std::string & DeviceId) {
         DEBUG_LOG("Device not found: %s", DeviceId.c_str());
         return;
     }
-    auto DP = Iter->second;
-    DEBUG_LOG("DeviceId=%s, DeviceRuntimeKey=%" PRIx64 "", DeviceId.c_str(), DP->InfoBase.RelayServerSideDeviceId);
+    auto PD = Iter->second;
+    if (PD->EnableCounter == DEVICE_INFO_ENABLE_COUNTER_TARGET) {
+        --LocalAudit.EnabledDeviceCount;
+    }
+    DEBUG_LOG("DeviceId=%s, DeviceRuntimeKey=%" PRIx64 "", DeviceId.c_str(), PD->InfoBase.RelayServerSideDeviceId);
 
-    delete DP;
+    delete PD;
     DeviceMap.erase(Iter);
     ++LocalAudit.RemovedDeviceCount;
     --LocalAudit.TotalDeviceCount;

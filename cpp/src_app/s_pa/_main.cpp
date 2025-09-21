@@ -12,14 +12,9 @@ int main(int argc, char ** argv) {
     auto SEG = xRuntimeEnvGuard(argc, argv);
     auto CL  = xConfigLoader(RuntimeEnv.DefaultConfigFilePath);
 
-    CL.Require(ConfigTcpBindAddress4, "TcpBindAddress4");
-    CL.Require(ConfigTcpBindAddress6, "TcpBindAddress6");
-    CL.Require(ConfigUdpBindAddress4, "UdpBindAddress4");
-    CL.Require(ConfigUdpBindAddress6, "UdpBindAddress6");
-
-    CL.Require(ConfigExportUdpServerAddress4, "ExportUdpServerAddress4");
-    CL.Require(ConfigExportUdpServerAddress6, "ExportUdpServerAddress6");
-
+    CL.Require(ConfigTcpBindAddress4, "TcpBindAddress");
+    CL.Require(ConfigUdpBindAddress4, "UdpBindAddress");
+    CL.Require(ConfigExportUdpServerAddress4, "ExportUdpServerAddress");
     CL.Require(ConfigServerListDownloadAddress, "ServerListDownloadAddress");
 
     X_GUARD(AuditAccountServerListDownloader, ServiceIoContext, ConfigServerListDownloadAddress);

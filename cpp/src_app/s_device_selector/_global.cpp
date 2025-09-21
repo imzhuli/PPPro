@@ -32,7 +32,8 @@ std::string xDS_LocalAudit::ToString() const {
     O(RemovedDeviceCount);
     O(TimeoutDeviceCount);
 
-    Ignore(TotalDeviceCount);
+    O(TotalDeviceCount);
+    O(EnabledDeviceCount);
 
     return OS.str();
 }
