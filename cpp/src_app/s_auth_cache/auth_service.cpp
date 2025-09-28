@@ -125,7 +125,7 @@ void xAC_AuthService::OnCmdAuthByUserPassResp(xPacketCommandId CommandId, xPacke
     DEBUG_LOG("%s", PC->ToString().c_str());
 
     ++NewCachedResultCount;
-    CacheManager.SetAsyncResultData(RequestId, PC);
+    CacheManager.SetAndDispatchAsyncResultData(RequestId, PC);
 }
 
 void xAC_AuthService::UpdateBackendAuthInfo(const std::string & AppKey, const std::string & AppSecret) {

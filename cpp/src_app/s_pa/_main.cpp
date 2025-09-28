@@ -12,27 +12,22 @@ int main(int argc, char ** argv) {
     auto SEG = xRuntimeEnvGuard(argc, argv);
     auto CL  = xConfigLoader(RuntimeEnv.DefaultConfigFilePath);
 
-    CL.Require(ConfigTcpBindAddress4, "TcpBindAddress");
-    CL.Require(ConfigUdpBindAddress4, "UdpBindAddress");
-    CL.Require(ConfigExportUdpServerAddress4, "ExportUdpServerAddress");
+    CL.Require(ConfigTcpBindAddress, "TcpBindAddress");
+    CL.Require(ConfigUdpBindAddress, "UdpBindAddress");
+    CL.Require(ConfigExportUdpServerAddress, "ExportUdpServerAddress");
     CL.Require(ConfigServerListDownloadAddress, "ServerListDownloadAddress");
 
-    X_GUARD(AuditAccountServerListDownloader, ServiceIoContext, ConfigServerListDownloadAddress);
+    auto X_VAR = xel::xScopeGuard(InitClientManager, CleanClietManager);
+    auto X_VAR = xel::xScopeGuard(InitAuditAccountService, CleanAuditAccountService);
+
     X_GUARD(AuthClient, ServiceIoContext, ConfigServerListDownloadAddress);
 
-    AuditAccountServerListDownloader.OnUpdateAuditAccountServerListCallback = [](uint32_t Version, const std::vector<xServerInfo> & List) {
-        for (auto & I : List) {
-            Logger->I("AA_ServerId=%" PRIi64 ", Address=%s", I.ServerId, I.Address.ToString().c_str());
-        }
-        // TODO
-    };
-
-    auto CMTicker = xTickRunner(ClientManagerTick);
+    auto AATicker = xTickRunner(TickAuditAccountService);
+    auto CMTicker = xTickRunner(TickClientManager);
     while (true) {
         ServiceUpdateOnce(
-            AuditAccountServerListDownloader,  //
-            AuthClient,                        //
-            CMTicker
+            AuthClient,  //
+            AATicker, CMTicker
         );
     }
 

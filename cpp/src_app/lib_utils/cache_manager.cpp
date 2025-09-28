@@ -53,14 +53,14 @@ void xCacheManager::RemoveTimeoutCacheNodes() {
     }
 }
 
-void xCacheManager::PostAcquireCacheNodeRequest(const std::string & Key, const xCacheRequestContext & Context) {
+xOptional<const void *> xCacheManager::TestLocalAndPostAcquireCacheNodeRequest(const std::string & Key, const xCacheRequestContext & Context) {
     auto NP   = (xCacheNode *)nullptr;
     auto Iter = CacheMap.find(Key);
     if (Iter == CacheMap.end()) {
         auto CNID = CacheNodePool.Acquire();
         if (!CNID) {
             ++LocalAudit.CacheLimit;
-            return;
+            return { nullptr };
         }
         NP              = &CacheNodePool[CNID];
         NP->CacheNodeId = CNID;
@@ -76,23 +76,21 @@ void xCacheManager::PostAcquireCacheNodeRequest(const std::string & Key, const x
     }
 
     if (NP->State == xCacheNode::CACHE_STATE_RESULT) {
-        OnImmediateResult(Context, NP->DataPtr);
         ++LocalAudit.CacheHit;
-        return;
+        return { NP->DataPtr };
     }
 
     auto RCtx = CacheRequestPool.Create();
     if (!RCtx) {
         ++LocalAudit.CacheQueryLimit;
-        OnImmediateResult(Context, nullptr);
-        return;
+        return { nullptr };
     }
     RCtx->Context = Context;
     NP->PendingRequestList.AddTail(*RCtx);
 
     if (NP->State == xCacheNode::CACHE_STATE_QUERY) {
         ++LocalAudit.CacheQueryCombined;
-        return;
+        return {};  // previous query exist
     }
 
     assert(NP->State == xCacheNode::CACHE_STATE_INIT);
@@ -100,13 +98,20 @@ void xCacheManager::PostAcquireCacheNodeRequest(const std::string & Key, const x
         ++LocalAudit.CacheQueryFailed;
         NP->DataPtr = nullptr;
         NP->State   = xCacheNode::CACHE_STATE_RESULT;
-        OnImmediateResult(Context, nullptr);
-        return;
+        return { nullptr };
     }
     ++LocalAudit.CacheQuery;
+    return {};
 }
 
-void xCacheManager::SetAsyncResultData(uint64_t CacheNodeId, const void * Data) {
+void xCacheManager::PostAcquireCacheNodeRequest(const std::string & Key, const xCacheRequestContext & Context) {
+    auto TR = TestLocalAndPostAcquireCacheNodeRequest(Key, Context);
+    if (TR) {
+        OnImmediateResult(Context, *TR);
+    }
+}
+
+void xCacheManager::SetAndDispatchAsyncResultData(uint64_t CacheNodeId, const void * Data) {
     auto NP = CacheNodePool.CheckAndGet(CacheNodeId);
     if (!NP) {
         ++LocalAudit.DanglingResult;

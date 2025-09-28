@@ -72,10 +72,15 @@ public:
     xOnReleaseDataCallback     OnReleaseDataCallback     = Noop<>;
 
 public:
-    void PostAcquireCacheNodeRequest(const std::string & Key, const xCacheRequestContext & Context);
-    auto GetLocalAudit() { return LocalAudit; }
-    auto GetAndResetLocalAudit() { return Steal(LocalAudit); }
-    void SetAsyncResultData(uint64_t CacheNodeId, const void * Data);
+    /**
+        @brief TestLocalAndPostAcquireCacheNodeRequest
+        @return true with dataptr: has local data(but maybe invalid),  false: no local data, async request made
+     */
+    xOptional<const void *> TestLocalAndPostAcquireCacheNodeRequest(const std::string & Key, const xCacheRequestContext & Context);
+    void                    PostAcquireCacheNodeRequest(const std::string & Key, const xCacheRequestContext & Context);
+    auto                    GetLocalAudit() { return LocalAudit; }
+    auto                    GetAndResetLocalAudit() { return Steal(LocalAudit); }
+    void                    SetAndDispatchAsyncResultData(uint64_t CacheNodeId, const void * Data);
 
 protected:
     void RemoveTimeoutCacheNodes();
