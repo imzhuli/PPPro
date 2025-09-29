@@ -7,7 +7,7 @@ auto IC  = xel::xIoContext();
 auto ICG = xel::xResourceGuard(IC);
 auto AC  = xAuthClient();
 
-auto TestAccount = "C_he_US_1001__5_78758832:1234567";
+auto TestAccount = "C_he_BR_1001__5_78758832:1234567";
 
 auto Ticker    = xTicker();
 auto StartTime = Ticker();
@@ -36,7 +36,7 @@ int main(int argc, char ** argv) {
     X_GUARD(AC, ServiceIoContext, xNetAddress::Parse(*OA));
     AC.OnEnabled = []() {
         cout << "enabled" << endl;
-        if (!AC.Request(TestAccount, time(nullptr))) {
+        if (!AC.Request(time(nullptr), TestAccount)) {
             cerr << "failed to post auth request" << endl;
         }
     };

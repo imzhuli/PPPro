@@ -38,7 +38,7 @@ size_t OnPAC_S5_Challenge(xPA_ClientConnection * Client, ubyte * DP, size_t Data
         Client->PostData(Socks5Auth, sizeof(Socks5Auth));
         Client->State = CS_S5_WAIT_FOR_AUTH_INFO;
     } else if (NoAuthSupport) {
-        Client->State = CS_S5_WAIT_FOR_IP_WHITELIST;
+        Client->State = CS_S5_WAIT_FOR_AUTH_INFO;
         // ubyte Socks5NoAuthAccepted[2] = { 0x05, 0x00 };
         // Client->PostData(Socks5Auth, sizeof(Socks5NoAuthAccepted));
     } else {
@@ -89,13 +89,26 @@ size_t OnPAC_S5_AuthInfo(xPA_ClientConnection * Client, ubyte * DataPtr, size_t 
         return InvalidDataSize;
     }
     DEBUG_LOG("AuthInfo AuthType=%u: NP=%s", (unsigned)Ver, NP.c_str());
-
-    // TODO
+    if (!PostAuthRequest(Client->Connectionid, NP)) {
+        Client->PostData("\x01\x01", 2);
+        SchedulePassiveKillClientConnection(Client);
+    } else {
+        Client->State = CS_S5_WAIT_FOR_AUTH_RESULT;
+    }
     return R.Offset();
 }
 
 size_t OnPAC_S5_TargetAddress(xPA_ClientConnection * Client, ubyte * DataPtr, size_t DataSize) {
     return 0;
+}
+
+void OnPAC_S5_AuthResult(xPA_ClientConnection * CC, const xClientAuthResult * AR) {
+    if (!AR) {
+        CC->PostData("\x01\x01", 2);
+        SchedulePassiveKillClientConnection(CC);
+    }
+    CC->PostData("\x01\x00", 2);
+    KeepAlive(CC);
 }
 
 // size_t xPA_ClientStateHandler_S5_WaitForAuthResult::OnDataEvent(xPA_ClientConnection * Client, ubyte * DataPtr, size_t DataSize) {

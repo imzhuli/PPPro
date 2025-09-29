@@ -9,7 +9,7 @@ enum xPA_ClientState {
 
     CS_S5_CHALLENGE,                     // s5 challenge
     CS_S5_WAIT_FOR_AUTH_INFO,            // wait for auth info
-    CS_S5_WAIT_FOR_IP_WHITELIST,         // no-auth but ip white list required
+    CS_S5_WAIT_FOR_AUTH_RESULT,          //
     CS_S5_WAIT_FOR_TARGET_ADDRESS,       //
     CS_S5_WAIT_FOR_CONECTION_ESTABLISH,  //
     CS_S_TC,                             // tcp connection
@@ -40,16 +40,17 @@ struct xPA_ClientConnection
     // members:
     xPA_ClientTcpConnection Conn;
     xPA_ClientState         State = CS_CHALLENGE;
+    uint64_t                Connectionid;
 };
 
 extern void InitClientManager();
 extern void CleanClietManager();
 extern void TickClientManager(uint64_t NowMS);
 
-extern void DeferKillClientConnection(xPA_ClientConnection * ClientConnection);
-extern void SchedulePassiveKillClientConnection(xPA_ClientConnection * ClientConnection);
-
-extern void AsyncRequireAuthInfo(uint64_t ClientConnectionId, const std::string_view & AuthView);
+extern xPA_ClientConnection * GetClientConnectionById(uint64_t ClientConnectionId);
+extern void                   KeepAlive(xPA_ClientConnection * ClientConnection);
+extern void                   DeferKillClientConnection(xPA_ClientConnection * ClientConnection);
+extern void                   SchedulePassiveKillClientConnection(xPA_ClientConnection * ClientConnection);
 
 // private functions:
 
@@ -60,7 +61,11 @@ extern void                   OnPAClientConnectionPeerClose(xPA_ClientConnection
 extern void                   OnPAClientConnectionFlush(xPA_ClientConnection * CC);
 extern size_t                 OnPAClientConnectionData(xPA_ClientConnection * CC, ubyte * DP, size_t DS);
 
+extern void OnPAC_AuthResult(uint64_t ConnectionId, const xClientAuthResult * AR);
+
 extern size_t OnPAC_Challenge(xPA_ClientConnection * CC, ubyte * DP, size_t DS);
 extern size_t OnPAC_S5_Challenge(xPA_ClientConnection * CC, ubyte * DP, size_t DS);
 extern size_t OnPAC_S5_AuthInfo(xPA_ClientConnection * CC, ubyte * DP, size_t DS);
 extern size_t OnPAC_S5_TargetAddress(xPA_ClientConnection * CC, ubyte * DP, size_t DS);
+
+extern void OnPAC_S5_AuthResult(xPA_ClientConnection * CC, const xClientAuthResult * AR);

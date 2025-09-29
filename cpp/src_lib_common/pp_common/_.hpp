@@ -309,6 +309,7 @@ struct xClientAuthResult {
     bool        RequireUdp;
     bool        AutoChangeIp;
     std::string PAToken;
+    std::string ThirdRedirect;
 };
 
 struct xAuditAccountInfo {
@@ -402,5 +403,3 @@ inline std::ostream & operator<<(std::ostream & OS, const xNetAddress & Address)
 }
 
 #define X_AT_EXIT(v) auto X_CONCAT_FORCE_EXPAND(__X_AtExit__, __LINE__) = ::xel::xScopeGuard(v);
-// dismissable guard:
-#define XDG(name, v) auto name = xScopeGuard(v)

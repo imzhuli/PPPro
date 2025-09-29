@@ -23,4 +23,5 @@ extern void CleanDeviceContextManager();
 
 extern xDR_DeviceContext * GetDeviceContextById(uint64_t Id);
 extern bool OnDeviceConnectionPacket(const xTcpServiceClientConnectionHandle & Handle, xPacketCommandId CmdId, xPacketRequestId ReqId, ubyte * PayloadPtr, size_t PayloadSize);
+extern void OnDeviceKeepAlive(const xTcpServiceClientConnectionHandle & Handle);
 extern void OnDeviceConnectionClean(const xTcpServiceClientConnectionHandle & Handle);

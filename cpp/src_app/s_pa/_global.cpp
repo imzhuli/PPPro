@@ -5,5 +5,3 @@ xNetAddress ConfigUdpBindAddress;
 xNetAddress ConfigExportUdpServerAddress;
 
 xNetAddress ConfigServerListDownloadAddress;
-
-xAuthClient AuthClient;

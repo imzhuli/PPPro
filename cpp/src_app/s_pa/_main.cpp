@@ -1,13 +1,6 @@
 #include "../lib_utils/all.hpp"
 #include "./_global.hpp"
 
-static auto TcpServer = xTcpServer();
-
-// static bool EnableTcp4 = false;
-// static bool EnableTcp6 = false;
-// static bool EnableUdp4 = false;
-// static bool EnableUdp6 = false;
-
 int main(int argc, char ** argv) {
     auto SEG = xRuntimeEnvGuard(argc, argv);
     auto CL  = xConfigLoader(RuntimeEnv.DefaultConfigFilePath);
@@ -19,16 +12,13 @@ int main(int argc, char ** argv) {
 
     auto X_VAR = xel::xScopeGuard(InitClientManager, CleanClietManager);
     auto X_VAR = xel::xScopeGuard(InitAuditAccountService, CleanAuditAccountService);
+    auto X_VAR = xel::xScopeGuard(InitAuthCacheLocalServer, CleanAuthCacheLocalServer);
 
-    X_GUARD(AuthClient, ServiceIoContext, ConfigServerListDownloadAddress);
-
-    auto AATicker = xTickRunner(TickAuditAccountService);
-    auto CMTicker = xTickRunner(TickClientManager);
+    auto AATicker  = xTickRunner(TickAuditAccountService);
+    auto CMTicker  = xTickRunner(TickClientManager);
+    auto ACLTicker = xTickRunner(TickAuthCacheLocalServer);
     while (true) {
-        ServiceUpdateOnce(
-            AuthClient,  //
-            AATicker, CMTicker
-        );
+        ServiceUpdateOnce(AATicker, CMTicker, ACLTicker);
     }
 
     return 0;

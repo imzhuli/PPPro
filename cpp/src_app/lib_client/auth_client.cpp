@@ -79,7 +79,7 @@ void xAuthClient::Clean() {
     RequestPool.Clean();
 }
 
-bool xAuthClient::Request(const std::string_view & UserPassword, uint64_t SourceRequestId) {
+bool xAuthClient::Request(uint64_t SourceRequestId, const std::string_view & UserPassword) {
     if (!ACCConnections) {
         return false;
     }

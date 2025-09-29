@@ -68,6 +68,7 @@ int main(int argc, char ** argv) {
 
     DeviceService6.OnClientPacket = DeviceService4.OnClientPacket = &OnDeviceConnectionPacket;
     DeviceService6.OnClientClean = DeviceService4.OnClientClean = &OnDeviceConnectionClean;
+    DeviceService6.OnClientKeepAlive = DeviceService4.OnClientKeepAlive = &OnDeviceKeepAlive;
 
     DSRDownloader.OnUpdateDeviceStateRelayServerListCallback = [](uint32_t Version, const std::vector<xDeviceStateRelayServerInfo> & ServerList) {
         auto PSL = std::vector<xNetAddress>();

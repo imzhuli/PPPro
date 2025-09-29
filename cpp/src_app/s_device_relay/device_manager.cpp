@@ -271,6 +271,17 @@ void OnDeviceConnectionClean(const xTcpServiceClientConnectionHandle & Handle) {
     ReleaseDeviceContext(Id);
 }
 
+void OnDeviceKeepAlive(const xTcpServiceClientConnectionHandle & Handle) {
+    auto Id = Handle->UserContext.U64;
+    if (!Id) {
+        DEBUG_LOG("keepalive uninited device connection");
+        return;
+    }
+    assert(DeviceManager.CheckAndGet(Id));
+    auto PDC = &DeviceManager[Id];
+    ReportKeepAliveDevice(PDC);
+}
+
 bool OnDeviceConnectionPacket(const xTcpServiceClientConnectionHandle & Handle, xPacketCommandId CmdId, xPacketRequestId ReqId, ubyte * PayloadPtr, size_t PayloadSize) {
     auto Id = Handle->UserContext.U64;
     if (!Id) {

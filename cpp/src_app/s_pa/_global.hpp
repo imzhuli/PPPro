@@ -13,5 +13,3 @@ extern xNetAddress ConfigUdpBindAddress;
 extern xNetAddress ConfigExportUdpServerAddress;
 
 extern xNetAddress ConfigServerListDownloadAddress;
-
-extern xAuthClient AuthClient;
