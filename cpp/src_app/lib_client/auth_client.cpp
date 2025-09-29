@@ -3,7 +3,7 @@
 #include <pp_protocol/_backend/auth_by_user_pass.hpp>
 #include <pp_protocol/command.hpp>
 
-static constexpr const uint64_t RequestTimeoutMS = 1'500;
+static constexpr const uint64_t RequestTimeoutMS = 2'000;
 static constexpr const size_t   MaxRequestCount  = 10'0000;
 
 bool xAuthClient::Init(xIoContext * ICP, const xel::xNetAddress & ServerListAddress) {

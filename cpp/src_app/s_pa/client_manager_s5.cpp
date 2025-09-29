@@ -99,6 +99,66 @@ size_t OnPAC_S5_AuthInfo(xPA_ClientConnection * Client, ubyte * DataPtr, size_t 
 }
 
 size_t OnPAC_S5_TargetAddress(xPA_ClientConnection * Client, ubyte * DataPtr, size_t DataSize) {
+    if (DataSize < 10) {
+        return 0;
+    }
+    if (DataSize >= 6 + 256) {
+        DEBUG_LOG("Very big connection request, which is obviously wrong");
+        DeferKillClientConnection(Client);
+        return 0;
+    }
+    xStreamReader R(DataPtr);
+    uint8_t       Version   = R.R();
+    uint8_t       Operation = R.R();
+    uint8_t       Reserved  = R.R();
+    uint8_t       AddrType  = R.R();
+    if (Version != 0x05 || Reserved != 0x00) {
+        DEBUG_LOG("Non Socks5 connection request");
+        DeferKillClientConnection(Client);
+        return 0;
+    }
+    xNetAddress Address;
+    char        DomainName[256];
+    size_t      DomainNameLength = 0;
+    if (AddrType == 0x01) {  // ipv4
+        Address.Type = xNetAddress::IPV4;
+        R.R(Address.SA4, 4);
+        Address.Port = R.R2();
+    } else if (AddrType == 0x03) {
+        DomainNameLength = R.R();
+        if (DataSize < 4 + 1 + DomainNameLength + 2) {
+            return 0;
+        }
+        R.R(DomainName, DomainNameLength);
+        DomainName[DomainNameLength] = '\0';
+        Address.Port                 = R.R2();
+    } else if (AddrType == 0x04) {  // ipv6
+        if (DataSize < 4 + 16 + 2) {
+            return 0;
+        }
+        Address.Type = xNetAddress::IPV6;
+        R.R(Address.SA6, 16);
+        Address.Port = R.R2();
+    } else {
+        DEBUG_LOG("Invalid connection request");
+        DeferKillClientConnection(Client);
+        return 0;
+    }
+    size_t AddressLength = R.Offset() - 3;
+    if (Operation != 0x01 || AddrType == 0x06) {
+        DEBUG_LOG("Operation other than tcp ipv4/domain connection");
+        ubyte         Buffer[512];
+        xStreamWriter W(Buffer);
+        W.W(0x05);
+        W.W(0x01);
+        W.W(0x00);
+        W.W((ubyte *)DataPtr + 3, AddressLength);
+        Client->PostData(Buffer, W.Offset());
+        SchedulePassiveKillClientConnection(Client);
+        return 0;
+    }
+
+    DEBUG_LOG("TargetAddress: NA:%s, Host:%s", Address.ToString().c_str(), DomainName);
     return 0;
 }
 
@@ -109,6 +169,8 @@ void OnPAC_S5_AuthResult(xPA_ClientConnection * CC, const xClientAuthResult * AR
     }
     CC->PostData("\x01\x00", 2);
     KeepAlive(CC);
+
+    CC->State = CS_S5_WAIT_FOR_TARGET_ADDRESS;
 }
 
 // size_t xPA_ClientStateHandler_S5_WaitForAuthResult::OnDataEvent(xPA_ClientConnection * Client, ubyte * DataPtr, size_t DataSize) {

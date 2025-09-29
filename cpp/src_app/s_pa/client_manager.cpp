@@ -3,7 +3,7 @@
 #include "_global.hpp"
 
 static constexpr const uint64_t MAX_CLIENT_CONNECTION_AUTH_TIMEOUT_MS         = 3'000;
-static constexpr const uint64_t MAX_CLIENT_CONNECTION_PASSIVE_KILL_TIMEOUT_MS = 1'000;
+static constexpr const uint64_t MAX_CLIENT_CONNECTION_PASSIVE_KILL_TIMEOUT_MS = 10'000;
 static constexpr const uint64_t MAX_CLIENT_CONNECTION_IDLE_TIMEOUT_MS         = 90'000;
 static constexpr const uint64_t MAX_CLIENT_CONNECTION_ID_COUNT                = 250'000;
 
