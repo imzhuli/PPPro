@@ -149,4 +149,8 @@ void xCacheManager::ReleaseCacheNode(xCacheNode * NP) {
     } else {
         --LocalAudit.BadResult;
     }
+
+    auto Iter = CacheMap.find(NP->Key);
+    CacheMap.erase(Iter);
+    CacheNodePool.Release(NP->CacheNodeId);
 }

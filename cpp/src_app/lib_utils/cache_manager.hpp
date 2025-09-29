@@ -65,6 +65,7 @@ public:
     bool Init(size_t MaxCacheNodeCount = 1024, size_t RequestPoolSize = 1024);
     void Clean();
     void Tick(uint64_t NowMS);
+    void SetCacheTimeoutMS(uint64_t T) { CacheTimeoutMS = T; }
 
     xAsyncQueryProcedure       AsyncQueryProcedure       = Noop<false>;
     xOnImmediateResultCallback OnImmediateResultCallback = Noop<>;

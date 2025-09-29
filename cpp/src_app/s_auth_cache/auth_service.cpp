@@ -11,6 +11,8 @@ bool xAC_AuthService::Init(xIoContext * ICP, const xNetAddress & BindAddress) {
     RuntimeAssert(CacheManager.Init(100'000, 100'000));
     RuntimeAssert(BackendPool.Init(ICP, MAX_BACKEND_SERVER_COUNT));
 
+    CacheManager.SetCacheTimeoutMS(60'000);
+
     CacheManager.AsyncQueryProcedure = [this](uint64_t CacheNodeId, const std::string & Key) {
         DEBUG_LOG("Request: %s", Key.c_str());
 
