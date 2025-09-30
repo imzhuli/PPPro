@@ -43,7 +43,7 @@ bool xDeviceSelectorClient::Init(xIoContext * ICP, const xel::xNetAddress & Serv
             DEBUG_LOG("Invalid server response command");
             return false;
         }
-        auto Resp = xPP_QueryAuthCacheResp();
+        auto Resp = xPP_AcquireDeviceResp();
         if (!Resp.Deserialize(PayloadPtr, PayloadSize)) {
             Logger->E("Invalid server response protocol");
             return false;
@@ -53,7 +53,9 @@ bool xDeviceSelectorClient::Init(xIoContext * ICP, const xel::xNetAddress & Serv
             DEBUG_LOG("invalid request id");
             return true;
         }
-        OnAuthCacheResultCallback(P->SourceRequestId, &Resp.Result);
+
+        auto Result = xDeviceSelectorResult(Resp.DeviceRelayServerRuntimeId, Resp.DeviceRelaySideId);
+        OnDeviceSelectResultCallback(P->SourceRequestId, Result);
         RequestPool.Release(P->RequestId);
         return true;
     };
@@ -69,7 +71,7 @@ void xDeviceSelectorClient::Tick(uint64_t NowMS) {
     auto KillCond = [KT = NowMS - RequestTimeoutMS](const xRequestContext & C) { return C.StartTimestampMS <= KT; };
     while (auto P = static_cast<xRequestContext *>(RequestQueue.PopHead(KillCond))) {
         DEBUG_LOG("Remove request: %" PRIx64 "", P->SourceRequestId);
-        OnAuthCacheResultCallback(P->SourceRequestId, nullptr);
+        OnDeviceSelectResultCallback(P->SourceRequestId, {});
         RequestPool.Release(P->RequestId);
     }
 }
@@ -81,7 +83,7 @@ void xDeviceSelectorClient::Clean() {
     RequestPool.Clean();
 }
 
-bool xDeviceSelectorClient::Request(const std::string_view & UserPassword, uint64_t SourceRequestId) {
+bool xDeviceSelectorClient::Request(uint64_t SourceRequestId, const xDeviceSelectorOptions & Ops) {
     if (!ACCConnections) {
         return false;
     }
@@ -95,10 +97,16 @@ bool xDeviceSelectorClient::Request(const std::string_view & UserPassword, uint6
     R.SourceRequestId  = SourceRequestId;
     RequestQueue.AddTail(R);
 
-    auto T     = xPP_QueryAuthCache();
-    T.UserPass = UserPassword;
-    auto H     = HashString(UserPassword);
+    auto T = xPP_AcquireDevice();
 
-    ACC.PostMessageByHash(H, Cmd_AuthService_QueryAuthCache, RID, T);
+    T.CountryId        = Ops.CountryId;
+    T.StateId          = Ops.StateId;
+    T.CityId           = Ops.CityId;
+    T.RequireIpv6      = Ops.RequireIpv6;
+    T.RequireUdp       = Ops.RequireUdp;
+    T.RequireRemoteDns = Ops.RequireRemoteDns;
+    T.OptionEx         = Ops.OptionEx;
+
+    ACC.PostMessageByHash(RID.GetKey(), Cmd_DeviceSelector_AcquireDevice, RID, T);
     return true;
 }

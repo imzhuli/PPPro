@@ -1,4 +1,6 @@
 #pragma once
+#include "../lib_client/device_selector_client.hpp"
+
 #include <pp_common/_.hpp>
 
 class xPA_ClientConnection;
@@ -62,6 +64,7 @@ extern void                   OnPAClientConnectionFlush(xPA_ClientConnection * C
 extern size_t                 OnPAClientConnectionData(xPA_ClientConnection * CC, ubyte * DP, size_t DS);
 
 extern void OnPAC_AuthResult(uint64_t ConnectionId, const xClientAuthResult * AR);
+extern void OnPAC_DeviceSelectResult(uint64_t ConnectionId, const xDeviceSelectorResult & Result);
 
 extern size_t OnPAC_Challenge(xPA_ClientConnection * CC, ubyte * DP, size_t DS);
 extern size_t OnPAC_S5_Challenge(xPA_ClientConnection * CC, ubyte * DP, size_t DS);

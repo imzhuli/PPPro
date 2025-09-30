@@ -43,7 +43,7 @@ struct xPP_AcquireDevice : public xBinaryMessage {
     bool       RequireUdp;
     bool       RequireRemoteDns;
 
-    std::string OptionEx;
+    std::string_view OptionEx;
     //
 };
 

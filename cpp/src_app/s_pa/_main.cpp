@@ -13,12 +13,14 @@ int main(int argc, char ** argv) {
     auto X_VAR = xel::xScopeGuard(InitClientManager, CleanClietManager);
     auto X_VAR = xel::xScopeGuard(InitAuditAccountService, CleanAuditAccountService);
     auto X_VAR = xel::xScopeGuard(InitAuthCacheLocalServer, CleanAuthCacheLocalServer);
+    auto X_VAR = xel::xScopeGuard(InitDeviceSelector, CleanDeviceSelector);
 
     auto AATicker  = xTickRunner(TickAuditAccountService);
     auto CMTicker  = xTickRunner(TickClientManager);
     auto ACLTicker = xTickRunner(TickAuthCacheLocalServer);
+    auto DSTicker  = xTickRunner(TickDeviceSelector);
     while (true) {
-        ServiceUpdateOnce(AATicker, CMTicker, ACLTicker);
+        ServiceUpdateOnce(AATicker, CMTicker, ACLTicker, DSTicker);
     }
 
     return 0;

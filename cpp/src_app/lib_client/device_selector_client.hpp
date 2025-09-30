@@ -4,6 +4,24 @@
 
 #include <pp_common/_.hpp>
 
+struct xDeviceSelectorOptions {
+    xCountryId CountryId;
+    xStateId   StateId;
+    xCityId    CityId;
+    bool       RequireIpv6;
+    bool       RequireUdp;
+    bool       RequireRemoteDns;
+
+    std::string OptionEx;
+};
+
+struct xDeviceSelectorResult {
+    uint64_t DeviceRelayServerRuntimeId;
+    uint64_t DeviceRelaySideId;
+
+    operator bool() { return DeviceRelayServerRuntimeId && DeviceRelaySideId; }
+};
+
 class xDeviceSelectorClient {
 private:
     struct xRequestContext : xListNode {
@@ -19,16 +37,17 @@ public:
     void Clean();
 
     bool HasValidBackend() { return ACCConnections; }
-    bool Request(const std::string_view & UserPassword, uint64_t SourceRequestId);
+    bool Request(uint64_t SourceRequestId, const xDeviceSelectorOptions & Ops);
 
     // callback types
-    using xOnEnabled                 = std::function<void()>;
-    using xOnDisabled                = std::function<void()>;
-    using xOnAuthCacheResultCallback = std::function<void(uint64_t RequestContextId, const xClientAuthResult * AuthResult)>;
+    using xOnEnabled                    = std::function<void()>;
+    using xOnDisabled                   = std::function<void()>;
+    using xOnDeviceSelectResultCallback = std::function<void(uint64_t RequestContextId, const xDeviceSelectorResult & Result)>;
+
     // callbacks
-    xOnEnabled                 OnEnabled                 = Noop<>;
-    xOnDisabled                OnDisabled                = Noop<>;
-    xOnAuthCacheResultCallback OnAuthCacheResultCallback = Noop<>;
+    xOnEnabled                    OnEnabled                    = Noop<>;
+    xOnDisabled                   OnDisabled                   = Noop<>;
+    xOnDeviceSelectResultCallback OnDeviceSelectResultCallback = Noop<>;
 
 private:
     xTicker                                       T;
