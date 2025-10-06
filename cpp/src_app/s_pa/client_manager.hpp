@@ -3,7 +3,7 @@
 
 #include <pp_common/_.hpp>
 
-class xPA_ClientConnection;
+struct xPA_ClientConnection;
 
 enum xPA_ClientState {
     CS_CHALLENGE,  // challenge, protocol unknown
