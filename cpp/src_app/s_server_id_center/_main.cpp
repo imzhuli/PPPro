@@ -6,7 +6,7 @@ static constexpr const size_t MAX_ID_INDEX = 10'0000;
 
 static xCollectableErrorPrinter ErrorPrinter = { "Failed to allocate server id" };
 static xServerIdManager         ServerIdManager;
-static xNetAddress              BindAddress;
+static xNetAddress              BindAddress4;
 static xTcpService              TcpService;
 
 static bool OnClientPacket(const xTcpServiceClientConnectionHandle & Handle, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) {
@@ -51,7 +51,7 @@ int main(int argc, char ** argv) {
 
     auto SEG = xRuntimeEnvGuard(argc, argv);
     auto CL  = xConfigLoader(RuntimeEnv.DefaultConfigFilePath);
-    CL.Require(BindAddress, "BindAddress");
+    CL.Require(BindAddress4, "BindAddress4");
 
     ErrorPrinter.SetLogger(Logger);
 
@@ -59,7 +59,7 @@ int main(int argc, char ** argv) {
     TcpService.OnClientClose  = OnClientClose;
     X_GUARD(ServerIdManager);
 
-    X_GUARD(TcpService, ServiceIoContext, BindAddress, MAX_ID_INDEX);
+    X_GUARD(TcpService, ServiceIoContext, BindAddress4, MAX_ID_INDEX);
 
     while (ServiceRunState) {
         ServiceUpdateOnce();

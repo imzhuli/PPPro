@@ -11,16 +11,8 @@ bool xRelayInfoObserver::Init(xIoContext * ICP, const xNetAddress & ServerListDo
         return false;
     }
 
-    bool Prefer4 = ServerListDownloadAddress.Is4();
-    bool Prefer6 = ServerListDownloadAddress.Is6();
-    RuntimeAssert(Prefer4 || Prefer6);
-
-    DispatcherServerInfoDownloader.OnUpdateServerInfoCallback = [this, Prefer4, Prefer6](const xRelayInfoDispatcherServerInfo & Info) {
-        if (Prefer4) {
-            RelayInfoDispatcherClient.UpdateTarget(Info.ObserverAddress4);
-        } else if (Prefer6) {
-            RelayInfoDispatcherClient.UpdateTarget(Info.ObserverAddress6);
-        }
+    DispatcherServerInfoDownloader.OnUpdateServerInfoCallback = [this](const xRelayInfoDispatcherServerInfo & Info) {
+        RelayInfoDispatcherClient.UpdateTarget(Info.ObserverAddress4);
     };
     RelayInfoDispatcherClient.OnConnectedCallback = [this]() { RelayInfoDispatcherClient.PostMessage(Cmd_RegisterRelayInfoObserver, 0, XR(xPP_RegisterRelayInfoObserver())); };
     RelayInfoDispatcherClient.OnPacketCallback    = [this](xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) {

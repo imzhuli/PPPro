@@ -230,13 +230,11 @@ struct xPP_DownloadRelayInfoDispatcherServer : xBinaryMessage {
 
 struct xPP_DownloadRelayInfoDispatcherServerResp : xBinaryMessage {
 
-    void SerializeMembers() override {
+    void SerializeMembers() override {  //
         W(ServerInfo.ServerId, ServerInfo.ProducerAddress4, ServerInfo.ObserverAddress4);
-        W(ServerInfo.ServerId, ServerInfo.ProducerAddress6, ServerInfo.ObserverAddress6);
     }
-    void DeserializeMembers() override {
+    void DeserializeMembers() override {  //
         R(ServerInfo.ServerId, ServerInfo.ProducerAddress4, ServerInfo.ObserverAddress4);
-        R(ServerInfo.ServerId, ServerInfo.ProducerAddress6, ServerInfo.ObserverAddress6);
     }
 
     xRelayInfoDispatcherServerInfo ServerInfo;

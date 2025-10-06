@@ -9,8 +9,6 @@ static void RID_RegisterServer(const xMessageChannel & Poster, uint64_t LocalSer
         .ServerId         = LocalServerId,
         .ProducerAddress4 = ExportProducerAddress4,
         .ObserverAddress4 = ExportObserverAddress4,
-        .ProducerAddress6 = ExportProducerAddress6,
-        .ObserverAddress6 = ExportObserverAddress6,
     };
     Poster.PostMessage(Cmd_RegisterRelayInfoDispatcherServer, 0, Req);
 }

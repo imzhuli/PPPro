@@ -7,8 +7,6 @@
 
 static auto RegisterServiceBindAddress4 = xNetAddress();
 static auto DownloadServiceBindAddress4 = xNetAddress();
-static auto RegisterServiceBindAddress6 = xNetAddress();
-static auto DownloadServiceBindAddress6 = xNetAddress();
 static auto BackendServerListFilename   = std::string();
 
 //////////
@@ -39,8 +37,6 @@ static size_t   DeviceSelectorDispatcherListResponseSize = {};
 ///////////
 static xTcpService RegisterService4;
 static xTcpService DownloadService4;
-static xTcpService RegisterService6;
-static xTcpService DownloadService6;
 
 static xSL_InternalServerListManager ServerListManager;
 
@@ -482,43 +478,25 @@ int main(int argc, char ** argv) {
     auto CL  = xConfigLoader(RuntimeEnv.DefaultConfigFilePath);
     CL.Optional(RegisterServiceBindAddress4, "RegisterServiceBindAddress4");
     CL.Optional(DownloadServiceBindAddress4, "DownloadServiceBindAddress4");
-    CL.Optional(RegisterServiceBindAddress6, "RegisterServiceBindAddress6");
-    CL.Optional(DownloadServiceBindAddress6, "DownloadServiceBindAddress6");
     CL.Optional(BackendServerListFilename, "BackendServerListFilename");
 
     bool V4Enabled = RegisterServiceBindAddress4.Is4() && RegisterServiceBindAddress4.Port && DownloadServiceBindAddress4.Is4() && DownloadServiceBindAddress4.Port;
-    bool V6Enabled = RegisterServiceBindAddress6.Is6() && RegisterServiceBindAddress6.Port && DownloadServiceBindAddress6.Is6() && DownloadServiceBindAddress6.Port;
-    if (!V4Enabled && !V6Enabled) {
-        Logger->F("invalid config, v4 & v6 are both disabled");
+    if (!V4Enabled) {
+        Logger->F("invalid config, v4 is disabled");
         return 0;
     }
 
     X_COND_GUARD(V4Enabled, RegisterService4, ServiceIoContext, RegisterServiceBindAddress4, 10'0000);
     X_COND_GUARD(V4Enabled, DownloadService4, ServiceIoContext, DownloadServiceBindAddress4, 10'0000);
-    X_COND_GUARD(V6Enabled, RegisterService6, ServiceIoContext, RegisterServiceBindAddress6, 10'0000);
-    X_COND_GUARD(V6Enabled, DownloadService6, ServiceIoContext, DownloadServiceBindAddress6, 10'0000);
 
-    if (V4Enabled) {
-        RegisterService4.OnClientClose  = OnRegisterClientClose;
-        RegisterService4.OnClientPacket = OnRegisterClientPacket;
-        DownloadService4.OnClientPacket = OnDownloadClientPacket;
-    }
-    if (V6Enabled) {
-        RegisterService6.OnClientClose  = OnRegisterClientClose;
-        RegisterService6.OnClientPacket = OnRegisterClientPacket;
-        DownloadService6.OnClientPacket = OnDownloadClientPacket;
-    }
+    RegisterService4.OnClientClose  = OnRegisterClientClose;
+    RegisterService4.OnClientPacket = OnRegisterClientPacket;
+    DownloadService4.OnClientPacket = OnDownloadClientPacket;
 
     ServerListManager.SetBackendServerListFile(BackendServerListFilename);
 
     while (true) {
-        ServiceUpdateOnce(ServerListManager);
-        if (V4Enabled) {
-            TickAll(ServiceTicker(), RegisterService4, DownloadService4);
-        }
-        if (V6Enabled) {
-            TickAll(ServiceTicker(), RegisterService6, DownloadService6);
-        }
+        ServiceUpdateOnce(ServerListManager, RegisterService4, DownloadService4);
     }
 
     return 0;

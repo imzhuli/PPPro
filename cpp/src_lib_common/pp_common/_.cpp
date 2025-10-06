@@ -18,12 +18,6 @@ std::string xRelayServerInfoBase::ToString() const {
     O(ExportDeviceAddress4);
     O(ExportDeviceAddress6);
 
-    O(ExportStaticIpAddress4);
-    O(ExportStaticIpAddress6);
-
-    O(ExportStaticUdpAddress4);
-    O(ExportStaticUdpAddress6);
-
     O(ForcedPoolId);
 
     return OS.str();
@@ -34,8 +28,6 @@ std::string xRelayInfoDispatcherServerInfo::ToString() const {
     O(ServerId);
     O(ProducerAddress4);
     O(ObserverAddress4);
-    O(ProducerAddress6);
-    O(ObserverAddress6);
     return OS.str();
 }
 

@@ -9,18 +9,12 @@ extern xNetAddress ServerIdCenterAddress;
 extern xNetAddress ServerListRegisterAddress;
 
 extern xNetAddress ProducerAddress4;
-extern xNetAddress ProducerAddress6;
 extern xNetAddress ObserverAddress4;
-extern xNetAddress ObserverAddress6;
 extern xNetAddress ExportProducerAddress4;
-extern xNetAddress ExportProducerAddress6;
 extern xNetAddress ExportObserverAddress4;
-extern xNetAddress ExportObserverAddress6;
 
 extern xTcpService ProducerService4;
-extern xTcpService ProducerService6;
 extern xTcpService ObserverService4;
-extern xTcpService ObserverService6;
 
 struct xRID_LocalAudit {
     size_t TotalRelayConnections          = 0;

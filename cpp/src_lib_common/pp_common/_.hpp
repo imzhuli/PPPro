@@ -236,8 +236,6 @@ struct xRelayInfoDispatcherServerInfo {
     uint64_t    ServerId         = {};
     xNetAddress ProducerAddress4 = {};
     xNetAddress ObserverAddress4 = {};
-    xNetAddress ProducerAddress6 = {};
-    xNetAddress ObserverAddress6 = {};
 
     bool operator==(const xRelayInfoDispatcherServerInfo &) const = default;
 
@@ -260,10 +258,6 @@ struct xRelayServerInfoBase {
 
     xNetAddress ExportDeviceAddress4;
     xNetAddress ExportDeviceAddress6;
-    xNetAddress ExportStaticIpAddress4;
-    xNetAddress ExportStaticIpAddress6;
-    xNetAddress ExportStaticUdpAddress4;
-    xNetAddress ExportStaticUdpAddress6;
 
     uint32_t ForcedPoolId;
 

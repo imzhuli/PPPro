@@ -43,13 +43,7 @@ int main(int argc, char ** argv) {
 
     RIDDownloader.OnUpdateServerInfoCallback = [=](const xRelayInfoDispatcherServerInfo & Info) {
         DEBUG_LOG("RelayInfoDispatcher producer address updated: %s", Info.ToString().c_str());
-        if (Enable4 && Info.ProducerAddress4.Is4()) {
-            RIReporter.UpdateServerAddress(Info.ProducerAddress4);
-        } else if (Enable6 && Info.ProducerAddress6.Is6()) {
-            RIReporter.UpdateServerAddress(Info.ProducerAddress6);
-        } else {
-            Logger->E("invalid relay info dispatcher address support!");
-        }
+        RIReporter.UpdateServerAddress(Info.ProducerAddress4);
     };
 
     X_GUARD(ServerIdClient, ServiceIoContext, ServerIdCenterAddress, RuntimeEnv.DefaultLocalServerIdFilePath);
