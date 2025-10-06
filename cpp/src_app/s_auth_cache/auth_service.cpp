@@ -22,7 +22,7 @@ bool xAC_AuthService::Init(xIoContext * ICP, const xNetAddress & BindAddress) {
         return true;
     };
 
-    CacheManager.OnAsyncResultCallback = CacheManager.OnImmediateResultCallback = [this](const xCacheRequestContext & Context, const void * Data) {
+    CacheManager.OnAsyncResultCallback = CacheManager.OnImmediateResultCallback = [](const xCacheRequestContext & Context, const void * Data) {
         DEBUG_LOG("ResultCallback, Data=%p", Data);
         auto Resp = xPP_QueryAuthCacheResp();
         if (auto RD = (xPPB_BackendAuthByUserPassResp *)Data) {
