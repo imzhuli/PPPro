@@ -61,46 +61,33 @@ bool xDS_DeviceSelectorServiceProvider::OnSelectDevice(const xMessageChannel & S
     }
 
     // TODO: select device:
+    DEBUG_LOG("RequestGeoInfo: %u/%u/%u", (unsigned)Req.CountryId, (unsigned)Req.StateId, (unsigned)Req.CityId);
+    auto PD = (const xDS_DeviceContext *)nullptr;
+    if (Req.CityId) {
+        DEBUG_LOG("by CityId");
+        PD = DeviceContextManager.SelectDeviceByCityId(Req.CityId);
+    } else if (Req.StateId) {
+        DEBUG_LOG("by StateId");
+        PD = DeviceContextManager.SelectDeviceByStateId(Req.StateId);
+    } else if (Req.CountryId) {
+        DEBUG_LOG("by CountryId");
+        PD = DeviceContextManager.SelectDeviceByCountryId(Req.CountryId);
+    } else {
+        DEBUG_LOG("no device select condition");
+    }
 
     auto Resp = xPP_AcquireDeviceResp();
+    if (PD) {
+        Resp.DeviceRelayServerRuntimeId = PD->InfoBase.ReleayServerRuntimeId;
+        Resp.DeviceRelaySideId          = PD->InfoBase.RelayServerSideDeviceId;
+        DEBUG_LOG("DeviceSelected: ServerId=%" PRIx64 ", DeviceId=%" PRIx64 "", Resp.DeviceRelayServerRuntimeId, Resp.DeviceRelaySideId);
+    } else {
+        DEBUG_LOG("No device found!");
+    }
+
     Source.PostMessage(Cmd_DeviceSelector_AcquireDeviceResp, RequestId, Resp);
     return true;
 }
-
-// bool xDS_DeviceSelectorService::OnSelectDevice(xServiceClientConnection & CC, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) {
-//     auto Req = xPP_AcquireDevice();
-//     if (!Req.Deserialize(PayloadPtr, PayloadSize)) {
-//         DEBUG_LOG("Invalid protocol");
-//         return true;
-//     }
-//     DEBUG_LOG("RequestGeoInfo: %u/%u/%u", (unsigned)Req.CountryId, (unsigned)Req.StateId, (unsigned)Req.CityId);
-
-//     auto PD = (const xDS_DeviceContext *)nullptr;
-//     if (Req.CityId) {
-//         DEBUG_LOG("by CityId");
-//         PD = DeviceContextManager.SelectDeviceByCityId(Req.CityId);
-//     } else if (Req.StateId) {
-//         DEBUG_LOG("by StateId");
-//         PD = DeviceContextManager.SelectDeviceByStateId(Req.StateId);
-//     } else if (Req.CountryId) {
-//         DEBUG_LOG("by CountryId");
-//         PD = DeviceContextManager.SelectDeviceByCountryId(Req.CountryId);
-//     } else {
-//         DEBUG_LOG("no device select condition");
-//     }
-
-//     auto Resp = xPP_AcquireDeviceResp();
-//     if (PD) {
-//         Resp.DeviceRelayServerRuntimeId = PD->InfoBase.ReleayServerRuntimeId;
-//         Resp.DeviceRelaySideId          = PD->InfoBase.RelayServerSideDeviceId;
-//         DEBUG_LOG("DeviceSelected: ServerId=%" PRIx64 ", DeviceId=%" PRIx64 "", Resp.DeviceRelayServerRuntimeId, Resp.DeviceRelaySideId);
-//     } else {
-//         DEBUG_LOG("No device found!");
-//     }
-
-//     PostMessage(CC, Cmd_DeviceSelector_AcquireDeviceResp, RequestId, Resp);
-//     return true;
-// }
 
 void xDS_DeviceSelectorServiceProvider::UpdateDispatcherList(const std::vector<xDeviceSelectorDispatcherInfo> & ServerList) {
     auto L = std::vector<xNetAddress>();

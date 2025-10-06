@@ -5,19 +5,15 @@ struct xPP_RegisterDeviceSelector : public xBinaryMessage {
 
     void SerializeMembers() override {
         W(ServerInfo.RegionDetailLevel);
-        W(ServerInfo.AllowRegionDowngrade);
-        W(ServerInfo.HasAuditBinding);
         W(ServerInfo.PoolId);
-        W(ServerInfo.StrategyId);
+        W(ServerInfo.StrategyFlags);
         //
     }
 
     void DeserializeMembers() override {
         R(ServerInfo.RegionDetailLevel);
-        R(ServerInfo.AllowRegionDowngrade);
-        R(ServerInfo.HasAuditBinding);
         R(ServerInfo.PoolId);
-        R(ServerInfo.StrategyId);
+        R(ServerInfo.StrategyFlags);
     }
 
     xDeviceSelectorServerInfo ServerInfo;
@@ -26,16 +22,19 @@ struct xPP_RegisterDeviceSelector : public xBinaryMessage {
 struct xPP_AcquireDevice : public xBinaryMessage {
 
     void SerializeMembers() override {
+        W(StrategyFlags);
         W(CountryId, StateId, CityId);
         W(RequireIpv6, RequireUdp, RequireRemoteDns);
         W(OptionEx);
     }
     void DeserializeMembers() override {
+        R(StrategyFlags);
         R(CountryId, StateId, CityId);
         R(RequireIpv6, RequireUdp, RequireRemoteDns);
         R(OptionEx);
     }
 
+    uint16_t   StrategyFlags;
     xCountryId CountryId;
     xStateId   StateId;
     xCityId    CityId;

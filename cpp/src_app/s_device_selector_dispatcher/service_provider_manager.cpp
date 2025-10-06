@@ -12,7 +12,7 @@ void xDSD_ServiceProviderManager::Clean() {
 }
 
 bool xDSD_ServiceProviderManager::AddServer(uint64_t ConnectionId, const xDeviceSelectorServerInfo & SI) {
-    if (SI.PoolId >= xDeviceSelectorServerInfo::MAX_POOL_ID || SI.StrategyId >= xDeviceSelectorServerInfo::MAX_STRATEGY_ID) {
+    if (SI.PoolId >= xDeviceSelectorServerInfo::MAX_POOL_ID || SI.StrategyFlags >= xDeviceSelectorServerInfo::MAX_STRATEGY_COMBINED_ENABLED_COUNT) {
         return false;
     }
 
@@ -25,8 +25,9 @@ bool xDSD_ServiceProviderManager::AddServer(uint64_t ConnectionId, const xDevice
     SP.ServiceProviderId = Id;
     SP.ServerInfo        = SI;
 
-    auto & Pool = Pools[SI.PoolId];
-    auto & SL   = Pool.StrategyList[SI.StrategyId];
+    auto &   Pool       = Pools[SI.PoolId];
+    uint16_t StrategyId = SI.StrategyFlags;
+    auto &   SL         = Pool.StrategyList[StrategyId];
     SL.AddTail(SP);
     return true;
 }

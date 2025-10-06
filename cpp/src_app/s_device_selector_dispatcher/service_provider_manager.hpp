@@ -5,7 +5,7 @@ struct xDSD_StrategyListNode : xListNode {};
 using xDSD_StrategyList = xList<xDSD_StrategyListNode>;
 
 struct xDSD_ServerProviderPool {
-    xDSD_StrategyList StrategyList[xDeviceSelectorServerInfo::MAX_STRATEGY_ID];
+    xDSD_StrategyList StrategyList[xDeviceSelectorServerInfo::MAX_STRATEGY_COMBINED_ENABLED_COUNT];
 };
 
 struct xDSD_ServerProvider : xDSD_StrategyListNode {

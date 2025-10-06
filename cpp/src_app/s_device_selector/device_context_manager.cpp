@@ -54,6 +54,7 @@ void xDS_DeviceContextManager::UpdateDevice(const xDR_DeviceInfoBase & InfoBase)
                     CityDeviceList[InfoBase.CityId].AddTail(*PD);
                     ++LocalAudit.EnabledDeviceCount;
                 }
+                DEBUG_LOG("Enable device");
             }
         }
         KeepAlive(PD);
@@ -70,7 +71,7 @@ void xDS_DeviceContextManager::UpdateDevice(const xDR_DeviceInfoBase & InfoBase)
     ++LocalAudit.NewDeviceCount;
     ++LocalAudit.TotalDeviceCount;
 
-    DEBUG_LOG("UpdateDevice: %s,%" PRIx64 ": %u/%u/%u", InfoBase.DeviceId.c_str(), InfoBase.RelayServerSideDeviceId, InfoBase.CountryId, InfoBase.StateId, InfoBase.CityId);
+    DEBUG_LOG("NewDevice: %s,%" PRIx64 ": %u/%u/%u", InfoBase.DeviceId.c_str(), InfoBase.RelayServerSideDeviceId, InfoBase.CountryId, InfoBase.StateId, InfoBase.CityId);
 }
 
 void xDS_DeviceContextManager::RemoveDevice(xDS_DeviceContext * Device) {
@@ -96,7 +97,6 @@ void xDS_DeviceContextManager::RemoveDeviceById(const std::string & DeviceId) {
 }
 
 void xDS_DeviceContextManager::KeepAlive(xDS_DeviceContext * Device) {
-    DEBUG_LOG("%s", Device->InfoBase.DeviceId.c_str());
     Device->TimestampMS = Ticker();
     TimeoutDeviceList.GrabTail(*Device);
 }

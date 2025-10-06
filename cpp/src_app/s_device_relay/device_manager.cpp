@@ -245,7 +245,6 @@ static bool OnDeviceHandshake(const xTcpServiceClientConnectionHandle & Handle, 
     Handle.PostMessage(Cmd_DV_RL_HandshakeResp, 0, RS);
     DEBUG_ADT("accept new device connection: %" PRIx64 ", uuid=%s remote address=%s", PDC->Id, R.DeviceUUID.c_str(), Handle.GetRemoteAddress().ToString().c_str());
 
-    ReportNewDevice(PDC);
     return true;
 }
 

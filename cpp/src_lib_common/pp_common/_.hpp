@@ -278,6 +278,8 @@ struct xDeviceSelectorDispatcherInfo {
 };
 
 struct xDeviceSelectorServerInfo {
+    static constexpr const uint16_t MAX_POOL_ID = 128;
+
     enum eRegionDetailLevel : uint16_t {
         UNSPECIFIED = 0,
         COUNTRY     = 1,
@@ -286,18 +288,19 @@ struct xDeviceSelectorServerInfo {
         LOCAL_AREA  = 4,
     };
 
-    enum eStrategyId : uint16_t {
-        SI_GENERIC = 0,
+    enum eStrategyFlags : uint16_t {
+        SF_CLEAR             = 0,
+        SF_IPV4              = 0x01u << 0,
+        SF_IPV6              = 0x01u << 1,
+        SF_DEVICE_PERSISTENT = 0x01u << 2,
+        SF_REGION_DOWNGRADE  = 0x01u << 3,
     };
+    static constexpr const size_t MAX_STRATEGY_BIT_COUNT              = 16;
+    static constexpr const size_t MAX_STRATEGY_COMBINED_ENABLED_COUNT = 32;
 
-    static constexpr const uint16_t MAX_POOL_ID     = 128;
-    static constexpr const uint16_t MAX_STRATEGY_ID = 128;
-
-    eRegionDetailLevel RegionDetailLevel    = UNSPECIFIED;
-    bool               AllowRegionDowngrade = false;  // 当高精度区域不可用时, 返回粗精度的IP
-    bool               HasAuditBinding      = false;  // 对于要求IP不变的对象, 需要有保持记忆功能
-    uint16_t           PoolId               = 0;
-    uint16_t           StrategyId           = 0;
+    eRegionDetailLevel RegionDetailLevel = UNSPECIFIED;
+    uint16_t           StrategyFlags     = SF_CLEAR;
+    uint32_t           PoolId            = 0;
 };
 
 struct xClientAuthResult {

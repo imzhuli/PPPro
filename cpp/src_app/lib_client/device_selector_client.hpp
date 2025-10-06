@@ -5,6 +5,7 @@
 #include <pp_common/_.hpp>
 
 struct xDeviceSelectorOptions {
+    uint16_t   StrategyFlags;
     xCountryId CountryId;
     xStateId   StateId;
     xCityId    CityId;
