@@ -29,7 +29,7 @@ void ServiceUpdateOnce(tTickerObserver &&... Observers) {
 }
 
 /////////////////////////
-struct xServiceRequestContext;
+class xServiceRequestContext;
 class xServiceRequestContextPool;
 
 class xServiceRequestContext : private xListNode {

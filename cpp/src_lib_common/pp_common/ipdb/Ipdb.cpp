@@ -37,7 +37,7 @@ static void InitKnownGeoInfoList(const char * filename) {
         const auto & CountryName = ACS[I];
         auto         CountryId   = CountryCodeToCountryId(CountryName.c_str());
         if (!CountryId) {
-            X_PERROR("Invalid CountryId: SourceName: %s", ACS[I]);
+            X_PERROR("Invalid CountryId: SourceName: %s", ACS[I].c_str());
             continue;
         }
         auto CombinedStateName = MakeCombinedStateName(CountryName, RGNS[I]);

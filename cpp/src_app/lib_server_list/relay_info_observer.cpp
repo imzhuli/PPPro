@@ -22,9 +22,8 @@ bool xRelayInfoObserver::Init(xIoContext * ICP, const xNetAddress & ServerListDo
             RelayInfoDispatcherClient.UpdateTarget(Info.ObserverAddress6);
         }
     };
-    RelayInfoDispatcherClient.OnConnectedCallback =
-        [this]() { /* RelayInfoDispatcherClient.PostMessage(Cmd_RegisterRelayInfoObserver, 0, XR(xPP_RegisterRelayInfoObserver())); */ };
-    RelayInfoDispatcherClient.OnPacketCallback = [this](xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) {
+    RelayInfoDispatcherClient.OnConnectedCallback = [this]() { RelayInfoDispatcherClient.PostMessage(Cmd_RegisterRelayInfoObserver, 0, XR(xPP_RegisterRelayInfoObserver())); };
+    RelayInfoDispatcherClient.OnPacketCallback    = [this](xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) {
         return OnRelayInfoDispatcherPacket(CommandId, RequestId, PayloadPtr, PayloadSize);
     };
     return true;
