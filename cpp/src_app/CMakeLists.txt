@@ -83,6 +83,7 @@ set(target_list
 	t_base
 	t_direct_auth
 	t_server_list_downloader
+	t_device_select_client
 
 	x_device
 

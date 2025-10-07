@@ -65,11 +65,6 @@ xRuntimeEnvGuard::~xRuntimeEnvGuard() {
     Reset(Instance);
 }
 
-xRuntimeEnv * xRuntimeEnvGuard::operator->() const {
-    RuntimeAssert(Instance);
-    return &RuntimeEnv;
-}
-
 /////////////////////////
 
 bool xServiceRequestContextPool::Init(size_t PoolSize) {

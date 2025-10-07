@@ -16,8 +16,8 @@ static xGeoInfo UsernameToGeoSelection(const std::string_view & Username) {
 }
 
 int main(int argc, char ** argv) {
-    XG   xRuntimeEnvGuard(argc, argv);
-    auto CL = RuntimeEnv.LoadConfig();
+    X_INSTANCE xRuntimeEnvGuard(argc, argv);
+    auto       CL = RuntimeEnv.LoadConfig();
 
     cout << UsernameToGeoSelection("BR").CountryId << endl;
 

@@ -19,6 +19,7 @@ bool xDeviceSelectorClient::Init(xIoContext * ICP, const xel::xNetAddress & Serv
     }
 
     DSD.OnUpdateDeviceSelectorDispatcherServerListCallback = [this](uint32_t Version, const std::vector<xDeviceSelectorDispatcherInfo> & ServerList) {
+        DEBUG_LOG("");
         std::vector<xNetAddress> AL;
         for (auto S : ServerList) {
             AL.push_back(S.ExportAddressForClient);
@@ -29,11 +30,13 @@ bool xDeviceSelectorClient::Init(xIoContext * ICP, const xel::xNetAddress & Serv
 
     ACC.OnConnectedCallback = [this](auto &) {
         if (!ACCConnections++) {
+            DEBUG_LOG("OnEnabled");
             OnEnabled();
         }
     };
     ACC.OnDisonnectedCallback = [this](auto &) {
         if (!--ACCConnections) {
+            DEBUG_LOG("OnDisabled");
             OnDisabled();
         }
     };
@@ -102,7 +105,7 @@ bool xDeviceSelectorClient::Request(uint64_t SourceRequestId, const xDeviceSelec
     T.CountryId        = Ops.CountryId;
     T.StateId          = Ops.StateId;
     T.CityId           = Ops.CityId;
-    T.RequireIpv6      = Ops.RequireIpv6;
+    T.StrategyFlags    = Ops.StrategyFlags;
     T.RequireUdp       = Ops.RequireUdp;
     T.RequireRemoteDns = Ops.RequireRemoteDns;
     T.OptionEx         = Ops.OptionEx;

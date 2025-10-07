@@ -9,6 +9,7 @@ static void DSD_RegisterServer(const xMessageChannel & Poster, uint64_t LocalSer
     ServerInfo.ServerId                        = LocalServerId;
     ServerInfo.ExportAddressForClient          = ExportBindAddressForClient;
     ServerInfo.ExportAddressForServiceProvider = ExportBindAddressForServer;
+
     Poster.PostMessage(Cmd_RegisterDeviceSelectorDispatcherServer, 0, Req);
 }
 

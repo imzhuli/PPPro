@@ -15,8 +15,6 @@ struct xRuntimeEnvGuard final : xNonCopyable {
     xRuntimeEnvGuard(int argc, char ** argv, bool EnableDefaultLogger = true);
     ~xRuntimeEnvGuard();
 
-    xRuntimeEnv * operator->() const;
-
 private:
     const bool EnableLogger;
 };
@@ -52,11 +50,12 @@ public:
     auto Acquire(xVariable RequestContext = {}, xVariable RequestContextEx = {}) -> const xServiceRequestContext *;
     auto CheckAndGet(uint64_t RequestId) -> const xServiceRequestContext *;
     void Release(const xServiceRequestContext * RCP);
-
-    using xOnTimeoutRequestCallback = std::function<void(const xServiceRequestContext *)>;
     void SetRequestTimeoutMS(uint64_t TimeoutMS) { DefaultTimeoutMS = TimeoutMS > 500 ? TimeoutMS : 500; }
-    void SetOnTimeoutRequestCallback(const xOnTimeoutRequestCallback & CB) { OnTimeoutRequestCallback = CB; }
-    void ClearTimeoutRequestCallback() { OnTimeoutRequestCallback = &IgnoreTimeoutRequest; }
+
+    // callbacks
+    using xOnTimeoutRequestCallback = std::function<void(const xServiceRequestContext *)>;
+    //
+    xOnTimeoutRequestCallback OnTimeoutRequestCallback = Noop<>;
 
     void RemoveTimeoutRequests(uint64_t TimeoutMS, uint64_t NowMS = ServiceTicker()) {
         auto KillTimepoint = NowMS - TimeoutMS;
@@ -67,13 +66,9 @@ public:
     }
 
 private:
-    static void IgnoreTimeoutRequest(const xServiceRequestContext *) {}
-
-private:
     xIndexedStorage<xServiceRequestContext> Pool;
     xServiceRequestContextList              TimeoutList;
-    uint64_t                                DefaultTimeoutMS         = 2'000;
-    xOnTimeoutRequestCallback               OnTimeoutRequestCallback = &IgnoreTimeoutRequest;
+    uint64_t                                DefaultTimeoutMS = 2'000;
 };
 
 class xTickRunner {
@@ -102,8 +97,4 @@ private:
 #else
 #define DEBUG_LOG(...)
 #define DEBUG_ADT(...)
-#endif
-
-#ifndef XG
-#define XG auto X_VAR =
 #endif

@@ -201,12 +201,22 @@ struct xDeviceId final {
     std::strong_ordering operator<=>(const xDeviceId &) const = default;
 };
 
-using xDeviceFlag                          = uint32_t;
+using xDeviceFlag              = uint32_t;
+using xDevicePoolId            = uint32_t;
+using xDeviceSelectionStrategy = uint16_t;
+
 constexpr const xDeviceFlag DF_NONE        = 0x00;
 constexpr const xDeviceFlag DF_ENABLE_TCP4 = 0x01 << 0;
 constexpr const xDeviceFlag DF_ENABLE_TCP6 = 0x01 << 1;
 constexpr const xDeviceFlag DF_ENABLE_UDP4 = 0x01 << 2;
 constexpr const xDeviceFlag DF_ENABLE_UDP6 = 0x01 << 3;
+
+constexpr const xDeviceSelectionStrategy DSS_CLEAR             = 0;
+constexpr const xDeviceSelectionStrategy DSS_IPV4              = 0x01u << 0;
+constexpr const xDeviceSelectionStrategy DSS_IPV6              = 0x01u << 1;
+constexpr const xDeviceSelectionStrategy DSS_UDP               = 0x01u << 2;
+constexpr const xDeviceSelectionStrategy DSS_DEVICE_PERSISTENT = 0x01u << 3;
+constexpr const xDeviceSelectionStrategy DSS_REGION_DOWNGRADE  = 0x01u << 4;
 
 struct xDeviceChallengePack {
     uint32_t    Version;
@@ -272,7 +282,7 @@ struct xDeviceSelectorDispatcherInfo {
 };
 
 struct xDeviceSelectorServerInfo {
-    static constexpr const uint16_t MAX_POOL_ID = 128;
+    static constexpr const uint16_t MAX_DEVICE_POOL_ID = 128;
 
     enum eRegionDetailLevel : uint16_t {
         UNSPECIFIED = 0,
@@ -282,19 +292,11 @@ struct xDeviceSelectorServerInfo {
         LOCAL_AREA  = 4,
     };
 
-    enum eStrategyFlags : uint16_t {
-        SF_CLEAR             = 0,
-        SF_IPV4              = 0x01u << 0,
-        SF_IPV6              = 0x01u << 1,
-        SF_DEVICE_PERSISTENT = 0x01u << 2,
-        SF_REGION_DOWNGRADE  = 0x01u << 3,
-    };
-    static constexpr const size_t MAX_STRATEGY_BIT_COUNT              = 16;
     static constexpr const size_t MAX_STRATEGY_COMBINED_ENABLED_COUNT = 32;
 
-    eRegionDetailLevel RegionDetailLevel = UNSPECIFIED;
-    uint16_t           StrategyFlags     = SF_CLEAR;
-    uint32_t           PoolId            = 0;
+    eRegionDetailLevel       RegionDetailLevel = UNSPECIFIED;
+    xDeviceSelectionStrategy StrategyFlags     = DSS_CLEAR;
+    xDevicePoolId            DevicePoolId      = 0;
 };
 
 struct xClientAuthResult {
@@ -399,4 +401,5 @@ inline std::ostream & operator<<(std::ostream & OS, const xNetAddress & Address)
     return OS;
 }
 
+#define X_INSTANCE   auto X_VAR =
 #define X_AT_EXIT(v) auto X_CONCAT_FORCE_EXPAND(__X_AtExit__, __LINE__) = ::xel::xScopeGuard(v);

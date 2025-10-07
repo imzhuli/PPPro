@@ -9,7 +9,6 @@ struct xDeviceSelectorOptions {
     xCountryId CountryId;
     xStateId   StateId;
     xCityId    CityId;
-    bool       RequireIpv6;
     bool       RequireUdp;
     bool       RequireRemoteDns;
 
@@ -21,6 +20,7 @@ struct xDeviceSelectorResult {
     uint64_t DeviceRelaySideId;
 
     operator bool() { return DeviceRelayServerRuntimeId && DeviceRelaySideId; }
+    std::strong_ordering operator<=>(const xDeviceSelectorResult &) const = default;
 };
 
 class xDeviceSelectorClient {

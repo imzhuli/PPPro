@@ -9,8 +9,8 @@ static bool Enable4 = false;
 static bool Enable6 = false;
 
 int main(int argc, char ** argv) {
-    auto REG = xRuntimeEnvGuard(argc, argv);
-    auto CL  = REG->LoadConfig();
+    X_INSTANCE xRuntimeEnvGuard(argc, argv);
+    auto       CL = RuntimeEnv.LoadConfig();
 
     CL.Optional(BindAddressForDevice4, "BindAddressForDevice4");
     CL.Optional(BindAddressForDevice6, "BindAddressForDevice6");

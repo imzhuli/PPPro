@@ -17,6 +17,11 @@ extern xDeviceSelectorDispatcherServerListDownloader DSDDownloader;
 
 extern xClientPoolWrapper DeviceObserver;
 
+extern xDevicePoolId DevicePoolId;
+extern bool          EnableGenericV4Device;
+extern bool          EnableGenericV6Device;
+extern bool          EnablePersistentDeviceBinding;
+
 extern struct xDS_LocalAudit {
     uint64_t DurationMS = 0;
 

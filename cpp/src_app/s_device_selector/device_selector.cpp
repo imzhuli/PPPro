@@ -47,8 +47,18 @@ bool xDS_DeviceSelectorServiceProvider::OnRegisterServerResp(ubyte * PayloadPtr,
 }
 
 void xDS_DeviceSelectorServiceProvider::RegisterServiceProvider(const xMessageChannel & Poster) {
-    auto R = xPP_RegisterDeviceSelector();
-    // TODO: set server info
+    auto   R                = xPP_RegisterDeviceSelector();
+    auto & ServerInfo       = R.ServerInfo;
+    ServerInfo.DevicePoolId = DevicePoolId;
+    if (EnableGenericV4Device) {
+        ServerInfo.StrategyFlags |= DSS_IPV4;
+    }
+    if (EnableGenericV6Device) {
+        ServerInfo.StrategyFlags |= DSS_IPV6;
+    }
+    if (EnablePersistentDeviceBinding) {
+        ServerInfo.StrategyFlags |= DSS_DEVICE_PERSISTENT;
+    }
 
     Poster.PostMessage(Cmd_RegisterDeviceSelector, 0, R);
 }

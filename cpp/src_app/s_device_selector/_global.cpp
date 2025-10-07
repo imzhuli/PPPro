@@ -11,6 +11,11 @@ xDeviceStateRelayServerListDownloader         DSRDownloader;
 xDeviceSelectorDispatcherServerListDownloader DSDDownloader;
 xClientPoolWrapper                            DeviceObserver;
 
+xDevicePoolId DevicePoolId                  = 0;
+bool          EnableGenericV4Device         = true;
+bool          EnableGenericV6Device         = true;
+bool          EnablePersistentDeviceBinding = false;
+
 xDS_LocalAudit LocalAudit;
 
 void xDS_LocalAudit::ResetPeriodCount() {
