@@ -35,6 +35,7 @@ bool xAC_AuthService::Init(xIoContext * ICP, const xNetAddress & BindAddress) {
             R.RequireUdp     = RD->EnableUdp;
             R.AlwaysChangeIp = RD->AutoChangeIpOnDeviceOffline;
             R.PAToken        = RD->ServerToken;
+            R.ThirdRedirect  = RD->Redirect;
         }
         auto Handle = xTcpServiceClientConnectionHandle(static_cast<xTcpService *>(Context.Value.P), Context.ValueEx.U64);
         if (Handle.operator->()) {
@@ -123,6 +124,7 @@ void xAC_AuthService::OnCmdAuthByUserPassResp(xPacketCommandId CommandId, xPacke
         DEBUG_LOG("invalid protocol");
         return;
     }
+
     auto PC = new xPPB_BackendAuthByUserPassResp(P);
     DEBUG_LOG("%s", PC->ToString().c_str());
 

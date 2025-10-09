@@ -21,6 +21,7 @@ struct xPP_QueryAuthCacheResp : xBinaryMessage {
         W(Result.RequireUdp);
         W(Result.AlwaysChangeIp);
         W(Result.PAToken);
+        W(Result.ThirdRedirect);
     }
     void DeserializeMembers() override {
         R(Result.AuditId);
@@ -31,6 +32,7 @@ struct xPP_QueryAuthCacheResp : xBinaryMessage {
         R(Result.RequireUdp);
         R(Result.AlwaysChangeIp);
         R(Result.PAToken);
+        W(Result.ThirdRedirect);
     }
 
     xClientAuthResult Result;

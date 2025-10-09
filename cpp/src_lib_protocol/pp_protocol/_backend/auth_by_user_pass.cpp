@@ -5,9 +5,6 @@
 std::string xPPB_BackendAuthByUserPassResp::ToString() const {
     auto O = std::ostringstream();
     O << "EC: " << (uint32_t)ErrorCode << endl;
-    if (ErrorCode) {
-        return O.str();
-    }
 
     O << "AuditId:" << AuditId << endl;
     O << "ContinentId:" << ContinentId << endl;

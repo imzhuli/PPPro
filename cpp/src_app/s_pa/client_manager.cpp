@@ -184,6 +184,21 @@ void OnPAC_AuthResult(uint64_t ConnectionId, const xClientAuthResult * AR) {
         DEBUG_LOG("timeout auth result");
         return;
     }
+
+    do {
+        auto OS = std::ostringstream();
+        OS << "AuditId: " << AR->AuditId << " ";
+        OS << "CountryId: " << AR->CountryId << " ";
+        OS << "StateId: " << AR->StateId << " ";
+        OS << "RequireIpv6: " << AR->RequireIpv6 << " ";
+        OS << "RequireUdp: " << AR->RequireUdp << " ";
+        OS << "AlwaysChangeIp: " << AR->AlwaysChangeIp << " ";
+        OS << "PersistentDeviceBinding: " << AR->PersistentDeviceBinding << " ";
+        OS << "PAToken: " << AR->PAToken << " ";
+        OS << "ThirdRedirect: " << AR->ThirdRedirect << " ";
+        DEBUG_LOG("%s", OS.str().c_str());
+    } while (false);
+
     switch (CC->State) {
         case CS_S5_WAIT_FOR_AUTH_RESULT:
             OnPAC_S5_AuthResult(CC, AR);
