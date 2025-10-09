@@ -19,7 +19,7 @@ struct xDeviceSelectorResult {
     uint64_t DeviceRelayServerRuntimeId;
     uint64_t DeviceRelaySideId;
 
-    operator bool() { return DeviceRelayServerRuntimeId && DeviceRelaySideId; }
+    operator bool() const { return DeviceRelayServerRuntimeId && DeviceRelaySideId; }
     std::strong_ordering operator<=>(const xDeviceSelectorResult &) const = default;
 };
 

@@ -19,7 +19,7 @@ struct xPP_QueryAuthCacheResp : xBinaryMessage {
         W(Result.CityId);
         W(Result.RequireIpv6);
         W(Result.RequireUdp);
-        W(Result.AutoChangeIp);
+        W(Result.AlwaysChangeIp);
         W(Result.PAToken);
     }
     void DeserializeMembers() override {
@@ -29,7 +29,7 @@ struct xPP_QueryAuthCacheResp : xBinaryMessage {
         R(Result.CityId);
         R(Result.RequireIpv6);
         R(Result.RequireUdp);
-        R(Result.AutoChangeIp);
+        R(Result.AlwaysChangeIp);
         R(Result.PAToken);
     }
 

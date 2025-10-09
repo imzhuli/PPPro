@@ -12,6 +12,7 @@ enum xPA_ClientState {
     CS_S5_CHALLENGE,                     // s5 challenge
     CS_S5_WAIT_FOR_AUTH_INFO,            // wait for auth info
     CS_S5_WAIT_FOR_AUTH_RESULT,          //
+    CS_S5_WAIT_FOR_DEVICE_RESULT,        //
     CS_S5_WAIT_FOR_TARGET_ADDRESS,       //
     CS_S5_WAIT_FOR_CONECTION_ESTABLISH,  //
     CS_S_TC,                             // tcp connection
@@ -38,11 +39,12 @@ struct xPA_ClientConnection
 
     xNetAddress GetRemoteAddress() const { return Conn.GetRemoteAddress(); }
     void        PostData(const void * DataPtr, size_t DataSize) { Conn.PostData(DataPtr, DataSize); }
+    bool        HasPendingWrites() const { return Conn.HasPendingWrites(); }
 
     // members:
     xPA_ClientTcpConnection Conn;
     xPA_ClientState         State = CS_CHALLENGE;
-    uint64_t                Connectionid;
+    uint64_t                ConnectionId;
 };
 
 extern void InitClientManager();
@@ -72,3 +74,5 @@ extern size_t OnPAC_S5_AuthInfo(xPA_ClientConnection * CC, ubyte * DP, size_t DS
 extern size_t OnPAC_S5_TargetAddress(xPA_ClientConnection * CC, ubyte * DP, size_t DS);
 
 extern void OnPAC_S5_AuthResult(xPA_ClientConnection * CC, const xClientAuthResult * AR);
+extern void OnPAC_S5_DeviceResult();
+extern void OnPAC_S5_DeviceResult(xPA_ClientConnection * CC, const xDeviceSelectorResult & Result);

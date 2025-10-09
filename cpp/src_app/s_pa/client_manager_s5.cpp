@@ -38,6 +38,7 @@ size_t OnPAC_S5_Challenge(xPA_ClientConnection * Client, ubyte * DP, size_t Data
         Client->PostData(Socks5Auth, sizeof(Socks5Auth));
         Client->State = CS_S5_WAIT_FOR_AUTH_INFO;
     } else if (NoAuthSupport) {
+        DEBUG_LOG("no auth s5");
         Client->State = CS_S5_WAIT_FOR_AUTH_INFO;
         // ubyte Socks5NoAuthAccepted[2] = { 0x05, 0x00 };
         // Client->PostData(Socks5Auth, sizeof(Socks5NoAuthAccepted));
@@ -89,7 +90,7 @@ size_t OnPAC_S5_AuthInfo(xPA_ClientConnection * Client, ubyte * DataPtr, size_t 
         return InvalidDataSize;
     }
     DEBUG_LOG("AuthInfo AuthType=%u: NP=%s", (unsigned)Ver, NP.c_str());
-    if (!PostAuthRequest(Client->Connectionid, NP)) {
+    if (!PostAuthRequest(Client->ConnectionId, NP)) {
         Client->PostData("\x01\x01", 2);
         SchedulePassiveKillClientConnection(Client);
     } else {
@@ -167,18 +168,42 @@ void OnPAC_S5_AuthResult(xPA_ClientConnection * CC, const xClientAuthResult * AR
         CC->PostData("\x01\x01", 2);
         SchedulePassiveKillClientConnection(CC);
     }
-    CC->PostData("\x01\x00", 2);
-    KeepAlive(CC);
 
-    CC->State = CS_S5_WAIT_FOR_TARGET_ADDRESS;
+    // select device:
+    auto OPS      = xDeviceSelectorOptions();
+    OPS.CountryId = AR->CountryId;
+    OPS.StateId   = AR->StateId;
+    OPS.CityId    = AR->CityId;
+    if (AR->RequireIpv6) {
+        OPS.StrategyFlags |= DSS_IPV6;
+    } else {
+        OPS.StrategyFlags |= DSS_IPV4;
+    }
+    if (AR->RequireUdp) {
+        OPS.StrategyFlags |= DSS_UDP;
+    }
+    if (AR->PersistentDeviceBinding) {
+        OPS.StrategyFlags |= DSS_DEVICE_PERSISTENT;
+    } else {
+        if (!AR->AlwaysChangeIp) {
+            OPS.StrategyFlags |= DSS_DEVICE_VOLATILE;
+        }
+    }
+    if (!PostDeviceSelectorRequest(CC->ConnectionId, OPS)) {
+        CC->PostData("\x01\x01", 2);
+        SchedulePassiveKillClientConnection(CC);
+    }
+    CC->State = CS_S5_WAIT_FOR_DEVICE_RESULT;
 }
 
-// size_t xPA_ClientStateHandler_S5_WaitForAuthResult::OnDataEvent(xPA_ClientConnection * Client, ubyte * DataPtr, size_t DataSize) {
-//     if (!DataSize) {
-//         return 0;
-//     }
+void OnPAC_S5_DeviceResult(xPA_ClientConnection * CC, const xDeviceSelectorResult & Result) {
+    if (!Result) {
+        CC->PostData("\x01\x01", 2);
+        SchedulePassiveKillClientConnection(CC);
+        return;
+    }
 
-//     DEBUG_LOG("Forward data received, closing connection, data=\n%s", HexShow(DataPtr, DataSize).c_str());
-//     ScheduleClientStateChange(Client, CloseClientStateHandler);
-//     return 0;
-// };
+    CC->PostData("\x01\x00", 2);
+    KeepAlive(CC);
+    CC->State = CS_S5_WAIT_FOR_TARGET_ADDRESS;
+}

@@ -49,11 +49,13 @@ void CleanClietManager() {
 void TickClientManager(uint64_t NowMS) {
     auto AuthTimeoutPred = [KillPoint = NowMS - MAX_CLIENT_CONNECTION_AUTH_TIMEOUT_MS](const xPA_ClientConnectionIdleNode & N) { return N.LastActivityTimestampMS <= KillPoint; };
     while (auto P = static_cast<xPA_ClientConnection *>(AuthTimeoutList.PopHead(AuthTimeoutPred))) {
+        DEBUG_LOG("AuthTimeout");
         DestroyClientConnection(P);
     }
 
     auto IdleTimeoutPred = [KillPoint = NowMS - MAX_CLIENT_CONNECTION_IDLE_TIMEOUT_MS](const xPA_ClientConnectionIdleNode & N) { return N.LastActivityTimestampMS <= KillPoint; };
     while (auto P = static_cast<xPA_ClientConnection *>(ClientIdleList.PopHead(IdleTimeoutPred))) {
+        DEBUG_LOG("IdleTimeout");
         DestroyClientConnection(P);
     }
 
@@ -61,10 +63,12 @@ void TickClientManager(uint64_t NowMS) {
         return N.KillingScheduledTimestampMS <= KillPoint;
     };
     while (auto P = static_cast<xPA_ClientConnection *>(ClientPassiveKillList.PopHead(PassiveTimeoutPred))) {
+        DEBUG_LOG("PassiveTimeout");
         DestroyClientConnection(P);
     }
 
     while (auto P = static_cast<xPA_ClientConnection *>(ClientKillList.PopHead())) {
+        DEBUG_LOG("DirectKilled");
         DestroyClientConnection(P);
     }
 }
@@ -85,13 +89,15 @@ xPA_ClientConnection * AcceptClientConnection(xSocket && NativeHandle) {
         delete C;
         return nullptr;
     }
-    C->Connectionid = Id;
+    C->ConnectionId = Id;
+    DEBUG_LOG("ConnectionId: %" PRIx64 "", C->ConnectionId);
     return C;
 }
 
 void DestroyClientConnection(xPA_ClientConnection * CC) {
-    assert(CC == GetClientConnectionById(CC->Connectionid));
-    ClientIdManager.Release(CC->Connectionid);
+    DEBUG_LOG("ConnectionId: %" PRIx64 "", CC->ConnectionId);
+    assert(CC == GetClientConnectionById(CC->ConnectionId));
+    ClientIdManager.Release(CC->ConnectionId);
     CC->Conn.Clean();
     delete CC;
 }
@@ -117,7 +123,11 @@ void SchedulePassiveKillClientConnection(xPA_ClientConnection * CC) {
     if (CC->State == CS_KILL_ON_FLUSH) {
         return;
     }
-    CC->State                       = CS_KILL_ON_FLUSH;
+    CC->State = CS_KILL_ON_FLUSH;
+    if (!CC->HasPendingWrites()) {
+        DeferKillClientConnection(CC);
+        return;
+    }
     CC->KillingScheduledTimestampMS = ServiceTicker();
     ClientPassiveKillList.GrabTail(*CC);
 }
@@ -182,4 +192,22 @@ void OnPAC_AuthResult(uint64_t ConnectionId, const xClientAuthResult * AR) {
             DeferKillClientConnection(CC);
     }
     return;
+}
+
+void OnPAC_DeviceSelectResult(uint64_t ConnectionId, const xDeviceSelectorResult & Result) {
+    DEBUG_LOG("RID: %" PRIx64 ", RelayServerId=%" PRIx64 ", DeviceConnectionId=%" PRIx64 "", ConnectionId, Result.DeviceRelayServerRuntimeId, Result.DeviceRelaySideId);
+    auto CC = GetClientConnectionById(ConnectionId);
+    if (!CC) {
+        DEBUG_LOG("Missing original connection");
+        return;
+    }
+
+    switch (CC->State) {
+        case CS_S5_WAIT_FOR_DEVICE_RESULT:
+            OnPAC_S5_DeviceResult(CC, Result);
+            break;
+
+        default:
+            DeferKillClientConnection(CC);
+    }
 }

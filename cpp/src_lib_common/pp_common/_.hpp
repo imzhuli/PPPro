@@ -216,7 +216,8 @@ constexpr const xDeviceSelectionStrategy DSS_IPV4              = 0x01u << 0;
 constexpr const xDeviceSelectionStrategy DSS_IPV6              = 0x01u << 1;
 constexpr const xDeviceSelectionStrategy DSS_UDP               = 0x01u << 2;
 constexpr const xDeviceSelectionStrategy DSS_DEVICE_PERSISTENT = 0x01u << 3;
-constexpr const xDeviceSelectionStrategy DSS_REGION_DOWNGRADE  = 0x01u << 4;
+constexpr const xDeviceSelectionStrategy DSS_DEVICE_VOLATILE   = 0x01u << 4;
+constexpr const xDeviceSelectionStrategy DSS_REGION_DOWNGRADE  = 0x01u << 5;
 
 struct xDeviceChallengePack {
     uint32_t    Version;
@@ -306,7 +307,8 @@ struct xClientAuthResult {
     xCityId     CityId;
     bool        RequireIpv6;
     bool        RequireUdp;
-    bool        AutoChangeIp;
+    bool        AlwaysChangeIp;
+    bool        PersistentDeviceBinding;
     std::string PAToken;
     std::string ThirdRedirect;
 };

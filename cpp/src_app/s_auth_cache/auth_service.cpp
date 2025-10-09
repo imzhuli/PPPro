@@ -26,15 +26,15 @@ bool xAC_AuthService::Init(xIoContext * ICP, const xNetAddress & BindAddress) {
         DEBUG_LOG("ResultCallback, Data=%p", Data);
         auto Resp = xPP_QueryAuthCacheResp();
         if (auto RD = (xPPB_BackendAuthByUserPassResp *)Data) {
-            auto & R       = Resp.Result;
-            R.AuditId      = RD->AuditId;
-            R.CountryId    = RD->CountryId;
-            R.StateId      = RD->StateId;
-            R.CityId       = RD->CityId;
-            R.RequireIpv6  = RD->Ipv6Prefered;
-            R.RequireUdp   = RD->EnableUdp;
-            R.AutoChangeIp = RD->AutoChangeIpOnDeviceOffline;
-            R.PAToken      = RD->ServerToken;
+            auto & R         = Resp.Result;
+            R.AuditId        = RD->AuditId;
+            R.CountryId      = RD->CountryId;
+            R.StateId        = RD->StateId;
+            R.CityId         = RD->CityId;
+            R.RequireIpv6    = RD->Ipv6Prefered;
+            R.RequireUdp     = RD->EnableUdp;
+            R.AlwaysChangeIp = RD->AutoChangeIpOnDeviceOffline;
+            R.PAToken        = RD->ServerToken;
         }
         auto Handle = xTcpServiceClientConnectionHandle(static_cast<xTcpService *>(Context.Value.P), Context.ValueEx.U64);
         if (Handle.operator->()) {

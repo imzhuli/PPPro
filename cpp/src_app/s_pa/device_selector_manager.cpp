@@ -24,4 +24,5 @@ bool PostDeviceSelectorRequest(uint64_t SourceRequestId, const xDeviceSelectorOp
 }
 
 void DispatchDeviceSelectorResult(uint64_t RequestContextId, const xDeviceSelectorResult & Result) {
+    OnPAC_DeviceSelectResult(RequestContextId, Result);
 }

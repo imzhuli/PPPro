@@ -42,7 +42,7 @@ bool xDeviceSelectorClient::Init(xIoContext * ICP, const xel::xNetAddress & Serv
     };
     ACC.OnPacketCallback = [this](const xMessageChannel & Source, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) {
         DEBUG_LOG("CommondId=%" PRIx32 ", RequestId:%" PRIx64 " Data=\n%s", CommandId, RequestId, HexShow(PayloadPtr, PayloadSize).c_str());
-        if (CommandId != Cmd_AuthService_QueryAuthCacheResp) {
+        if (CommandId != Cmd_DeviceSelector_AcquireDeviceResp) {
             DEBUG_LOG("Invalid server response command");
             return false;
         }
