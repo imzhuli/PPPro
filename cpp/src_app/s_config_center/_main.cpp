@@ -25,6 +25,8 @@ int main(int argc, char ** argv) {
         Logger->F("neither ipv4 or ipv6 is enabled");
         return 0;
     }
+    Logger->I("bind v4: %s", BindAddressForDevice4.ToString().c_str());
+    Logger->I("bind v6: %s", BindAddressForDevice6.ToString().c_str());
 
     ChallengeService4.OnPacketCallback = OnTerminalChallenge;
     ChallengeService6.OnPacketCallback = OnTerminalChallenge;
@@ -57,7 +59,7 @@ int main(int argc, char ** argv) {
     };
 
     while (ServiceRunState) {
-        ServiceUpdateOnce(RelayInfoObserver, LocalAudit);
+        ServiceUpdateOnce(RelayInfoObserver, LocalAudit, IpLocationManager);
     }
 
     return 0;

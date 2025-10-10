@@ -20,6 +20,10 @@ static xPP_DeviceInfoUpdate PrepareReport(const xDR_DeviceContext * PDC) {
     DI.Tcp6Address = PDC->Tcp6Address;
     DI.Udp6Address = PDC->Udp6Address;
 
+    DI.CountryId = PDC->GeoInfo.CountryId;
+    DI.StateId   = PDC->GeoInfo.StateId;
+    DI.CityId    = PDC->GeoInfo.CityId;
+
     return DI;
 }
 

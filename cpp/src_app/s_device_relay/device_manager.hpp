@@ -16,6 +16,8 @@ struct xDR_DeviceContext final {
     xNetAddress Udp4Address;
     xNetAddress Tcp6Address;
     xNetAddress Udp6Address;
+
+    xGeoInfo GeoInfo;
 };
 
 extern void InitDeviceContextManager();

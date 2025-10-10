@@ -9,6 +9,9 @@ struct xDeviceChallengePackMessage_W : xBinaryMessage {
         W(Pack->Tcp6Address);
         W(Pack->Udp4Address);
         W(Pack->Udp6Address);
+        W(Pack->GeoInfo.CountryId);
+        W(Pack->GeoInfo.StateId);
+        W(Pack->GeoInfo.CityId);
     }
     void DeserializeMembers() override {}
 
@@ -24,6 +27,9 @@ struct xDeviceChallengePackMessage_R : xBinaryMessage {
         R(Pack->Tcp6Address);
         R(Pack->Udp4Address);
         R(Pack->Udp6Address);
+        R(Pack->GeoInfo.CountryId);
+        R(Pack->GeoInfo.StateId);
+        R(Pack->GeoInfo.CityId);
     }
 
     xDeviceChallengePack * Pack = nullptr;

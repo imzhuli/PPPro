@@ -240,6 +240,8 @@ static bool OnDeviceHandshake(const xTcpServiceClientConnectionHandle & Handle, 
     PDC->Tcp6Address = DAP.Tcp6Address;
     PDC->Udp6Address = DAP.Udp6Address;
 
+    PDC->GeoInfo = DAP.GeoInfo;
+
     auto RS     = xPP_DeviceHandshakeResp();
     RS.Accepted = true;
     Handle.PostMessage(Cmd_DV_RL_HandshakeResp, 0, RS);

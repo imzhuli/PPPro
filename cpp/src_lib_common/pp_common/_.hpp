@@ -226,6 +226,7 @@ struct xDeviceChallengePack {
     xNetAddress Tcp6Address;
     xNetAddress Udp4Address;
     xNetAddress Udp6Address;
+    xGeoInfo    GeoInfo;
 };
 
 struct xServerInfo {
