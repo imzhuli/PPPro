@@ -121,6 +121,8 @@ size_t OnPAC_S5_TargetAddress(xPA_ClientConnection * Client, ubyte * DataPtr, si
     xNetAddress Address;
     char        DomainName[256];
     size_t      DomainNameLength = 0;
+    DomainName[0]                = '\0';
+
     if (AddrType == 0x01) {  // ipv4
         Address.Type = xNetAddress::IPV4;
         R.R(Address.SA4, 4);
@@ -203,7 +205,10 @@ void OnPAC_S5_DeviceResult(xPA_ClientConnection * CC, const xDeviceSelectorResul
         return;
     }
 
+    CC->DeviceRelayServerRuntimeId = Result.DeviceRelayServerRuntimeId;
+    CC->DeviceRelaySideId          = Result.DeviceRelaySideId;
+    CC->State                      = CS_S5_WAIT_FOR_TARGET_ADDRESS;
+
     CC->PostData("\x01\x00", 2);
     KeepAlive(CC);
-    CC->State = CS_S5_WAIT_FOR_TARGET_ADDRESS;
 }

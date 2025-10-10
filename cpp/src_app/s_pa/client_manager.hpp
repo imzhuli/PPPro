@@ -45,6 +45,9 @@ struct xPA_ClientConnection
     xPA_ClientTcpConnection Conn;
     xPA_ClientState         State = CS_CHALLENGE;
     uint64_t                ConnectionId;
+
+    uint64_t DeviceRelayServerRuntimeId = 0;
+    uint64_t DeviceRelaySideId          = 0;
 };
 
 extern void InitClientManager();

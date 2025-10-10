@@ -2,9 +2,8 @@
 #include <pp_common/_.hpp>
 #include <unordered_map>
 
-static constexpr const uint64_t DEVICE_KEEPALIVE_TIMEOUT_MS       = 180'000;  // normally device is removed by request from dispatcher
-static constexpr const size_t   DEVICE_INFO_RESIST_COUNTER        = 2;        // normally device is removed by request from dispatcher
-static constexpr const size_t   DEVICE_INFO_ENABLE_COUNTER_TARGET = 2;
+static constexpr const uint64_t DEVICE_KEEPALIVE_TIMEOUT_MS = 180'000;  // normally device is removed by request from dispatcher
+static constexpr const size_t   DEVICE_INFO_RESIST_COUNTER  = 2;        // normally device is removed by request from dispatcher
 
 struct xDR_TimeoutNode : xListNode {
     uint64_t TimestampMS;
@@ -33,7 +32,6 @@ struct xDS_DeviceContext
     , xDR_CityNode {
     xDR_DeviceInfoBase InfoBase;
     size_t             ResisterCounter = DEVICE_INFO_RESIST_COUNTER;
-    size_t             EnableCounter   = 0;
 };
 
 class xDS_DeviceContextManager {

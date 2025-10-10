@@ -32,29 +32,14 @@ void xDS_DeviceContextManager::UpdateDevice(const xDR_DeviceInfoBase & InfoBase)
             if (!--PD->ResisterCounter) {
                 DEBUG_LOG("ReplaceDevice with new info");
                 ++LocalAudit.ReplacedDeviceCount;
-                if (PD->EnableCounter == DEVICE_INFO_ENABLE_COUNTER_TARGET) {
-                    --LocalAudit.EnabledDeviceCount;
-                }
 
-                PD->InfoBase = InfoBase;
                 Reset(PD->ResisterCounter, DEVICE_INFO_RESIST_COUNTER);
+                PD->InfoBase = InfoBase;
 
-                Reset(PD->EnableCounter);
-                xDR_CoutryList::Remove(*PD);
-                xDR_StateList::Remove(*PD);
-                xDR_CityList::Remove(*PD);
-            }
-        } else {
-            Reset(PD->ResisterCounter, DEVICE_INFO_RESIST_COUNTER);
-            if (PD->EnableCounter < DEVICE_INFO_ENABLE_COUNTER_TARGET) {
-                ++PD->EnableCounter;
-                if (PD->EnableCounter == DEVICE_INFO_ENABLE_COUNTER_TARGET) {
-                    CountryDeviceList[InfoBase.CountryId].AddTail(*PD);
-                    StateDeviceList[InfoBase.StateId].AddTail(*PD);
-                    CityDeviceList[InfoBase.CityId].AddTail(*PD);
-                    ++LocalAudit.EnabledDeviceCount;
-                }
-                DEBUG_LOG("Enable device");
+                // update geo link
+                CountryDeviceList[InfoBase.CountryId].GrabTail(*PD);
+                StateDeviceList[InfoBase.StateId].GrabTail(*PD);
+                CityDeviceList[InfoBase.CityId].GrabTail(*PD);
             }
         }
         KeepAlive(PD);
@@ -62,10 +47,14 @@ void xDS_DeviceContextManager::UpdateDevice(const xDR_DeviceInfoBase & InfoBase)
     }
 
     // add new device:
-    auto PD      = new xDS_DeviceContext();
-    PD->InfoBase = InfoBase;
-
+    auto PD                      = new xDS_DeviceContext();
+    PD->InfoBase                 = InfoBase;
     DeviceMap[InfoBase.DeviceId] = PD;
+
+    CountryDeviceList[InfoBase.CountryId].AddTail(*PD);
+    StateDeviceList[InfoBase.StateId].AddTail(*PD);
+    CityDeviceList[InfoBase.CityId].AddTail(*PD);
+
     KeepAlive(PD);
 
     ++LocalAudit.NewDeviceCount;
@@ -85,9 +74,6 @@ void xDS_DeviceContextManager::RemoveDeviceById(const std::string & DeviceId) {
         return;
     }
     auto PD = Iter->second;
-    if (PD->EnableCounter == DEVICE_INFO_ENABLE_COUNTER_TARGET) {
-        --LocalAudit.EnabledDeviceCount;
-    }
     DEBUG_LOG("DeviceId=%s, DeviceRuntimeKey=%" PRIx64 "", DeviceId.c_str(), PD->InfoBase.RelayServerSideDeviceId);
 
     delete PD;

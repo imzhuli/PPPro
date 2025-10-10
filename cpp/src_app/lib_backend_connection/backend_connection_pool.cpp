@@ -72,9 +72,9 @@ void xBackendConnectionPool::OnServerConnected(xClientConnection & CC) {
     auto  RSize = xel::WriteMessage(Buffer, Cmd_BackendChallenge, 0, challenge);
     CC.PostData(Buffer, RSize);
 
-    X_DEBUG_PRINTF("Sending:\n%s", HexShow(Buffer, RSize).c_str());
-    X_DEBUG_PRINTF("Header: %s", StrToHex(Buffer, PacketHeaderSize).c_str());
-    X_DEBUG_PRINTF("Body: %s", StrToHex(Buffer + PacketHeaderSize, RSize - PacketHeaderSize).c_str());
+    // X_DEBUG_PRINTF("Sending:\n%s", HexShow(Buffer, RSize).c_str());
+    // X_DEBUG_PRINTF("Header: %s", StrToHex(Buffer, PacketHeaderSize).c_str());
+    // X_DEBUG_PRINTF("Body: %s", StrToHex(Buffer + PacketHeaderSize, RSize - PacketHeaderSize).c_str());
 }
 
 bool xBackendConnectionPool::OnServerPacket(xClientConnection & CC, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) {
@@ -106,17 +106,17 @@ bool xBackendConnectionPool::OnCmdBackendChallengeResp(xClientConnection & CC, x
     auto & Ctx = ContextList[Idx];
 
     if (Ctx.IsChallengeReady) {
-        X_DEBUG_PRINTF("invalid challenge state");
+        // X_DEBUG_PRINTF("invalid challenge state");
         return false;
     }
 
     auto R = xBackendChallengeResp();
     if (!R.Deserialize(PayloadPtr, PayloadSize)) {
-        X_DEBUG_PRINTF("failed server challenge");
+        // X_DEBUG_PRINTF("failed server challenge");
         return false;
     }
 
-    X_DEBUG_PRINTF("server challenge ready");
+    // X_DEBUG_PRINTF("server challenge ready");
     Ctx.IsChallengeReady = true;
     return true;
 }

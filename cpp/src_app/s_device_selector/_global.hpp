@@ -30,8 +30,7 @@ extern struct xDS_LocalAudit {
     size_t RemovedDeviceCount  = 0;
     size_t TimeoutDeviceCount  = 0;
 
-    size_t TotalDeviceCount   = 0;
-    size_t EnabledDeviceCount = 0;
+    size_t TotalDeviceCount = 0;
 
     void        ResetPeriodCount();
     std::string ToString() const;
