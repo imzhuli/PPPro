@@ -18,8 +18,9 @@ static void OnNewDeviceRelayInfoCallback(const xRIO_RelayServerInfoContext & Inf
     Info.MutableUserContext.U64 = Cid;
     auto & RV                   = RelayIdMap[Info.ServerInfo.ServerId];
     RuntimeAssert(!RV);
+
+    DEBUG_LOG("RelayServer added: LocalId=%" PRIx64 ", ServerId=%" PRIx64 ", Address=%s", Cid, Info.ServerInfo.ServerId, Info.ServerInfo.ExportProxyAddress4.ToString().c_str());
     RV = Cid;
-    DEBUG_LOG("RelayServer added: LocalId=%" PRIx64 ", ServerId=%" PRIx64 ", Address=%s", Info.ServerInfo.ServerId, Info.ServerInfo.ExportProxyAddress4.ToString().c_str());
 }
 
 static void OnRemoveDeviceRelayInfoCallback(const xRIO_RelayServerInfoContext & Info) {
@@ -28,6 +29,7 @@ static void OnRemoveDeviceRelayInfoCallback(const xRIO_RelayServerInfoContext & 
     RelayIdMap.erase(Iter);
 
     auto Cid = Info.MutableUserContext.U64;
+    DEBUG_LOG("RelayServer removed: LocalId=%" PRIx64 ", ServerId=%" PRIx64 ", Address=%s", Cid, Info.ServerInfo.ServerId, Info.ServerInfo.ExportProxyAddress4.ToString().c_str());
     RelayPool.RemoveServer(Cid);
 }
 
