@@ -19,7 +19,7 @@ bool xDeviceSelectorClient::Init(xIoContext * ICP, const xel::xNetAddress & Serv
     }
 
     DSD.OnUpdateDeviceSelectorDispatcherServerListCallback = [this](uint32_t Version, const std::vector<xDeviceSelectorDispatcherInfo> & ServerList) {
-        DEBUG_LOG("");
+        DEBUG_LOG("OnUpdateDeviceSelectorDispatcherServerListCallback");
         std::vector<xNetAddress> AL;
         for (auto S : ServerList) {
             AL.push_back(S.ExportAddressForClient);

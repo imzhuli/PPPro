@@ -8,17 +8,15 @@ int main(int argc, char ** argv) {
     CL.Optional(DeviceAddress4, "DeviceAddress4");
     CL.Optional(DeviceAddress6, "DeviceAddress6");
     CL.Optional(ProxyAddress4, "ProxyAddress4");
-    CL.Optional(ProxyAddress6, "ProxyAddress6");
     CL.Optional(ExportDeviceAddress4, "ExportDeviceAddress4");
     CL.Optional(ExportDeviceAddress6, "ExportDeviceAddress6");
     CL.Optional(ExportProxyAddress4, "ExportProxyAddress4");
-    CL.Optional(ExportProxyAddress6, "ExportProxyAddress6");
 
     CL.Require(ServerIdCenterAddress, "ServerIdCenterAddress");
     CL.Require(ServerListDownloadAddress, "ServerListDownloadAddress");
 
-    bool Enable4 = DeviceAddress4.Is4() && DeviceAddress4.Port && ProxyAddress4.Is4() && ProxyAddress4.Port;
-    bool Enable6 = DeviceAddress6.Is6() && DeviceAddress6.Port && ProxyAddress6.Is6() && ProxyAddress6.Port;
+    bool Enable4 = DeviceAddress4.Is4() && DeviceAddress4.Port;
+    bool Enable6 = DeviceAddress6.Is6() && DeviceAddress6.Port;
     if (!Enable4 && !Enable6) {
         Logger->F("neither ipv4 or ipv6 is enabled");
         return 0;
@@ -33,7 +31,6 @@ int main(int argc, char ** argv) {
         LocalInfo.StartupTimestampMS = ServiceTicker();
 
         LocalInfo.ExportProxyAddress4 = ExportProxyAddress4;
-        LocalInfo.ExportProxyAddress6 = ExportProxyAddress6;
 
         LocalInfo.ExportDeviceAddress4 = ExportDeviceAddress4;
         LocalInfo.ExportDeviceAddress6 = ExportDeviceAddress6;
@@ -52,13 +49,12 @@ int main(int argc, char ** argv) {
     X_GUARD(RIReporter, ServiceIoContext);
     X_GUARD(DeviceReporter, ServiceIoContext);
 
-    auto X_VAR = xel::xScopeGuard(InitDeviceContextManager, CleanDeviceContextManager);
-    X_COND_GUARD(Enable4, DeviceService4, ServiceIoContext, DeviceAddress4, MaxDeviceCount);
-    X_COND_GUARD(Enable4, ProxyService4, ServiceIoContext, ProxyAddress4, MaxDeviceCount);
-    X_COND_GUARD(Enable6, DeviceService6, ServiceIoContext, DeviceAddress6, MaxDeviceCount);
-    X_COND_GUARD(Enable6, ProxyService6, ServiceIoContext, ProxyAddress6, MaxDeviceCount);
+    X_WRAP_SCOPE(InitProxyService, CleanProxyService);
+    X_WRAP_SCOPE(InitDeviceContextManager, CleanDeviceContextManager);
+    X_WRAP_SCOPE(InitRelayContextPool, CleanRelayContextPool);
 
-    auto X_VAR = xel::xScopeGuard([] { InitRelayContextPool(MaxRelayContextCount); }, CleanRelayContextPool);
+    X_COND_GUARD(Enable4, DeviceService4, ServiceIoContext, DeviceAddress4, MaxDeviceCount);
+    X_COND_GUARD(Enable6, DeviceService6, ServiceIoContext, DeviceAddress6, MaxDeviceCount);
 
     DeviceService6.OnClientPacket = DeviceService4.OnClientPacket = &OnDeviceConnectionPacket;
     DeviceService6.OnClientClean = DeviceService4.OnClientClean = &OnDeviceConnectionClean;
@@ -82,27 +78,29 @@ int main(int argc, char ** argv) {
         DEBUG_LOG("%s", OS.str().c_str());
     };
 
-    auto Auditer = xTickRunner(60'000, [](uint64_t) { AuditLogger->I("%s", LocalAudit.ToString().c_str()); });
+    auto Auditer            = xTickRunner(60'000, [](uint64_t) { AuditLogger->I("%s", LocalAudit.ToString().c_str()); });
+    auto ProxyServiceTicker = xTickRunner(TickProxyService);
     while (true) {
         ServiceUpdateOnce(
-            ServerIdClient,  //
-                             // DeviceConnectionManager,  //
-                             // DeviceManager,            //
-                             // DeviceRelayService,       //
-                             // ProxyConnectionManager,   //
-                             // RelayConnectionManager,   //
-            RIDDownloader,   //
-            DSRDownloader,   //
-            RIReporter,      //
-            DeviceReporter,  //
-            Auditer,         //
+            ServerIdClient,      //
+                                 // DeviceConnectionManager,  //
+                                 // DeviceManager,            //
+                                 // DeviceRelayService,       //
+                                 // ProxyConnectionManager,   //
+                                 // RelayConnectionManager,   //
+            RIDDownloader,       //
+            DSRDownloader,       //
+            RIReporter,          //
+            DeviceReporter,      //
+            ProxyServiceTicker,  //
+            Auditer,             //
             DeadTicker
         );
         if (Enable4) {
-            TickAll(ServiceTicker(), DeviceService4, ProxyService4);
+            TickAll(ServiceTicker(), DeviceService4);
         }
         if (Enable6) {
-            TickAll(ServiceTicker(), DeviceService6, ProxyService6);
+            TickAll(ServiceTicker(), DeviceService6);
         }
     }
 

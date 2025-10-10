@@ -249,7 +249,6 @@ struct xPP_RelayServerHeartBeat : xBinaryMessage {
         W(ServerInfo.ServerId);
         W(ServerInfo.StartupTimestampMS);
         W(ServerInfo.ExportProxyAddress4);
-        W(ServerInfo.ExportProxyAddress6);
         switch (ServerInfo.ServerType) {
             case eRelayServerType::DEVICE:
                 W(ServerInfo.ExportDeviceAddress4);
@@ -265,7 +264,6 @@ struct xPP_RelayServerHeartBeat : xBinaryMessage {
         R(ServerInfo.ServerId);
         R(ServerInfo.StartupTimestampMS);
         R(ServerInfo.ExportProxyAddress4);
-        R(ServerInfo.ExportProxyAddress6);
         switch (ServerInfo.ServerType) {
             case eRelayServerType::DEVICE:
                 R(ServerInfo.ExportDeviceAddress4);
@@ -295,7 +293,6 @@ struct xPP_BroadcastRelayInfo : xBinaryMessage {
         W(ServerInfo.ServerId);
         W(ServerInfo.StartupTimestampMS);
         W(ServerInfo.ExportProxyAddress4);
-        W(ServerInfo.ExportProxyAddress6);
         switch (ServerInfo.ServerType) {
             case eRelayServerType::DEVICE:
                 W(ServerInfo.ExportDeviceAddress4);
@@ -311,7 +308,6 @@ struct xPP_BroadcastRelayInfo : xBinaryMessage {
         R(ServerInfo.ServerId);
         R(ServerInfo.StartupTimestampMS);
         R(ServerInfo.ExportProxyAddress4);
-        R(ServerInfo.ExportProxyAddress6);
         switch (ServerInfo.ServerType) {
             case eRelayServerType::DEVICE:
                 R(ServerInfo.ExportDeviceAddress4);

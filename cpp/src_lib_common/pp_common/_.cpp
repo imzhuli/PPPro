@@ -13,7 +13,6 @@ std::string xRelayServerInfoBase::ToString() const {
     O(StartupTimestampMS);
 
     O(ExportProxyAddress4);
-    O(ExportProxyAddress6);
 
     O(ExportDeviceAddress4);
     O(ExportDeviceAddress6);

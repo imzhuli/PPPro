@@ -4,9 +4,7 @@
 void InitRelayConnectionManager();
 void CleanRelayConnectionManager();
 void TickRelayConnectionManager(uint64_t NowMS);
+bool PostRelayMessage(uint64_t RelayServerId, xPacketCommandId CmdId, xPacketRequestId RequestId, xel::xBinaryMessage & Message);
 
-void UpdateRelayConnection(uint64_t RelayServerId, const xNetAddress & Address);
-void RemoveRelayConnection(uint64_t RelayServerId);
-
-void RequestRelayTargetConnection(uint64_t RelayServerId, uint64_t DeviceRelaySideId, const xNetAddress & TargetAddress);
-void RequestRelayTargetConnection(uint64_t RelayServerId, uint64_t DeviceRelaySideId, const std::string_view & TargetHost);
+bool RequestRelayTargetConnection(uint64_t RelayServerId, uint64_t DeviceRelaySideId, const xNetAddress & TargetAddress);
+bool RequestRelayTargetConnection(uint64_t RelayServerId, uint64_t DeviceRelaySideId, const std::string_view & TargetHost);

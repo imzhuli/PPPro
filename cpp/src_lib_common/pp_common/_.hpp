@@ -266,7 +266,6 @@ struct xRelayServerInfoBase {
     uint64_t         ServerId = {};
     uint64_t         StartupTimestampMS;
     xNetAddress      ExportProxyAddress4;
-    xNetAddress      ExportProxyAddress6;
 
     xNetAddress ExportDeviceAddress4;
     xNetAddress ExportDeviceAddress6;
@@ -404,5 +403,6 @@ inline std::ostream & operator<<(std::ostream & OS, const xNetAddress & Address)
     return OS;
 }
 
-#define X_INSTANCE   auto X_VAR =
-#define X_AT_EXIT(v) auto X_CONCAT_FORCE_EXPAND(__X_AtExit__, __LINE__) = ::xel::xScopeGuard(v);
+#define X_INSTANCE                auto X_VAR =
+#define X_AT_EXIT(exit)           auto X_CONCAT_FORCE_EXPAND(__X_AtExit__, __LINE__) = ::xel::xScopeGuard(exit);
+#define X_WRAP_SCOPE(entry, exit) auto X_CONCAT_FORCE_EXPAND(__X_Scope__, __LINE__) = ::xel::xScopeGuard(entry, exit);

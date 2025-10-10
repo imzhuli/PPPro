@@ -22,7 +22,7 @@ struct xRL_RelayContext : xRL_RelayContextTimeoutNode {
 };
 using xRL_RelayContextTimeoutList = xList<xRL_RelayContext>;
 
-extern void InitRelayContextPool(size_t MaxContextCount);
+extern void InitRelayContextPool();
 extern void CleanRelayContextPool();
 
 extern xRL_RelayContext * AllocRelayContext(uint64_t DeviceId);

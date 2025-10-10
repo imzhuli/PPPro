@@ -3,6 +3,7 @@
 #include "../lib_server_list/relay_info_dispatcher_server_info_downloader.hpp"
 #include "../lib_utils/all.hpp"
 #include "./device_manager.hpp"
+#include "./proxy_manager.hpp"
 #include "./relay_context.hpp"
 #include "./relay_server_info_reporter.hpp"
 
@@ -18,12 +19,10 @@ static constexpr const uint64_t RelayContextIdleTimeoutMS = 180'000;
 extern xNetAddress DeviceAddress4;
 extern xNetAddress DeviceAddress6;
 extern xNetAddress ProxyAddress4;
-extern xNetAddress ProxyAddress6;
 
 extern xNetAddress ExportDeviceAddress4;
 extern xNetAddress ExportDeviceAddress6;
 extern xNetAddress ExportProxyAddress4;
-extern xNetAddress ExportProxyAddress6;
 
 extern xNetAddress ServerIdCenterAddress;
 extern xNetAddress ServerListDownloadAddress;
@@ -38,8 +37,6 @@ extern xClientPoolWrapper                       DeviceReporter;
 
 extern xTcpService DeviceService4;
 extern xTcpService DeviceService6;
-extern xTcpService ProxyService4;
-extern xTcpService ProxyService6;
 
 struct xRD_LocalAudit {
     uint64_t TotalCtrlConnections;

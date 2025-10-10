@@ -10,8 +10,8 @@
 static xel::xIndexedStorage<xRL_RelayContext> RelayContextPool;
 static xRL_RelayContextTimeoutList            RelayContextIdleList;
 
-void InitRelayContextPool(size_t MaxContextCount) {
-    RuntimeAssert(RelayContextPool.Init(MaxContextCount));
+void InitRelayContextPool() {
+    RuntimeAssert(RelayContextPool.Init(MaxRelayContextCount));
 }
 
 void CleanRelayContextPool() {

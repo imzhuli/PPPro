@@ -23,9 +23,8 @@ class xRelayInfoObserver final : xel::xNonCopyable {
     using xRelayInfoTimeoutList = xList<xManagedRelayServerInfo>;
 
 public:
-    using xOnNewDeviceRelayInfoCallback      = std::function<void(const xRIO_RelayServerInfoContext & Info)>;
-    using xOnNewDeviceRelayInfoErrorCallback = std::function<void(const xRIO_RelayServerInfoContext & Info)>;
-    using xOnRemoveDeviceRelayInfoCallback   = std::function<void(const xRIO_RelayServerInfoContext & Info)>;
+    using xOnNewDeviceRelayInfoCallback    = std::function<void(const xRIO_RelayServerInfoContext & Info)>;
+    using xOnRemoveDeviceRelayInfoCallback = std::function<void(const xRIO_RelayServerInfoContext & Info)>;
 
 public:
     bool Init(xIoContext * ICP, const xNetAddress & ServerListDownloadAddress);
