@@ -19,6 +19,7 @@ int main(int argc, char ** argv) {
     auto CMTicker  = xTickRunner(TickClientManager);
     auto ACLTicker = xTickRunner(TickAuthCacheLocalServer);
     auto DSTicker  = xTickRunner(TickDeviceSelector);
+    auto RLMTicker = xTickRunner(TickRelayConnectionManager);
     while (true) {
         ServiceUpdateOnce(AATicker, CMTicker, ACLTicker, DSTicker);
     }

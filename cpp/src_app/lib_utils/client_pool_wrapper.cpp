@@ -1,5 +1,18 @@
 #include "./client_pool_wrapper.hpp"
 
+bool xClientPoolWrapper::Init(xIoContext * ICP, size_t MaxConnectionCount) {
+    if (!xClientPool::Init(ICP, MaxConnectionCount)) {
+        return false;
+    }
+    xClientPool::OnServerConnected = std::bind(&xClientPoolWrapper::OnServerConnectedCallback, this, std::placeholders::_1);
+    xClientPool::OnServerClose     = std::bind(&xClientPoolWrapper::OnServerCloseCallback, this, std::placeholders::_1);
+    xClientPool::OnServerPacket    = std::bind(
+        &xClientPoolWrapper::OnServerPacketCallback,  //
+        this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5
+    );
+    return true;
+}
+
 void xClientPoolWrapper::Clean() {
     xClientPool::Clean();
     Reset(SortedServerList);
@@ -93,7 +106,7 @@ void xClientPoolWrapper::PostMessage(xPacketCommandId CmdId, xPacketRequestId Re
     xClientPool::PostMessage(CmdId, RequestId, Message);
 }
 
-void xClientPoolWrapper::OnServerConnected(xClientConnection & CC) {
+void xClientPoolWrapper::OnServerConnectedCallback(xClientConnection & CC) {
     auto Poster = xCPW_MessageChannel{
         this,
         &CC,
@@ -101,7 +114,7 @@ void xClientPoolWrapper::OnServerConnected(xClientConnection & CC) {
     OnConnectedCallback(Poster);
 }
 
-void xClientPoolWrapper::OnServerClose(xClientConnection & CC) {
+void xClientPoolWrapper::OnServerCloseCallback(xClientConnection & CC) {
     auto Poster = xCPW_MessageChannel{
         this,
         &CC,
@@ -109,7 +122,7 @@ void xClientPoolWrapper::OnServerClose(xClientConnection & CC) {
     OnDisonnectedCallback(Poster);
 }
 
-bool xClientPoolWrapper::OnServerPacket(xClientConnection & CC, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) {
+bool xClientPoolWrapper::OnServerPacketCallback(xClientConnection & CC, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) {
     auto Poster = xCPW_MessageChannel{
         this,
         &CC,

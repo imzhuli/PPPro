@@ -6,9 +6,9 @@
 class xClientPoolWrapper final : private xClientPool {
 
 public:
-    using xClientPool::Init;
-    using xClientPool::Tick;
+    bool Init(xIoContext * ICP, size_t MaxConnectionCount = 1024);
     void Clean();
+    using xClientPool::Tick;
 
     void AddServer(const xNetAddress & Address);
     void RemoveServer(const xNetAddress & Address);
@@ -29,9 +29,9 @@ public:
     xOnPacketCallback           OnPacketCallback           = Noop<true>;
 
 private:
-    void OnServerConnected(xClientConnection & CC) override;
-    void OnServerClose(xClientConnection & CC) override;
-    bool OnServerPacket(xClientConnection & CC, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) override;
+    void OnServerConnectedCallback(xClientConnection & CC);
+    void OnServerCloseCallback(xClientConnection & CC);
+    bool OnServerPacketCallback(xClientConnection & CC, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize);
 
 private:
     struct xCPW_InternalServerInfo final {

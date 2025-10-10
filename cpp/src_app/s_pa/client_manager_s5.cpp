@@ -162,6 +162,7 @@ size_t OnPAC_S5_TargetAddress(xPA_ClientConnection * Client, ubyte * DataPtr, si
     }
 
     DEBUG_LOG("TargetAddress: NA:%s, Host:%s", Address.ToString().c_str(), DomainName);
+
     return 0;
 }
 

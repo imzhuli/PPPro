@@ -8,6 +8,13 @@ bool xBackendConnectionPool::Init(xIoContext * ICP, size_t MaxConnectionCount) {
         return false;
     }
     ContextList.resize(MaxConnectionCount);
+
+    xClientPool::OnServerConnected = std::bind(&xBackendConnectionPool::OnServerConnectedCallback, this, std::placeholders::_1);
+    xClientPool::OnServerClose     = std::bind(&xBackendConnectionPool::OnServerCloseCallback, this, std::placeholders::_1);
+    xClientPool::OnServerPacket    = std::bind(
+        &xBackendConnectionPool::OnServerPacketCallback,  //
+        this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5
+    );
     return true;
 }
 
@@ -59,7 +66,7 @@ void xBackendConnectionPool::RemoveServer(const xNetAddress & Address) {
     ++TotalRemovedServer;
 }
 
-void xBackendConnectionPool::OnServerConnected(xClientConnection & CC) {
+void xBackendConnectionPool::OnServerConnectedCallback(xClientConnection & CC) {
     auto   Sid = CC.GetConnectionId();
     auto   Idx = Sid.GetIndex();
     auto & Ctx = ContextList[Idx];
@@ -77,7 +84,7 @@ void xBackendConnectionPool::OnServerConnected(xClientConnection & CC) {
     // X_DEBUG_PRINTF("Body: %s", StrToHex(Buffer + PacketHeaderSize, RSize - PacketHeaderSize).c_str());
 }
 
-bool xBackendConnectionPool::OnServerPacket(xClientConnection & CC, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) {
+bool xBackendConnectionPool::OnServerPacketCallback(xClientConnection & CC, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) {
     if (CommandId == Cmd_BackendChallengeResp) {
         return OnCmdBackendChallengeResp(CC, CommandId, RequestId, PayloadPtr, PayloadSize);
     }
@@ -93,7 +100,7 @@ bool xBackendConnectionPool::OnServerPacket(xClientConnection & CC, xPacketComma
     return true;
 }
 
-void xBackendConnectionPool::OnServerClose(xClientConnection & CC) {
+void xBackendConnectionPool::OnServerCloseCallback(xClientConnection & CC) {
     auto   Sid = CC.GetConnectionId();
     auto   Idx = Sid.GetIndex();
     auto & Ctx = ContextList[Idx];

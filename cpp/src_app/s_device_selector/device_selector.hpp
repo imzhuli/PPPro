@@ -24,7 +24,3 @@ protected:
 private:
     xClientPoolWrapper ClientPool;
 };
-
-struct xDS_DeviceObserver : public xClientPool {
-    bool OnServerPacket(xClientConnection & CC, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) override;
-};

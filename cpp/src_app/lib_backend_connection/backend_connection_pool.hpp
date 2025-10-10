@@ -33,9 +33,9 @@ public:
     void     RemoveServer(const xNetAddress & Address);
 
 private:
-    void OnServerConnected(xClientConnection & CC) override;
-    bool OnServerPacket(xClientConnection & CC, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) override;
-    void OnServerClose(xClientConnection & CC) override;
+    void OnServerConnectedCallback(xClientConnection & CC);
+    void OnServerCloseCallback(xClientConnection & CC);
+    bool OnServerPacketCallback(xClientConnection & CC, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize);
     bool OnCmdBackendChallengeResp(xClientConnection & CC, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize);
 
     //

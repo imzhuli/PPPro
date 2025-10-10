@@ -6,6 +6,7 @@
 #include "./auth_cache_server.hpp"
 #include "./client_manager.hpp"
 #include "./device_selector_manager.hpp"
+#include "./relay_connection_manager.hpp"
 
 #include <pp_common/_.hpp>
 
