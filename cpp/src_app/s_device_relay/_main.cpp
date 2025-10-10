@@ -79,6 +79,7 @@ int main(int argc, char ** argv) {
     };
 
     auto Auditer            = xTickRunner(60'000, [](uint64_t) { AuditLogger->I("%s", LocalAudit.ToString().c_str()); });
+    auto RelayContextTicker = xTickRunner([](uint64_t) { ReleaseTimeoutRelayContext(); });
     auto ProxyServiceTicker = xTickRunner(TickProxyService);
     while (true) {
         ServiceUpdateOnce(
@@ -92,6 +93,7 @@ int main(int argc, char ** argv) {
             DSRDownloader,       //
             RIReporter,          //
             DeviceReporter,      //
+            RelayContextTicker,  //
             ProxyServiceTicker,  //
             Auditer,             //
             DeadTicker

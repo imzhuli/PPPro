@@ -3,11 +3,11 @@
 #include "../lib_utils/all.hpp"
 #include "./_global.hpp"
 #include "./device_reporter.hpp"
-#include "pp_protocol/device_relay/connection.hpp"
-#include "pp_protocol/device_relay/post_data.hpp"
-#include "pp_protocol/device_relay/udp_channel.hpp"
 
+#include <pp_protocol/device_relay/connection.hpp>
 #include <pp_protocol/device_relay/handshake.hpp>
+#include <pp_protocol/device_relay/post_data.hpp>
+#include <pp_protocol/device_relay/udp_channel.hpp>
 
 xIndexedStorage<xDR_DeviceContext> DeviceManager;
 
@@ -49,14 +49,11 @@ static bool OnDeviceCreateConnectionResp(xDR_DeviceContext * PDC, ubyte * Payloa
 
     // TODO:
     if (!Resp.Connected) {
+        NotifyProxyConnectionRefused(PRC);
         ReleaseRelayContext(PRC);
-        // TODO: notify proxy
-
     } else {
         PRC->DeviceSideContextId = Resp.DeviceSideContextId;
-        // TEST:
-        auto Req = "GET / HTTP/1.1\r\nHost: www.baidu.com\r\nUser-Agent: curl/8.5.0\r\n\r\n";
-        PostConnectionData(PRC->RelaySideContextId, Req, strlen(Req));
+        NotifyProxyConnectionEstablished(PRC);
     }
 
     return true;
@@ -173,7 +170,8 @@ static bool OnDevicePostUdpChannelData(xDR_DeviceContext * PDC, ubyte * PayloadP
 
 static bool OnDevicePacket(xDR_DeviceContext * PDC, xPacketCommandId CmdId, xPacketRequestId ReqId, ubyte * PayloadPtr, size_t PayloadSize) {
 
-    DEBUG_LOG("%" PRIx32 "/%" PRIx64 " message_length=%z", PayloadSize);
+    DEBUG_LOG("");
+    DEBUG_LOG("%" PRIx32 "/%" PRIx64 " message_length=%zi", CmdId, ReqId, PayloadSize);
 
     switch (CmdId) {
         case Cmd_DV_RL_CreateConnectionResp: {
@@ -245,8 +243,9 @@ static bool OnDeviceHandshake(const xTcpServiceClientConnectionHandle & Handle, 
     auto RS     = xPP_DeviceHandshakeResp();
     RS.Accepted = true;
     Handle.PostMessage(Cmd_DV_RL_HandshakeResp, 0, RS);
-    DEBUG_ADT("accept new device connection: %" PRIx64 ", uuid=%s remote address=%s", PDC->Id, R.DeviceUUID.c_str(), Handle.GetRemoteAddress().ToString().c_str());
+    DEBUG_LOG("accept new device connection: %" PRIx64 ", uuid=%s remote address=%s", PDC->Id, R.DeviceUUID.c_str(), Handle.GetRemoteAddress().ToString().c_str());
 
+    ReportKeepAliveDevice(PDC);
     return true;
 }
 

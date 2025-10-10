@@ -48,6 +48,7 @@ struct xPA_ClientConnection
 
     uint64_t DeviceRelayServerRuntimeId = 0;
     uint64_t DeviceRelaySideId          = 0;
+    uint64_t RelaySideContextId         = 0;
 };
 
 extern void InitClientManager();

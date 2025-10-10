@@ -36,6 +36,7 @@ int main(int argc, char ** argv) {
                 }
 
                 if (!PP.IsOffline) {
+                    DEBUG_LOG("DeviceHeartbeat");
                     auto LocalDevInfo                    = xDR_DeviceInfoBase{};
                     LocalDevInfo.DeviceId                = PP.DeviceUuid;
                     LocalDevInfo.ReleayServerRuntimeId   = PP.RelayServerRuntimeId;
@@ -47,6 +48,7 @@ int main(int argc, char ** argv) {
 
                     DeviceContextManager.UpdateDevice(LocalDevInfo);
                 } else {
+                    DEBUG_LOG("DeviceOffline");
                     DeviceContextManager.RemoveDeviceById(PP.DeviceUuid);
                 }
                 return true;

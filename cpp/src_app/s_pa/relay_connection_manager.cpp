@@ -3,6 +3,8 @@
 #include "../lib_server_list/relay_info_observer.hpp"
 #include "./_global.hpp"
 
+#include <pp_protocol/proxy_relay/connection.hpp>
+
 static auto RIO       = xRelayInfoObserver();
 static auto RelayPool = xClientPool();
 
@@ -33,8 +35,66 @@ static void OnRemoveDeviceRelayInfoCallback(const xRIO_RelayServerInfoContext & 
     RelayPool.RemoveServer(Cid);
 }
 
+static bool OnConnectionStateChange(ubyte * PayloadPtr, size_t PayloadSize) {
+    auto Notify = xPP_ProxyConnectionState();
+    if (!Notify.Deserialize(PayloadPtr, PayloadSize)) {
+        DEBUG_LOG("invalid protocol");
+        return false;
+    }
+
+    auto CC = GetClientConnectionById(Notify.ProxySideContextId);
+    if (!CC) {
+        DEBUG_LOG("mismatched connection");
+        return true;
+    }
+
+    switch (CC->State) {
+
+        case CS_S5_WAIT_FOR_CONECTION_ESTABLISH: {
+            if (!Notify.DeviceSideContextId) {
+                DEBUG_LOG("Connection refused");
+                assert(!Notify.DeviceSideContextId);
+                // not connected
+                static constexpr const ubyte ErrorReply[] = {
+                    '\x05', '\x05', '\x00',          // refused
+                    '\x01',                          // ipv4
+                    '\x00', '\x00', '\x00', '\x00',  // ip: 0.0.0.0
+                    '\x00', '\x00',                  // port 0:
+                };
+                CC->PostData(ErrorReply, sizeof(ErrorReply));
+                SchedulePassiveKillClientConnection(CC);
+                return true;
+            } else {
+                DEBUG_LOG("Connection established");
+                static constexpr const ubyte ReadyReply[] = {
+                    '\x05', '\x00', '\x00',          // ok
+                    '\x01',                          // ipv4
+                    '\x00', '\x00', '\x00', '\x00',  // ip: 0.0.0.0
+                    '\x00', '\x00',                  // port 0:
+                };
+                CC->PostData(ReadyReply, sizeof(ReadyReply));
+                CC->RelaySideContextId = Notify.RelaySideContextId;
+            }
+        } break;
+
+        default:
+            DEBUG_LOG("unprocessed");
+            break;
+    }
+
+    return true;
+}
+
 static bool OnRelayData(xClientConnection & CC, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) {
     DEBUG_LOG("CommandId=%" PRIx32 ", RequestId=%" PRIx64 " ", CommandId, RequestId);
+    switch (CommandId) {
+        case Cmd_PA_RL_NotifyConnectionState:
+            return OnConnectionStateChange(PayloadPtr, PayloadSize);
+
+        default:
+            DEBUG_LOG("unprocessed");
+            break;
+    }
 
     return true;
 }
@@ -67,6 +127,23 @@ bool PostRelayMessage(uint64_t RelayServerId, xPacketCommandId CmdId, xPacketReq
     return RelayPool.PostMessage(ConnectionId, CmdId, RequestId, Message);
 }
 
-bool RequestRelayTargetConnection(uint64_t RelayServerId, uint64_t DeviceRelaySideId, const xNetAddress & TargetAddress) {
-    return false;
+bool RequestRelayTargetConnection(uint64_t ProxyConnectionId, uint64_t RelayServerId, uint64_t DeviceRelaySideId, const xNetAddress & TargetAddress) {
+    auto Request = xPR_CreateConnection();
+
+    Request.RelayServerSideDeviceId = DeviceRelaySideId;
+    Request.ProxySideConnectionId   = ProxyConnectionId;
+    Request.TargetAddress           = TargetAddress;
+
+    return PostRelayMessage(RelayServerId, Cmd_PA_RL_CreateConnection, 0, Request);
+}
+
+bool RequestRelayTargetConnection(uint64_t ProxyConnectionId, uint64_t RelayServerId, uint64_t DeviceRelaySideId, const std::string_view & TargetHost, uint16_t TargetPort) {
+    auto Request = xPR_CreateConnection();
+
+    Request.RelayServerSideDeviceId = DeviceRelaySideId;
+    Request.ProxySideConnectionId   = ProxyConnectionId;
+    Request.HostnameView            = TargetHost;
+    Request.HostnamePort            = TargetPort;
+
+    return PostRelayMessage(RelayServerId, Cmd_PA_RL_CreateConnection, 0, Request);
 }

@@ -25,7 +25,6 @@ using xRL_RelayContextTimeoutList = xList<xRL_RelayContext>;
 extern void InitRelayContextPool();
 extern void CleanRelayContextPool();
 
-extern xRL_RelayContext * AllocRelayContext(uint64_t DeviceId);
 extern void               ReleaseRelayContext(xRL_RelayContext *);
 extern xRL_RelayContext * GetRelayContextById(uint64_t RelaySideContextId);
 extern void               KeepAlive(xRL_RelayContext *);
@@ -36,6 +35,9 @@ extern xRL_RelayContext * CreateTcpConnection(uint64_t DeviceId, const std::stri
 extern xRL_RelayContext * CreateUdpChannel(uint64_t DeviceId);
 extern xRL_RelayContext * CreateUdpChannel4(uint64_t DeviceId);
 extern xRL_RelayContext * CreateUdpChannel6(uint64_t DeviceId);
+
+extern void NotifyProxyConnectionRefused(xRL_RelayContext * PRC);
+extern void NotifyProxyConnectionEstablished(xRL_RelayContext * PRC);
 
 extern void PostConnectionData(uint64_t RelaySideContextId, const void * DataPtr, size_t DataSize);
 extern void PostUdpChannelData(uint64_t RelaySideContextId, const xNetAddress & TargetAddress, const void * DataPtr, size_t DataSize);

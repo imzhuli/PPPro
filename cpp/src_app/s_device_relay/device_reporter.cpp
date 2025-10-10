@@ -4,7 +4,11 @@
 
 #include <pp_protocol/ad_bk/device_info.hpp>
 
+#ifndef NDEBUG
+static constexpr const uint64_t MIN_DEVICE_KEEPALIVE_TIMEOUT_MS = 0;
+#else
 static constexpr const uint64_t MIN_DEVICE_KEEPALIVE_TIMEOUT_MS = 2 * 60'000 + 15'000;
+#endif
 
 static xPP_DeviceInfoUpdate PrepareReport(const xDR_DeviceContext * PDC) {
     auto DI       = xPP_DeviceInfoUpdate();
@@ -28,8 +32,7 @@ static xPP_DeviceInfoUpdate PrepareReport(const xDR_DeviceContext * PDC) {
 }
 
 void ReportKeepAliveDevice(const xDR_DeviceContext * PDC) {
-    if (ServiceTicker() - PDC->StartupTimestampMS <= MIN_DEVICE_KEEPALIVE_TIMEOUT_MS) {
-        DEBUG_LOG("Skip new device");
+    if (ServiceTicker() - PDC->StartupTimestampMS < MIN_DEVICE_KEEPALIVE_TIMEOUT_MS) {
         return;
     }
     auto DI = PrepareReport(PDC);

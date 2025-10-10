@@ -18,7 +18,7 @@ void CleanRelayContextPool() {
     RelayContextPool.Clean();
 }
 
-xRL_RelayContext * AllocRelayContext(uint64_t DeviceId) {
+static xRL_RelayContext * AllocRelayContext(uint64_t DeviceId) {
     auto Id = RelayContextPool.AcquireValue();
     if (!Id) {
         return nullptr;
@@ -33,6 +33,7 @@ xRL_RelayContext * AllocRelayContext(uint64_t DeviceId) {
 
 void ReleaseRelayContext(xRL_RelayContext * PRC) {
     assert(RelayContextPool.CheckAndGet(PRC->RelaySideContextId) == PRC);
+    DEBUG_LOG("ContextId=%" PRIx64 "", PRC->RelaySideContextId);
     RelayContextPool.Release(PRC->RelaySideContextId);
 }
 
@@ -55,17 +56,19 @@ void ReleaseTimeoutRelayContext() {
 xRL_RelayContext * CreateTcpConnection(uint64_t DeviceId, const xNetAddress & TargetAddress) {
     auto PDC = GetDeviceContextById(DeviceId);
     if (!PDC) {
+        DEBUG_LOG("invalid device id: %" PRIx64 "", DeviceId);
         return nullptr;
     }
     auto PRC = AllocRelayContext(DeviceId);
     if (!PRC) {
+        DEBUG_LOG("failed to alloc relay context");
         return nullptr;
     }
 
     auto CC               = xPP_CreateConnection();
     CC.RelaySideContextId = PRC->RelaySideContextId;
     CC.TargetAddress      = TargetAddress;
-    PDC->Handle.PostMessage(Cmd_DV_RL_CreateConnectionHost, 0, CC);
+    PDC->Handle.PostMessage(Cmd_DV_RL_CreateConnection, 0, CC);
     PRC->ContextState = xRelayContextState::TCP_CONNECTING;
     return PRC;
 }
@@ -73,10 +76,12 @@ xRL_RelayContext * CreateTcpConnection(uint64_t DeviceId, const xNetAddress & Ta
 xRL_RelayContext * CreateTcpConnection(uint64_t DeviceId, const std::string_view & HostnameView, uint16_t Port) {
     auto PDC = GetDeviceContextById(DeviceId);
     if (!PDC) {
+        DEBUG_LOG("invalid device id: %" PRIx64 "", DeviceId);
         return nullptr;
     }
     auto PRC = AllocRelayContext(DeviceId);
     if (!PRC) {
+        DEBUG_LOG("failed to alloc relay context");
         return nullptr;
     }
 
@@ -84,7 +89,7 @@ xRL_RelayContext * CreateTcpConnection(uint64_t DeviceId, const std::string_view
     auto CC               = xPP_CreateConnectionHost();
     CC.RelaySideContextId = PRC->RelaySideContextId;
     CC.HostnameView       = HostnameView;
-    CC.Port               = 80;
+    CC.Port               = Port;
     PDC->Handle.PostMessage(Cmd_DV_RL_CreateConnectionHost, 0, CC);
 
     PRC->ContextState = xRelayContextState::TCP_CONNECTING;
@@ -187,4 +192,18 @@ void PostUdpChannelData(uint64_t RelaySideContextId, const xNetAddress & TargetA
     Req.RelaySideContextId  = PRC->RelaySideContextId;
     Req.PayloadView         = { PB, DataSize };
     PDC->Handle.PostMessage(Cmd_DV_RL_PostUdpChannelData, 0, Req);
+}
+
+void NotifyProxyConnectionRefused(xRL_RelayContext * PRC) {
+    auto N               = xPP_DeviceConnectionState();
+    N.ProxySideContextId = PRC->ProxySideContextId;
+    PostMessageToProxy(PRC->ProxyConnectionId, Cmd_PA_RL_NotifyConnectionState, 0, N);
+}
+
+void NotifyProxyConnectionEstablished(xRL_RelayContext * PRC) {
+    auto N                = xPP_DeviceConnectionState();
+    N.DeviceSideContextId = PRC->DeviceSideContextId;
+    N.ProxySideContextId  = PRC->ProxySideContextId;
+    N.RelaySideContextId  = PRC->RelaySideContextId;
+    PostMessageToProxy(PRC->ProxyConnectionId, Cmd_PA_RL_NotifyConnectionState, 0, N);
 }

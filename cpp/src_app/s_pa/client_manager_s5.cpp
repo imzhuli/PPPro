@@ -162,7 +162,15 @@ size_t OnPAC_S5_TargetAddress(xPA_ClientConnection * Client, ubyte * DataPtr, si
     }
 
     DEBUG_LOG("TargetAddress: NA:%s, Host:%s", Address.ToString().c_str(), DomainName);
+    DEBUG_LOG("Selected device: %" PRIx64 "", Client->DeviceRelaySideId);
 
+    if (Address) {
+        RequestRelayTargetConnection(Client->ConnectionId, Client->DeviceRelayServerRuntimeId, Client->DeviceRelaySideId, Address);
+    } else {
+        RequestRelayTargetConnection(Client->ConnectionId, Client->DeviceRelayServerRuntimeId, Client->DeviceRelaySideId, DomainName, Address.Port);
+    }
+
+    Client->State = CS_S5_WAIT_FOR_CONECTION_ESTABLISH;
     return 0;
 }
 

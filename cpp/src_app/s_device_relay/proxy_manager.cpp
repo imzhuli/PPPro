@@ -2,10 +2,16 @@
 
 #include "./_global.hpp"
 
+#include <pp_protocol/device_relay/connection.hpp>
+#include <pp_protocol/device_relay/post_data.hpp>
+#include <pp_protocol/device_relay/udp_channel.hpp>
+#include <pp_protocol/proxy_relay/connection.hpp>
+
 static xTcpService ProxyService4;
 
 void InitProxyService() {
     RuntimeAssert(ProxyService4.Init(ServiceIoContext, ProxyAddress4, 20000));
+    ProxyService4.OnClientPacket = OnProxyPacket;
 }
 
 void CleanProxyService() {
@@ -14,4 +20,59 @@ void CleanProxyService() {
 
 void TickProxyService(uint64_t NowMS) {
     ProxyService4.Tick(NowMS);
+}
+
+////////////////////
+
+static bool OnProxyCreateConnection(const xTcpServiceClientConnectionHandle & CC, ubyte * PayloadPtr, size_t PayloadSize) {
+    auto Request = xPR_CreateConnection();
+    if (!Request.Deserialize(PayloadPtr, PayloadSize)) {
+        Logger->E("invalid protocol");
+        return false;
+    }
+
+    auto Ctx = (xRL_RelayContext *)nullptr;
+    if (Request.TargetAddress) {
+        DEBUG_LOG("ByAddress");
+        Ctx = CreateTcpConnection(Request.RelayServerSideDeviceId, Request.TargetAddress);
+    } else {
+        DEBUG_LOG("ByHost");
+        Ctx = CreateTcpConnection(Request.RelayServerSideDeviceId, Request.HostnameView, Request.HostnamePort);
+    }
+
+    if (!Ctx) {
+        auto Resp               = xPP_ProxyConnectionState();
+        Resp.ProxySideContextId = Request.ProxySideConnectionId;
+        CC.PostMessage(Cmd_PA_RL_NotifyConnectionState, 0, Resp);
+        return true;
+    }
+    Ctx->ProxyConnectionId = CC.GetConnectionId();
+    return true;
+}
+
+bool OnProxyPacket(const xTcpServiceClientConnectionHandle & CC, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) {
+    DEBUG_LOG("CommandId=%" PRIx32 "", CommandId);
+    switch (CommandId) {
+        case Cmd_PA_RL_CreateConnection:
+            return OnProxyCreateConnection(CC, PayloadPtr, PayloadSize);
+
+        default:
+            break;
+    }
+    return true;
+}
+
+void PostDataToProxy(uint64_t ProxyConnectionId, const void * PL, size_t PS) {
+    auto H = ProxyService4.GetConnectionHandle(ProxyConnectionId);
+    if (!H.operator->()) {
+        DEBUG_LOG("mismatched proxy connection");
+        return;
+    }
+    H.PostData(PL, PS);
+}
+
+void PostMessageToProxy(uint64_t ProxyConnectionId, xPacketCommandId CmdId, xPacketRequestId ReqId, xel::xBinaryMessage & Message) {
+    ubyte Buffer[MaxPacketSize];
+    auto  RS = Message.Serialize(Buffer, sizeof(Buffer));
+    PostDataToProxy(ProxyConnectionId, Buffer, RS);
 }
