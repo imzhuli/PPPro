@@ -51,8 +51,9 @@ bool xAC_AuthService::Init(xIoContext * ICP, const xNetAddress & BindAddress) {
         return;
     };
 
-    TcpService.OnClientPacket           = Delegate(&xAC_AuthService::OnClientPacket, this);
-    BackendPool.OnBackendPacketCallback = Delegate(&xAC_AuthService::OnBackendPacket, this);
+    TcpService.OnClientPacket              = Delegate(&xAC_AuthService::OnClientPacket, this);
+    BackendPool.OnBackendPacketCallback    = Delegate(&xAC_AuthService::OnBackendPacket, this);
+    BackendPool.OnBackendConnectedCallback = [](const xNetAddress & Address) { DEBUG_LOG("Backend server connected: address=%s", Address.ToString().c_str()); };
 
     return true;
 }

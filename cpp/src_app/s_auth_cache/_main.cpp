@@ -4,52 +4,11 @@
 #include <pp_protocol/_backend/auth_by_user_pass.hpp>
 #include <pp_protocol/command.hpp>
 
-// struct xAuthTest : public xBackendConnectionPool {
-
-//     using xBackendConnectionPool::Clean;
-//     using xBackendConnectionPool::Init;
-
-//     bool OnBackendPacket(xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) override {
-//         switch (CommandId) {
-//             case Cmd_BackendAuthByUserPassResp:
-//                 return OnCmdAuthByUserPassResp(CommandId, RequestId, PayloadPtr, PayloadSize);
-
-//             default:
-//                 X_DEBUG_PRINTF("unsupported protocol command");
-//                 break;
-//         }
-//         return true;
-//     }
-
-//     bool OnCmdAuthByUserPassResp(xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) {
-//         auto P = xPPB_BackendAuthByUserPassResp();
-//         if (!P.Deserialize(PayloadPtr, PayloadSize)) {
-//             X_DEBUG_PRINTF("invalid protocol");
-//             return false;
-//         }
-//         X_DEBUG_PRINTF("%s", P.ToString().c_str());
-
-//         return true;
-//     }
-
-//     //
-// };
-
 //////////
 
 auto TA = xNetAddress::Parse("45.202.204.29:20005");
 
 using namespace std::chrono_literals;
-
-// static void Test() {
-//     static xTimer TestTimer;
-//     if (TestTimer.TestAndTag(1s)) {
-//         auto T     = xPPB_BackendAuthByUserPass();
-//         T.UserPass = "C_he_0_US_1001__5_78758832:1234567";
-//         T.ClientIp = xNetAddress::Parse("45.202.204.29:7777");
-//         C.PostMessage(Cmd_BackendAuthByUserPass, 0, T);
-//     }
-// }
 
 static void AC_RegisterServer(const xMessageChannel & Poster, uint64_t LocalServerId) {
     auto Req     = xPP_RegisterAuthCacheServer();

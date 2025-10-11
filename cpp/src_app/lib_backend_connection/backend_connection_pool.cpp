@@ -9,12 +9,9 @@ bool xBackendConnectionPool::Init(xIoContext * ICP, size_t MaxConnectionCount) {
     }
     ContextList.resize(MaxConnectionCount);
 
-    xClientPool::OnServerConnected = std::bind(&xBackendConnectionPool::OnServerConnectedCallback, this, std::placeholders::_1);
-    xClientPool::OnServerClose     = std::bind(&xBackendConnectionPool::OnServerCloseCallback, this, std::placeholders::_1);
-    xClientPool::OnServerPacket    = std::bind(
-        &xBackendConnectionPool::OnServerPacketCallback,  //
-        this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5
-    );
+    xClientPool::OnServerConnected = Delegate(&xBackendConnectionPool::OnServerConnectedCallback, this);
+    xClientPool::OnServerClose     = Delegate(&xBackendConnectionPool::OnServerCloseCallback, this);
+    xClientPool::OnServerPacket    = Delegate(&xBackendConnectionPool::OnServerPacketCallback, this);
     return true;
 }
 
@@ -125,6 +122,7 @@ bool xBackendConnectionPool::OnCmdBackendChallengeResp(xClientConnection & CC, x
 
     // X_DEBUG_PRINTF("server challenge ready");
     Ctx.IsChallengeReady = true;
+    OnBackendConnectedCallback(CC.GetTargetAddress());
     return true;
 }
 

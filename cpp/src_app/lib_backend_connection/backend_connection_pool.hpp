@@ -25,8 +25,10 @@ public:
     std::string GetLocalAudit();
     void        ResetLocalAudit();
 
-    using xOnBackendPacketCallback                   = std::function<void(xPacketCommandId, xPacketRequestId, ubyte *, size_t)>;
-    xOnBackendPacketCallback OnBackendPacketCallback = Noop<>;
+    using xOnBackendConnectedCallback                      = std::function<void(const xNetAddress & Address)>;
+    using xOnBackendPacketCallback                         = std::function<void(xPacketCommandId, xPacketRequestId, ubyte *, size_t)>;
+    xOnBackendConnectedCallback OnBackendConnectedCallback = Noop<>;
+    xOnBackendPacketCallback    OnBackendPacketCallback    = Noop<>;
 
 public:
     uint64_t AddServer(const xNetAddress & Address, const std::string & AppKey, const std::string & AppSecret);

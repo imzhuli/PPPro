@@ -4,11 +4,11 @@ bool xClientPoolWrapper::Init(xIoContext * ICP, size_t MaxConnectionCount) {
     if (!xClientPool::Init(ICP, MaxConnectionCount)) {
         return false;
     }
-    xClientPool::OnServerConnected = std::bind(&xClientPoolWrapper::OnServerConnectedCallback, this, std::placeholders::_1);
-    xClientPool::OnServerClose     = std::bind(&xClientPoolWrapper::OnServerCloseCallback, this, std::placeholders::_1);
-    xClientPool::OnServerPacket    = std::bind(
+    xClientPool::OnServerConnected = Delegate(&xClientPoolWrapper::OnServerConnectedCallback, this);
+    xClientPool::OnServerClose     = Delegate(&xClientPoolWrapper::OnServerCloseCallback, this);
+    xClientPool::OnServerPacket    = Delegate(
         &xClientPoolWrapper::OnServerPacketCallback,  //
-        this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5
+        this
     );
     return true;
 }

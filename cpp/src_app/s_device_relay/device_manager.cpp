@@ -47,7 +47,6 @@ static bool OnDeviceCreateConnectionResp(xDR_DeviceContext * PDC, ubyte * Payloa
     }
     DEBUG_LOG("CreateConnectionResult: %s, DeviceSideContextId=%" PRIx32 "", YN(Resp.Connected), Resp.DeviceSideContextId);
 
-    // TODO:
     if (!Resp.Connected) {
         NotifyProxyConnectionRefused(PRC);
         ReleaseRelayContext(PRC);
@@ -170,7 +169,6 @@ static bool OnDevicePostUdpChannelData(xDR_DeviceContext * PDC, ubyte * PayloadP
 
 static bool OnDevicePacket(xDR_DeviceContext * PDC, xPacketCommandId CmdId, xPacketRequestId ReqId, ubyte * PayloadPtr, size_t PayloadSize) {
 
-    DEBUG_LOG("");
     DEBUG_LOG("%" PRIx32 "/%" PRIx64 " message_length=%zi", CmdId, ReqId, PayloadSize);
 
     switch (CmdId) {

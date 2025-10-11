@@ -3,7 +3,11 @@
 #include <unordered_map>
 
 static constexpr const uint64_t DEVICE_KEEPALIVE_TIMEOUT_MS = 180'000;  // normally device is removed by request from dispatcher
-static constexpr const size_t   DEVICE_INFO_RESIST_COUNTER  = 2;        // normally device is removed by request from dispatcher
+#ifndef NDEBUG
+static constexpr const size_t DEVICE_INFO_RESIST_COUNTER = 1;  // normally device is removed by request from dispatcher
+#else
+static constexpr const size_t DEVICE_INFO_RESIST_COUNTER = 2;  // normally device is removed by request from dispatcher
+#endif
 
 struct xDR_TimeoutNode : xListNode {
     uint64_t TimestampMS;

@@ -74,6 +74,9 @@ static bool OnConnectionStateChange(ubyte * PayloadPtr, size_t PayloadSize) {
                 };
                 CC->PostData(ReadyReply, sizeof(ReadyReply));
                 CC->RelaySideContextId = Notify.RelaySideContextId;
+                CC->State              = CS_S5_READY;
+                DEBUG_LOG("Connection established");
+                return true;
             }
         } break;
 
@@ -127,21 +130,21 @@ bool PostRelayMessage(uint64_t RelayServerId, xPacketCommandId CmdId, xPacketReq
     return RelayPool.PostMessage(ConnectionId, CmdId, RequestId, Message);
 }
 
-bool RequestRelayTargetConnection(uint64_t ProxyConnectionId, uint64_t RelayServerId, uint64_t DeviceRelaySideId, const xNetAddress & TargetAddress) {
+bool RequestRelayTargetConnection(uint64_t ProxySideContextId, uint64_t RelayServerId, uint64_t DeviceRelaySideId, const xNetAddress & TargetAddress) {
     auto Request = xPR_CreateConnection();
 
     Request.RelayServerSideDeviceId = DeviceRelaySideId;
-    Request.ProxySideConnectionId   = ProxyConnectionId;
+    Request.ProxySideContextId      = ProxySideContextId;
     Request.TargetAddress           = TargetAddress;
 
     return PostRelayMessage(RelayServerId, Cmd_PA_RL_CreateConnection, 0, Request);
 }
 
-bool RequestRelayTargetConnection(uint64_t ProxyConnectionId, uint64_t RelayServerId, uint64_t DeviceRelaySideId, const std::string_view & TargetHost, uint16_t TargetPort) {
+bool RequestRelayTargetConnection(uint64_t ProxySideContextId, uint64_t RelayServerId, uint64_t DeviceRelaySideId, const std::string_view & TargetHost, uint16_t TargetPort) {
     auto Request = xPR_CreateConnection();
 
     Request.RelayServerSideDeviceId = DeviceRelaySideId;
-    Request.ProxySideConnectionId   = ProxyConnectionId;
+    Request.ProxySideContextId      = ProxySideContextId;
     Request.HostnameView            = TargetHost;
     Request.HostnamePort            = TargetPort;
 

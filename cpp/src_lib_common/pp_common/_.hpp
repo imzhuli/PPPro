@@ -113,7 +113,6 @@ using xel::ZeroFill;
 // std-lib:
 #include <functional>
 #include <iostream>
-using std::bind;
 using std::cerr;
 using std::cout;
 using std::endl;

@@ -15,7 +15,9 @@ enum xPA_ClientState {
     CS_S5_WAIT_FOR_DEVICE_RESULT,        //
     CS_S5_WAIT_FOR_TARGET_ADDRESS,       //
     CS_S5_WAIT_FOR_CONECTION_ESTABLISH,  //
-    CS_S_TC,                             // tcp connection
+    CS_S5_READY,                         //
+
+    CS_S_TC,  // tcp connection
 
 };
 

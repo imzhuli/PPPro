@@ -42,11 +42,12 @@ static bool OnProxyCreateConnection(const xTcpServiceClientConnectionHandle & CC
 
     if (!Ctx) {
         auto Resp               = xPP_ProxyConnectionState();
-        Resp.ProxySideContextId = Request.ProxySideConnectionId;
+        Resp.ProxySideContextId = Request.ProxySideContextId;
         CC.PostMessage(Cmd_PA_RL_NotifyConnectionState, 0, Resp);
         return true;
     }
-    Ctx->ProxyConnectionId = CC.GetConnectionId();
+    Ctx->ProxyConnectionId  = CC.GetConnectionId();
+    Ctx->ProxySideContextId = Request.ProxySideContextId;
     return true;
 }
 
@@ -72,7 +73,10 @@ void PostDataToProxy(uint64_t ProxyConnectionId, const void * PL, size_t PS) {
 }
 
 void PostMessageToProxy(uint64_t ProxyConnectionId, xPacketCommandId CmdId, xPacketRequestId ReqId, xel::xBinaryMessage & Message) {
-    ubyte Buffer[MaxPacketSize];
-    auto  RS = Message.Serialize(Buffer, sizeof(Buffer));
-    PostDataToProxy(ProxyConnectionId, Buffer, RS);
+    auto H = ProxyService4.GetConnectionHandle(ProxyConnectionId);
+    if (!H.operator->()) {
+        DEBUG_LOG("mismatched proxy connection");
+        return;
+    }
+    H.PostMessage(CmdId, ReqId, Message);
 }
