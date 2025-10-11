@@ -91,9 +91,6 @@ static void PostDeviceInfo(const xODI_DeviceInfo * DP, bool Online) {
 
     auto MsgKey = DP->DeviceUuid;
     KR.Post(MsgKey, Buffer, MSize);
-
-    DEBUG_LOG("%u/%u/%u", (unsigned)ReqDI.CountryId, (unsigned)ReqDI.StateId, (unsigned)ReqDI.CityId);
-    DEBUG_LOG("\n%s", HexShow(Buffer, MSize).c_str());
 }
 
 static void OnDeviceUpdate(ubyte * PayloadPtr, size_t PayloadSize) {
