@@ -35,6 +35,10 @@ struct xODI_DeviceInfo : xODI_DeviceKeepAliveNode {
     xNetAddress Udp6Address;
     bool        SpeedLimitEnabled;
 
+    xCountryId CountryId;
+    xStateId   StateId;
+    xCityId    CityId;
+
     uint64_t TotalUploadSizeSinceOnline;    // 指发向目标的数据
     uint64_t TotalDownloadSizeSinceOnline;  // 下载数据
     uint32_t CurrentConnectionCount;
@@ -73,6 +77,9 @@ static void PostDeviceInfo(const xODI_DeviceInfo * DP, bool Online) {
     ReqDI.Udp4Address = DP->Udp4Address;
     ReqDI.Tcp6Address = DP->Tcp6Address;
     ReqDI.Udp6Address = DP->Udp6Address;
+    ReqDI.CountryId   = DP->CountryId;
+    ReqDI.StateId     = DP->StateId;
+    ReqDI.CityId      = DP->CityId;
 
     ReqDI.IsOffline         = !Online;
     ReqDI.SpeedLimitEnabled = DP->SpeedLimitEnabled;
@@ -85,7 +92,8 @@ static void PostDeviceInfo(const xODI_DeviceInfo * DP, bool Online) {
     auto MsgKey = DP->DeviceUuid;
     KR.Post(MsgKey, Buffer, MSize);
 
-    // DEBUG_LOG("\n%s", HexShow(Buffer, MSize).c_str());
+    DEBUG_LOG("%u/%u/%u", (unsigned)ReqDI.CountryId, (unsigned)ReqDI.StateId, (unsigned)ReqDI.CityId);
+    DEBUG_LOG("\n%s", HexShow(Buffer, MSize).c_str());
 }
 
 static void OnDeviceUpdate(ubyte * PayloadPtr, size_t PayloadSize) {
@@ -118,6 +126,10 @@ static void OnDeviceUpdate(ubyte * PayloadPtr, size_t PayloadSize) {
     DI.Udp4Address = PP.Udp4Address;
     DI.Tcp6Address = PP.Tcp6Address;
     DI.Udp6Address = PP.Udp6Address;
+
+    DI.CountryId = PP.CountryId;
+    DI.StateId   = PP.StateId;
+    DI.CityId    = PP.CityId;
 
     DI.SpeedLimitEnabled = PP.SpeedLimitEnabled;
 
