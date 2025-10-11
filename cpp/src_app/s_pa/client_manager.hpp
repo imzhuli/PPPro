@@ -17,8 +17,13 @@ enum xPA_ClientState {
     CS_S5_WAIT_FOR_CONECTION_ESTABLISH,  //
     CS_S5_READY,                         //
 
-    CS_S_TC,  // tcp connection
+    CS_H_CHALLENGE,  // http proxy
+    CS_H_READY,
 
+    CS_C_CHALLENGE,  // http raw (CONNECT) proxy
+    CS_C_READY,
+
+    CS_U_HOLDING,  // udp bound channel holder
 };
 
 struct xPA_ClientTcpConnection : xTcpConnection {
@@ -78,6 +83,7 @@ extern size_t OnPAC_Challenge(xPA_ClientConnection * CC, ubyte * DP, size_t DS);
 extern size_t OnPAC_S5_Challenge(xPA_ClientConnection * CC, ubyte * DP, size_t DS);
 extern size_t OnPAC_S5_AuthInfo(xPA_ClientConnection * CC, ubyte * DP, size_t DS);
 extern size_t OnPAC_S5_TargetAddress(xPA_ClientConnection * CC, ubyte * DP, size_t DS);
+extern size_t OnPAC_S5_PushData(xPA_ClientConnection * CC, ubyte * DP, size_t DS);
 
 extern void OnPAC_S5_AuthResult(xPA_ClientConnection * CC, const xClientAuthResult * AR);
 extern void OnPAC_S5_DeviceResult();

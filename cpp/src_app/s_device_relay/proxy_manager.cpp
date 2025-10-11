@@ -51,12 +51,42 @@ static bool OnProxyCreateConnection(const xTcpServiceClientConnectionHandle & CC
     return true;
 }
 
+static bool OnProxyDestroyConnection(const xTcpServiceClientConnectionHandle & CC, ubyte * PayloadPtr, size_t PayloadSize) {
+    auto Request = xPR_DestroyConnection();
+    if (!Request.Deserialize(PayloadPtr, PayloadSize)) {
+        Logger->E("invalid protocol");
+        return false;
+    }
+
+    auto PRC = GetRelayContextById(Request.RelaySideContextId);
+    if (!PRC) {
+        DEBUG_LOG("context mismatch");
+        return true;
+    }
+    PostDestroyConnection(PRC);
+    ReleaseRelayContext(PRC);
+    return true;
+}
+
+static bool OnProxyPushData(const xTcpServiceClientConnectionHandle & CC, ubyte * PayloadPtr, size_t PayloadSize) {
+    auto Request = xPR_PushData();
+    if (!Request.Deserialize(PayloadPtr, PayloadSize)) {
+        Logger->E("invalid protocol");
+        return false;
+    }
+    PostConnectionData(Request.RelaySideContextId, Request.PayloadView.data(), Request.PayloadView.size());
+    return true;
+}
+
 bool OnProxyPacket(const xTcpServiceClientConnectionHandle & CC, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) {
     DEBUG_LOG("CommandId=%" PRIx32 "", CommandId);
     switch (CommandId) {
         case Cmd_PA_RL_CreateConnection:
             return OnProxyCreateConnection(CC, PayloadPtr, PayloadSize);
-
+        case Cmd_PA_RL_PostData:
+            return OnProxyPushData(CC, PayloadPtr, PayloadSize);
+        case Cmd_PA_RL_DestroyConnection:
+            return OnProxyDestroyConnection(CC, PayloadPtr, PayloadSize);
         default:
             break;
     }

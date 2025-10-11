@@ -138,7 +138,18 @@ void OnPAClientConnectionAccepted(xPA_ClientConnection * CC) {
 }
 
 void OnPAClientConnectionPeerClose(xPA_ClientConnection * CC) {
-    DeferKillClientConnection(CC);
+    switch (CC->State) {
+        case CS_S5_READY:  // pass-through
+        case CS_H_READY:   // pass-through
+        case CS_C_READY:   // pass-through
+            RequestRelayCloseConnection(CC->ConnectionId, CC->DeviceRelayServerRuntimeId, CC->RelaySideContextId);
+            break;
+
+        default:
+            DEBUG_LOG("unhandled state on client close");
+            DeferKillClientConnection(CC);
+            break;
+    }
 }
 
 void OnPAClientConnectionFlush(xPA_ClientConnection * CC) {
@@ -162,9 +173,11 @@ size_t OnPAClientConnectionData(xPA_ClientConnection * CC, ubyte * DP, size_t DS
             return OnPAC_S5_TargetAddress(CC, DP, DS);
         case CS_S5_WAIT_FOR_CONECTION_ESTABLISH:
             return InvalidDataSize;
+        case CS_S5_READY:
+            return OnPAC_S5_PushData(CC, DP, DS);
 
         default:
-            DEBUG_LOG("Unhandled state");
+            DEBUG_LOG("Unhandled state: %u", (unsigned)CC->State);
             return InvalidDataSize;
     }
     return DS;

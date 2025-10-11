@@ -16,17 +16,17 @@
 // static constexpr const xPacketCommandId Cmd_ProxyClientAuthResp     = CmdRespBase + Cmd_ProxyClientAuth;
 
 // non dispatchable or direct command
-static constexpr const xPacketCommandId CmdProxyBase                 = 0x02'000;
-static constexpr const xPacketCommandId Cmd_CreateConnection         = CmdProxyBase + 0x01;
-static constexpr const xPacketCommandId Cmd_CreateConnectionResp     = CmdProxyBase + 0x02;
-static constexpr const xPacketCommandId Cmd_CloseConnection          = CmdProxyBase + 0x03;
-static constexpr const xPacketCommandId Cmd_PostProxyToRelayData     = CmdProxyBase + 0x04;
-static constexpr const xPacketCommandId Cmd_PostRelayToProxyData     = CmdProxyBase + 0x05;
-static constexpr const xPacketCommandId Cmd_CreateUdpAssociation     = CmdProxyBase + 0x06;
-static constexpr const xPacketCommandId Cmd_CreateUdpAssociationResp = CmdProxyBase + 0x07;
-static constexpr const xPacketCommandId Cmd_CloseUdpAssociation      = CmdProxyBase + 0x08;
-static constexpr const xPacketCommandId Cmd_PostProxyToRelayUdpData  = CmdProxyBase + 0x09;
-static constexpr const xPacketCommandId Cmd_PostRelayToProxyUdpData  = CmdProxyBase + 0x0A;
+static constexpr const xPacketCommandId CmdProxyBase = 0x02'000;
+// static constexpr const xPacketCommandId Cmd_CreateConnection         = CmdProxyBase + 0x01;
+// static constexpr const xPacketCommandId Cmd_CreateConnectionResp     = CmdProxyBase + 0x02;
+// static constexpr const xPacketCommandId Cmd_CloseConnection          = CmdProxyBase + 0x03;
+// static constexpr const xPacketCommandId Cmd_PostProxyToRelayData     = CmdProxyBase + 0x04;
+// static constexpr const xPacketCommandId Cmd_PostRelayToProxyData     = CmdProxyBase + 0x05;
+// static constexpr const xPacketCommandId Cmd_CreateUdpAssociation     = CmdProxyBase + 0x06;
+// static constexpr const xPacketCommandId Cmd_CreateUdpAssociationResp = CmdProxyBase + 0x07;
+// static constexpr const xPacketCommandId Cmd_CloseUdpAssociation      = CmdProxyBase + 0x08;
+// static constexpr const xPacketCommandId Cmd_PostProxyToRelayUdpData  = CmdProxyBase + 0x09;
+// static constexpr const xPacketCommandId Cmd_PostRelayToProxyUdpData  = CmdProxyBase + 0x0A;
 
 // management
 static constexpr const xPacketCommandId Cmd_ManagementBase       = 0x02'100;

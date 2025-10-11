@@ -8,6 +8,7 @@
 #include <pp_protocol/device_relay/handshake.hpp>
 #include <pp_protocol/device_relay/post_data.hpp>
 #include <pp_protocol/device_relay/udp_channel.hpp>
+#include <pp_protocol/proxy_relay/connection.hpp>
 
 xIndexedStorage<xDR_DeviceContext> DeviceManager;
 
@@ -141,10 +142,12 @@ static bool OnDevicePostConnectionData(xDR_DeviceContext * PDC, ubyte * PayloadP
         return true;
     }
 
-    DEBUG_LOG("%s", HexShow(PP.PayloadView).c_str());
-
-    // TODO:
-
+    DEBUG_LOG("\n%s", HexShow(PP.PayloadView).c_str());
+    auto RPush               = xPR_PushData();
+    RPush.ProxySideContextId = PRC->ProxySideContextId;
+    RPush.RelaySideContextId = PRC->RelaySideContextId;
+    RPush.PayloadView        = PP.PayloadView;
+    PostMessageToProxy(PRC->ProxyConnectionId, Cmd_PA_RL_PostData, 0, RPush);
     return true;
 }
 

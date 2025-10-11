@@ -1,6 +1,8 @@
 #include "./_global.hpp"
 #include "./client_manager.hpp"
 
+#include <pp_protocol/proxy_relay/connection.hpp>
+
 size_t OnPAC_S5_Challenge(xPA_ClientConnection * Client, ubyte * DP, size_t DataSize) {
     assert(Client->State == CS_S5_CHALLENGE);
     if (DataSize < 3) {
@@ -169,10 +171,34 @@ size_t OnPAC_S5_TargetAddress(xPA_ClientConnection * Client, ubyte * DataPtr, si
     } else {
         RequestRelayTargetConnection(Client->ConnectionId, Client->DeviceRelayServerRuntimeId, Client->DeviceRelaySideId, DomainName, Address.Port);
     }
-
     Client->State = CS_S5_WAIT_FOR_CONECTION_ESTABLISH;
-    return 0;
+    return R.Offset();
 }
+
+size_t OnPAC_S5_PushData(xPA_ClientConnection * CC, ubyte * DP, size_t DS) {
+    auto Consumed = size_t();
+    while (DS) {
+        auto MaxPushSize = std::min(DS, xPR_PushData::MAX_PAYLOAD_SIZE);
+        if (!MaxPushSize) {
+            break;
+        }
+        auto P               = xPR_PushData();
+        P.ProxySideContextId = CC->ConnectionId;
+        P.RelaySideContextId = CC->RelaySideContextId;
+        P.PayloadView        = std::string_view((const char *)DP, MaxPushSize);
+        if (!PostRelayMessage(CC->DeviceRelayServerRuntimeId, Cmd_PA_RL_PostData, 0, P)) {
+            DEBUG_LOG("failed to post PushData message to relay");
+            return InvalidDataSize;
+        }
+
+        DP       += MaxPushSize;
+        DS       -= MaxPushSize;
+        Consumed += Consumed;
+    }
+    return Consumed;
+}
+
+/////////////////// Passive event ///////////////////
 
 void OnPAC_S5_AuthResult(xPA_ClientConnection * CC, const xClientAuthResult * AR) {
     if (!AR) {
@@ -219,5 +245,4 @@ void OnPAC_S5_DeviceResult(xPA_ClientConnection * CC, const xDeviceSelectorResul
     CC->State                      = CS_S5_WAIT_FOR_TARGET_ADDRESS;
 
     CC->PostData("\x01\x00", 2);
-    KeepAlive(CC);
 }

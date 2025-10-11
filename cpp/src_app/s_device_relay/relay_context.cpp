@@ -1,14 +1,17 @@
 #include "./relay_context.hpp"
 
 #include "./_global.hpp"
-#include "pp_protocol/device_relay/connection.hpp"
-#include "pp_protocol/device_relay/post_data.hpp"
-#include "pp_protocol/device_relay/udp_channel.hpp"
 
 #include <atomic>
+#include <pp_protocol/device_relay/connection.hpp>
+#include <pp_protocol/device_relay/post_data.hpp>
+#include <pp_protocol/device_relay/udp_channel.hpp>
+#include <pp_protocol/proxy_relay/connection.hpp>
 
 static xel::xIndexedStorage<xRL_RelayContext> RelayContextPool;
 static xRL_RelayContextTimeoutList            RelayContextIdleList;
+
+static_assert(xPP_PostConnectionData::MAX_PAYLOAD_SIZE == xPR_PushData::MAX_PAYLOAD_SIZE);
 
 void InitRelayContextPool() {
     RuntimeAssert(RelayContextPool.Init(MaxRelayContextCount));
@@ -147,6 +150,17 @@ xRL_RelayContext * CreateUdpChannel6(uint64_t DeviceId) {
     PDC->Handle.PostMessage(Cmd_DV_RL_CreateUdpChannel, 0, CUB);
     PRC->ContextState = xRelayContextState::UDP_BINDING;
     return PRC;
+}
+
+void PostDestroyConnection(xRL_RelayContext * PRC) {
+    auto PDC = GetDeviceContextById(PRC->DeviceId);
+    if (!PDC || !PDC->Handle.IsValid()) {
+        return;
+    }
+    auto Req                = xPP_DestroyConnection();
+    Req.DeviceSideContextId = PRC->DeviceSideContextId;
+    Req.RelaySideContextId  = PRC->RelaySideContextId;
+    PDC->Handle.PostMessage(Cmd_DV_RL_DestroyConnection, 0, Req);
 }
 
 void PostConnectionData(uint64_t RelaySideContextId, const void * DataPtr, size_t DataSize) {

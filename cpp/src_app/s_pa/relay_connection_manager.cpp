@@ -75,7 +75,7 @@ static bool OnConnectionStateChange(ubyte * PayloadPtr, size_t PayloadSize) {
                 CC->PostData(ReadyReply, sizeof(ReadyReply));
                 CC->RelaySideContextId = Notify.RelaySideContextId;
                 CC->State              = CS_S5_READY;
-                DEBUG_LOG("Connection established");
+                KeepAlive(CC);
                 return true;
             }
         } break;
@@ -88,11 +88,29 @@ static bool OnConnectionStateChange(ubyte * PayloadPtr, size_t PayloadSize) {
     return true;
 }
 
+static bool OnRelayPushConnectionData(ubyte * PayloadPtr, size_t PayloadSize) {
+    auto Push = xPR_PushData();
+    if (!Push.Deserialize(PayloadPtr, PayloadSize)) {
+        DEBUG_LOG("invalid protocol");
+        return false;
+    }
+    auto CC = GetClientConnectionById(Push.ProxySideContextId);
+    if (!CC) {
+        DEBUG_LOG("client connection not match");
+        return true;
+    }
+
+    CC->PostData(Push.PayloadView.data(), Push.PayloadView.size());
+    return true;
+}
+
 static bool OnRelayData(xClientConnection & CC, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) {
     DEBUG_LOG("CommandId=%" PRIx32 ", RequestId=%" PRIx64 " ", CommandId, RequestId);
     switch (CommandId) {
         case Cmd_PA_RL_NotifyConnectionState:
             return OnConnectionStateChange(PayloadPtr, PayloadSize);
+        case Cmd_PA_RL_PostData:
+            return OnRelayPushConnectionData(PayloadPtr, PayloadSize);
 
         default:
             DEBUG_LOG("unprocessed");
@@ -149,4 +167,11 @@ bool RequestRelayTargetConnection(uint64_t ProxySideContextId, uint64_t RelaySer
     Request.HostnamePort            = TargetPort;
 
     return PostRelayMessage(RelayServerId, Cmd_PA_RL_CreateConnection, 0, Request);
+}
+
+void RequestRelayCloseConnection(uint64_t ProxyConnectionId, uint64_t RelayServerId, uint64_t RelaySideContextId) {
+    auto Request               = xPR_DestroyConnection();
+    Request.ProxySideContextId = ProxyConnectionId;
+    Request.RelaySideContextId = RelaySideContextId;
+    PostRelayMessage(RelayServerId, Cmd_PA_RL_DestroyConnection, 0, Request);
 }
