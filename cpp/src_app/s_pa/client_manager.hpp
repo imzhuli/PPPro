@@ -20,8 +20,11 @@ enum xPA_ClientState {
     CS_H_CHALLENGE,  // http proxy
     CS_H_READY,
 
-    CS_C_CHALLENGE,  // http raw (CONNECT) proxy
-    CS_C_READY,
+    CS_T_CHALLENGE,                     // http tunnel (CONNECT) proxy
+    CS_T_WAIT_FOR_AUTH_RESULT,          //
+    CS_T_WAIT_FOR_DEVICE_RESULT,        //
+    CS_T_WAIT_FOR_CONECTION_ESTABLISH,  //
+    CS_T_READY,
 
     CS_U_HOLDING,  // udp bound channel holder
 };
@@ -48,6 +51,9 @@ struct xPA_ClientConnection
     void        PostData(const void * DataPtr, size_t DataSize) { Conn.PostData(DataPtr, DataSize); }
     bool        HasPendingWrites() const { return Conn.HasPendingWrites(); }
 
+    void SuspendReading() { Conn.SuspendReading(); }
+    void ResumeReading() { Conn.ResumeReading(); }
+
     // members:
     xPA_ClientTcpConnection Conn;
     xPA_ClientState         State = CS_CHALLENGE;
@@ -56,6 +62,14 @@ struct xPA_ClientConnection
     uint64_t DeviceRelayServerRuntimeId = 0;
     uint64_t DeviceRelaySideId          = 0;
     uint64_t RelaySideContextId         = 0;
+
+    struct {
+        std::string RequestHeader;
+        std::string UnprocessedBody;
+
+        std::string TargetHost;
+        uint16_t    TargetPort;
+    } Http;
 };
 
 extern void InitClientManager();
@@ -80,11 +94,22 @@ extern void OnPAC_AuthResult(uint64_t ConnectionId, const xClientAuthResult * AR
 extern void OnPAC_DeviceSelectResult(uint64_t ConnectionId, const xDeviceSelectorResult & Result);
 
 extern size_t OnPAC_Challenge(xPA_ClientConnection * CC, ubyte * DP, size_t DS);
+
+// s5-client
 extern size_t OnPAC_S5_Challenge(xPA_ClientConnection * CC, ubyte * DP, size_t DS);
 extern size_t OnPAC_S5_AuthInfo(xPA_ClientConnection * CC, ubyte * DP, size_t DS);
 extern size_t OnPAC_S5_TargetAddress(xPA_ClientConnection * CC, ubyte * DP, size_t DS);
-extern size_t OnPAC_S5_PushData(xPA_ClientConnection * CC, ubyte * DP, size_t DS);
-
+extern size_t OnPAC_S5_UploadData(xPA_ClientConnection * CC, ubyte * DP, size_t DS);
+// s5-internal
 extern void OnPAC_S5_AuthResult(xPA_ClientConnection * CC, const xClientAuthResult * AR);
-extern void OnPAC_S5_DeviceResult();
 extern void OnPAC_S5_DeviceResult(xPA_ClientConnection * CC, const xDeviceSelectorResult & Result);
+extern void OnPAC_S5_ConnectionResult(xPA_ClientConnection * CC, uint64_t RelaySideContextId);
+
+// ht-client
+extern size_t OnPAC_T_Challenge(xPA_ClientConnection * CC, ubyte * DP, size_t DS);
+extern size_t OnPAC_T_UploadData(xPA_ClientConnection * CC, ubyte * DP, size_t DS);
+
+// ht-internal
+extern void OnPAC_T_AuthResult(xPA_ClientConnection * CC, const xClientAuthResult * AR);
+extern void OnPAC_T_DeviceResult(xPA_ClientConnection * CC, const xDeviceSelectorResult & Result);
+extern void OnPAC_T_ConnectionResult(xPA_ClientConnection * CC, uint64_t RelaySideContextId);

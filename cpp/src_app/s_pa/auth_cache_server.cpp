@@ -19,6 +19,6 @@ void TickAuthCacheLocalServer(uint64_t NowMS) {
     AuthClient.Tick(NowMS);
 }
 
-bool PostAuthRequest(uint64_t RequestContextId, const std::string & AuthKey) {
+bool PostAuthRequest(uint64_t RequestContextId, const std::string_view & AuthKey) {
     return AuthClient.Request(RequestContextId, AuthKey);
 }

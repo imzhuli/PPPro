@@ -175,7 +175,7 @@ size_t OnPAC_S5_TargetAddress(xPA_ClientConnection * Client, ubyte * DataPtr, si
     return R.Offset();
 }
 
-size_t OnPAC_S5_PushData(xPA_ClientConnection * CC, ubyte * DP, size_t DS) {
+size_t OnPAC_S5_UploadData(xPA_ClientConnection * CC, ubyte * DP, size_t DS) {
     auto Consumed = size_t();
     while (DS) {
         auto MaxPushSize = std::min(DS, xPR_PushData::MAX_PAYLOAD_SIZE);
@@ -193,8 +193,9 @@ size_t OnPAC_S5_PushData(xPA_ClientConnection * CC, ubyte * DP, size_t DS) {
 
         DP       += MaxPushSize;
         DS       -= MaxPushSize;
-        Consumed += Consumed;
+        Consumed += MaxPushSize;
     }
+    KeepAlive(CC);
     return Consumed;
 }
 
@@ -204,6 +205,7 @@ void OnPAC_S5_AuthResult(xPA_ClientConnection * CC, const xClientAuthResult * AR
     if (!AR) {
         CC->PostData("\x01\x01", 2);
         SchedulePassiveKillClientConnection(CC);
+        return;
     }
 
     // select device:
@@ -229,6 +231,7 @@ void OnPAC_S5_AuthResult(xPA_ClientConnection * CC, const xClientAuthResult * AR
     if (!PostDeviceSelectorRequest(CC->ConnectionId, OPS)) {
         CC->PostData("\x01\x01", 2);
         SchedulePassiveKillClientConnection(CC);
+        return;
     }
     CC->State = CS_S5_WAIT_FOR_DEVICE_RESULT;
 }
@@ -245,4 +248,31 @@ void OnPAC_S5_DeviceResult(xPA_ClientConnection * CC, const xDeviceSelectorResul
     CC->State                      = CS_S5_WAIT_FOR_TARGET_ADDRESS;
 
     CC->PostData("\x01\x00", 2);
+}
+
+void OnPAC_S5_ConnectionResult(xPA_ClientConnection * CC, uint64_t RelaySideContextId) {
+    if (!RelaySideContextId) {
+        DEBUG_LOG("Connection refused");
+        static constexpr const ubyte ErrorReply[] = {
+            '\x05', '\x05', '\x00',          // refused
+            '\x01',                          // ipv4
+            '\x00', '\x00', '\x00', '\x00',  // ip: 0.0.0.0
+            '\x00', '\x00',                  // port 0:
+        };
+        CC->PostData(ErrorReply, sizeof(ErrorReply));
+        SchedulePassiveKillClientConnection(CC);
+        return;
+    }
+
+    DEBUG_LOG("Connection established");
+    static constexpr const ubyte ReadyReply[] = {
+        '\x05', '\x00', '\x00',          // ok
+        '\x01',                          // ipv4
+        '\x00', '\x00', '\x00', '\x00',  // ip: 0.0.0.0
+        '\x00', '\x00',                  // port 0:
+    };
+    CC->PostData(ReadyReply, sizeof(ReadyReply));
+    CC->RelaySideContextId = RelaySideContextId;
+    CC->State              = CS_S5_READY;
+    KeepAlive(CC);
 }

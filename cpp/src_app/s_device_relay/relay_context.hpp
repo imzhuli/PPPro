@@ -38,6 +38,7 @@ extern xRL_RelayContext * CreateUdpChannel6(uint64_t DeviceId);
 
 extern void NotifyProxyConnectionRefused(xRL_RelayContext * PRC);      // to proxy
 extern void NotifyProxyConnectionEstablished(xRL_RelayContext * PRC);  // to proxy
+extern void NotifyDestroyProxyConnection(xRL_RelayContext * PRC);      // to proxy
 
 extern void PostDestroyConnection(xRL_RelayContext * PRC);  // to device
 extern void PostConnectionData(uint64_t RelaySideContextId, const void * DataPtr, size_t DataSize);

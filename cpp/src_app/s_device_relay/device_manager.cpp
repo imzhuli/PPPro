@@ -71,9 +71,7 @@ static bool OnDeviceDestroyConnection(xDR_DeviceContext * PDC, ubyte * PayloadPt
         return true;
     }
     DEBUG_LOG("OnDeviceDestroyConnection DeviceSideContextId=%" PRIx32 "", Resp.DeviceSideContextId);
-
-    // TODO: notify proxy
-
+    NotifyDestroyProxyConnection(PRC);
     ReleaseRelayContext(PRC);
     return true;
 }

@@ -221,3 +221,10 @@ void NotifyProxyConnectionEstablished(xRL_RelayContext * PRC) {
     N.RelaySideContextId  = PRC->RelaySideContextId;
     PostMessageToProxy(PRC->ProxyConnectionId, Cmd_PA_RL_NotifyConnectionState, 0, N);
 }
+
+void NotifyDestroyProxyConnection(xRL_RelayContext * PRC) {
+    auto N               = xPR_DestroyConnection();
+    N.ProxySideContextId = PRC->ProxySideContextId;
+    N.RelaySideContextId = PRC->RelaySideContextId;
+    PostMessageToProxy(PRC->ProxyConnectionId, Cmd_PA_RL_DestroyConnection, 0, N);
+}

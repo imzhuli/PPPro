@@ -50,35 +50,13 @@ static bool OnConnectionStateChange(ubyte * PayloadPtr, size_t PayloadSize) {
 
     switch (CC->State) {
 
-        case CS_S5_WAIT_FOR_CONECTION_ESTABLISH: {
-            if (!Notify.DeviceSideContextId) {
-                DEBUG_LOG("Connection refused");
-                assert(!Notify.DeviceSideContextId);
-                // not connected
-                static constexpr const ubyte ErrorReply[] = {
-                    '\x05', '\x05', '\x00',          // refused
-                    '\x01',                          // ipv4
-                    '\x00', '\x00', '\x00', '\x00',  // ip: 0.0.0.0
-                    '\x00', '\x00',                  // port 0:
-                };
-                CC->PostData(ErrorReply, sizeof(ErrorReply));
-                SchedulePassiveKillClientConnection(CC);
-                return true;
-            } else {
-                DEBUG_LOG("Connection established");
-                static constexpr const ubyte ReadyReply[] = {
-                    '\x05', '\x00', '\x00',          // ok
-                    '\x01',                          // ipv4
-                    '\x00', '\x00', '\x00', '\x00',  // ip: 0.0.0.0
-                    '\x00', '\x00',                  // port 0:
-                };
-                CC->PostData(ReadyReply, sizeof(ReadyReply));
-                CC->RelaySideContextId = Notify.RelaySideContextId;
-                CC->State              = CS_S5_READY;
-                KeepAlive(CC);
-                return true;
-            }
-        } break;
+        case CS_S5_WAIT_FOR_CONECTION_ESTABLISH:
+            OnPAC_S5_ConnectionResult(CC, Notify.RelaySideContextId);
+            break;
+
+        case CS_T_WAIT_FOR_CONECTION_ESTABLISH:
+            OnPAC_T_ConnectionResult(CC, Notify.RelaySideContextId);
+            break;
 
         default:
             DEBUG_LOG("unprocessed");
@@ -100,7 +78,26 @@ static bool OnRelayPushConnectionData(ubyte * PayloadPtr, size_t PayloadSize) {
         return true;
     }
 
+    DEBUG_LOG("PushData\n%s", HexShow(Push.PayloadView).c_str());
     CC->PostData(Push.PayloadView.data(), Push.PayloadView.size());
+    KeepAlive(CC);
+    return true;
+}
+
+static bool OnRelayDestroyConnection(ubyte * PayloadPtr, size_t PayloadSize) {
+    auto N = xPR_DestroyConnection();
+    if (!N.Deserialize(PayloadPtr, PayloadSize)) {
+        DEBUG_LOG("invalid protocol");
+        return false;
+    }
+    auto CC = GetClientConnectionById(N.ProxySideContextId);
+    if (!CC) {
+        DEBUG_LOG("client connection not match");
+        return true;
+    }
+
+    DEBUG_LOG("DestroyConnection %" PRIx64 "", N.ProxySideContextId);
+    SchedulePassiveKillClientConnection(CC);
     return true;
 }
 
@@ -111,6 +108,8 @@ static bool OnRelayData(xClientConnection & CC, xPacketCommandId CommandId, xPac
             return OnConnectionStateChange(PayloadPtr, PayloadSize);
         case Cmd_PA_RL_PostData:
             return OnRelayPushConnectionData(PayloadPtr, PayloadSize);
+        case Cmd_PA_RL_DestroyConnection:
+            return OnRelayDestroyConnection(PayloadPtr, PayloadSize);
 
         default:
             DEBUG_LOG("unprocessed");
