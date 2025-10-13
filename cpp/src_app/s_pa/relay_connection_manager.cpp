@@ -54,6 +54,10 @@ static bool OnConnectionStateChange(ubyte * PayloadPtr, size_t PayloadSize) {
             OnPAC_S5_ConnectionResult(CC, Notify.RelaySideContextId);
             break;
 
+        case CS_H_WAIT_FOR_CONECTION_ESTABLISH:
+            OnPAC_H_ConnectionResult(CC, Notify.RelaySideContextId);
+            break;
+
         case CS_T_WAIT_FOR_CONECTION_ESTABLISH:
             OnPAC_T_ConnectionResult(CC, Notify.RelaySideContextId);
             break;
@@ -75,6 +79,10 @@ static bool OnRelayPushConnectionData(ubyte * PayloadPtr, size_t PayloadSize) {
     auto CC = GetClientConnectionById(Push.ProxySideContextId);
     if (!CC) {
         DEBUG_LOG("client connection not match");
+        return true;
+    }
+    if (CC->State == CS_KILL_ON_FLUSH) {
+        DEBUG_LOG("client closing, no more push data");
         return true;
     }
 
@@ -173,4 +181,28 @@ void RequestRelayCloseConnection(uint64_t ProxyConnectionId, uint64_t RelayServe
     Request.ProxySideContextId = ProxyConnectionId;
     Request.RelaySideContextId = RelaySideContextId;
     PostRelayMessage(RelayServerId, Cmd_PA_RL_DestroyConnection, 0, Request);
+}
+
+bool RequestRelayPostConnectionData(uint64_t ProxyConnectionId, uint64_t RelayServerId, uint64_t RelaySideContextId, const void * DP_Input, size_t DS) {
+    auto DP       = (const ubyte *)DP_Input;
+    auto Consumed = size_t();
+    while (DS) {
+        auto MaxPushSize = std::min(DS, xPR_PushData::MAX_PAYLOAD_SIZE);
+        if (!MaxPushSize) {
+            break;
+        }
+        auto P               = xPR_PushData();
+        P.ProxySideContextId = ProxyConnectionId;
+        P.RelaySideContextId = RelaySideContextId;
+        P.PayloadView        = std::string_view((const char *)DP, MaxPushSize);
+        if (!PostRelayMessage(RelayServerId, Cmd_PA_RL_PostData, 0, P)) {
+            DEBUG_LOG("failed to post PushData message to relay");
+            return false;
+        }
+
+        DP       += MaxPushSize;
+        DS       -= MaxPushSize;
+        Consumed += MaxPushSize;
+    }
+    return true;
 }

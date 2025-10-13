@@ -163,6 +163,8 @@ size_t OnPAClientConnectionData(xPA_ClientConnection * CC, ubyte * DP, size_t DS
     switch (CC->State) {
         case CS_CHALLENGE:
             return OnPAC_Challenge(CC, DP, DS);
+        case CS_S5_CHALLENGE:
+            return OnPAC_S5_Challenge(CC, DP, DS);
         case CS_S5_WAIT_FOR_AUTH_INFO:
             return OnPAC_S5_AuthInfo(CC, DP, DS);
         case CS_S5_WAIT_FOR_TARGET_ADDRESS:
@@ -170,6 +172,13 @@ size_t OnPAClientConnectionData(xPA_ClientConnection * CC, ubyte * DP, size_t DS
         case CS_S5_READY:
             return OnPAC_S5_UploadData(CC, DP, DS);
 
+        case CS_H_CHALLENGE:
+            return OnPAC_H_Challenge(CC, DP, DS);
+        case CS_H_READY:
+            return OnPAC_H_UploadData(CC, DP, DS);
+
+        case CS_T_CHALLENGE:
+            return OnPAC_T_Challenge(CC, DP, DS);
         case CS_T_READY:
             return OnPAC_T_UploadData(CC, DP, DS);
 
@@ -189,7 +198,9 @@ size_t OnPAC_Challenge(xPA_ClientConnection * CC, ubyte * DP, size_t DS) {
         CC->State = CS_T_CHALLENGE;
         return OnPAC_T_Challenge(CC, DP, DS);
     }
-    return InvalidDataSize;
+    // currently only HTTP normal is accepted:
+    CC->State = CS_H_CHALLENGE;
+    return OnPAC_H_Challenge(CC, DP, DS);
 }
 
 void OnPAC_AuthResult(uint64_t ConnectionId, const xClientAuthResult * AR) {
@@ -217,11 +228,15 @@ void OnPAC_AuthResult(uint64_t ConnectionId, const xClientAuthResult * AR) {
         case CS_S5_WAIT_FOR_AUTH_RESULT:
             OnPAC_S5_AuthResult(CC, AR);
             break;
+        case CS_H_WAIT_FOR_AUTH_RESULT:
+            OnPAC_H_AuthResult(CC, AR);
+            break;
         case CS_T_WAIT_FOR_AUTH_RESULT:
             OnPAC_T_AuthResult(CC, AR);
             break;
         default:
             DeferKillClientConnection(CC);
+            break;
     }
     return;
 }
@@ -237,6 +252,9 @@ void OnPAC_DeviceSelectResult(uint64_t ConnectionId, const xDeviceSelectorResult
     switch (CC->State) {
         case CS_S5_WAIT_FOR_DEVICE_RESULT:
             OnPAC_S5_DeviceResult(CC, Result);
+            break;
+        case CS_H_WAIT_FOR_DEVICE_RESULT:
+            OnPAC_H_DeviceResult(CC, Result);
             break;
         case CS_T_WAIT_FOR_DEVICE_RESULT:
             OnPAC_T_DeviceResult(CC, Result);

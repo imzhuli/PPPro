@@ -4,20 +4,17 @@
 #include <pp_protocol/proxy_relay/connection.hpp>
 
 static constexpr const size_t MAX_HTTP_TUNNEL_REQUEST_HEADER = 1024;
-static constexpr auto         HTTP_407 = "HTTP/1.1 407 Proxy Authentication Required\r\nProxy-Authenticate: Basic realm=Restricted\r\nConnection: close\r\n\r\n"sv;
-static constexpr auto         HTTP_502 = "HTTP/1.1 502 Target Unreached"sv;
-static constexpr auto         HTTP_200 = "HTTP/1.1 200 Connection established\r\nProxy-agent: proxy / 1.0\r\n\r\n"sv;
 
 size_t OnPAC_T_Challenge(xPA_ClientConnection * CC, ubyte * DP, size_t DS) {
     auto & H = CC->Http;
     H.RequestHeader.append((const char *)DP, DS);
-    if (H.RequestHeader.size() >= MAX_HTTP_TUNNEL_REQUEST_HEADER) {
-        DEBUG_LOG("request header oversized");
-        return InvalidDataSize;
-    }
     if (H.RequestHeader.size() <= 4) {
         DEBUG_LOG("too small header");
         return DS;
+    }
+    if (H.RequestHeader.size() >= MAX_HTTP_TUNNEL_REQUEST_HEADER) {
+        DEBUG_LOG("request header oversized");
+        return InvalidDataSize;
     }
 
     DEBUG_LOG("Header: \n%s", H.RequestHeader.c_str());
@@ -73,10 +70,12 @@ size_t OnPAC_T_Challenge(xPA_ClientConnection * CC, ubyte * DP, size_t DS) {
 
             if (!PostAuthRequest(CC->ConnectionId, ProxyAuthRequest)) {
                 DEBUG_LOG("Failed to query account auth");
-                DeferKillClientConnection(CC);
+                CC->PostData(HTTP_500.data(), HTTP_500.size());
+                SchedulePassiveKillClientConnection(CC);
                 return 0;
             }
             DEBUG_LOG("AuthKey: %s", ProxyAuthRequest.c_str());
+            Reset(H.RequestHeader);
             CC->State = CS_T_WAIT_FOR_AUTH_RESULT;
             return DS;
         }
@@ -87,22 +86,19 @@ size_t OnPAC_T_Challenge(xPA_ClientConnection * CC, ubyte * DP, size_t DS) {
             auto AuthLength = LineLength - 21;
             if (AuthLength < 6 && 0 != strncasecmp(AuthStart, "Basic ", 6)) {
                 DEBUG_LOG("Invalid Proxy-Authorization Request");
-                DeferKillClientConnection(CC);
-                return 0;
+                return InvalidDataSize;
             }
             auto Base64Start = AuthStart + 6;
             auto Base64Size  = AuthLength - 6;
             ProxyAuthRequest = Base64Decode(Base64Start, Base64Size);
             if (ProxyAuthRequest.empty()) {
                 DEBUG_LOG("Invalid Proxy-Authorization Request");
-                DeferKillClientConnection(CC);
-                return 0;
+                return InvalidDataSize;
             }
             auto NameEndIndex = ProxyAuthRequest.find(':');
             if (NameEndIndex == std::string::npos) {
                 DEBUG_LOG("HttpReqeust AuthInfo Not Found!");
-                DeferKillClientConnection(CC);
-                return 0;
+                return InvalidDataSize;
             }
         }
 
@@ -140,7 +136,7 @@ void OnPAC_T_AuthResult(xPA_ClientConnection * CC, const xClientAuthResult * AR)
         }
     }
     if (!PostDeviceSelectorRequest(CC->ConnectionId, OPS)) {
-        CC->PostData(HTTP_407.data(), HTTP_407.size());
+        CC->PostData(HTTP_500.data(), HTTP_500.size());
         SchedulePassiveKillClientConnection(CC);
         return;
     }
@@ -149,7 +145,7 @@ void OnPAC_T_AuthResult(xPA_ClientConnection * CC, const xClientAuthResult * AR)
 
 void OnPAC_T_DeviceResult(xPA_ClientConnection * CC, const xDeviceSelectorResult & Result) {
     if (!Result) {
-        CC->PostData(HTTP_407.data(), HTTP_407.size());
+        CC->PostData(HTTP_500.data(), HTTP_500.size());
         SchedulePassiveKillClientConnection(CC);
         return;
     }
@@ -176,25 +172,10 @@ void OnPAC_T_ConnectionResult(xPA_ClientConnection * CC, uint64_t RelaySideConte
 }
 
 size_t OnPAC_T_UploadData(xPA_ClientConnection * CC, ubyte * DP, size_t DS) {
-    auto Consumed = size_t();
-    while (DS) {
-        auto MaxPushSize = std::min(DS, xPR_PushData::MAX_PAYLOAD_SIZE);
-        if (!MaxPushSize) {
-            break;
-        }
-        auto P               = xPR_PushData();
-        P.ProxySideContextId = CC->ConnectionId;
-        P.RelaySideContextId = CC->RelaySideContextId;
-        P.PayloadView        = std::string_view((const char *)DP, MaxPushSize);
-        if (!PostRelayMessage(CC->DeviceRelayServerRuntimeId, Cmd_PA_RL_PostData, 0, P)) {
-            DEBUG_LOG("failed to post PushData message to relay");
-            return InvalidDataSize;
-        }
-
-        DP       += MaxPushSize;
-        DS       -= MaxPushSize;
-        Consumed += MaxPushSize;
+    if (!RequestRelayPostConnectionData(CC->ConnectionId, CC->DeviceRelayServerRuntimeId, CC->RelaySideContextId, DP, DS)) {
+        DEBUG_LOG("failed to post PushData message to relay");
+        return InvalidDataSize;
     }
     KeepAlive(CC);
-    return Consumed;
+    return DS;
 }

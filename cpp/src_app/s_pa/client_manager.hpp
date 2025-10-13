@@ -17,7 +17,10 @@ enum xPA_ClientState {
     CS_S5_WAIT_FOR_CONECTION_ESTABLISH,  //
     CS_S5_READY,                         //
 
-    CS_H_CHALLENGE,  // http proxy
+    CS_H_CHALLENGE,                     // http proxy
+    CS_H_WAIT_FOR_AUTH_RESULT,          //
+    CS_H_WAIT_FOR_DEVICE_RESULT,        //
+    CS_H_WAIT_FOR_CONECTION_ESTABLISH,  //
     CS_H_READY,
 
     CS_T_CHALLENGE,                     // http tunnel (CONNECT) proxy
@@ -65,8 +68,6 @@ struct xPA_ClientConnection
 
     struct {
         std::string RequestHeader;
-        std::string UnprocessedBody;
-
         std::string TargetHost;
         uint16_t    TargetPort;
     } Http;
@@ -105,11 +106,24 @@ extern void OnPAC_S5_AuthResult(xPA_ClientConnection * CC, const xClientAuthResu
 extern void OnPAC_S5_DeviceResult(xPA_ClientConnection * CC, const xDeviceSelectorResult & Result);
 extern void OnPAC_S5_ConnectionResult(xPA_ClientConnection * CC, uint64_t RelaySideContextId);
 
+// hn-client
+extern size_t OnPAC_H_Challenge(xPA_ClientConnection * CC, ubyte * DP, size_t DS);
+extern size_t OnPAC_H_UploadData(xPA_ClientConnection * CC, ubyte * DP, size_t DS);
+// hn-internal
+extern void OnPAC_H_AuthResult(xPA_ClientConnection * CC, const xClientAuthResult * AR);
+extern void OnPAC_H_DeviceResult(xPA_ClientConnection * CC, const xDeviceSelectorResult & Result);
+extern void OnPAC_H_ConnectionResult(xPA_ClientConnection * CC, uint64_t RelaySideContextId);
+
 // ht-client
 extern size_t OnPAC_T_Challenge(xPA_ClientConnection * CC, ubyte * DP, size_t DS);
 extern size_t OnPAC_T_UploadData(xPA_ClientConnection * CC, ubyte * DP, size_t DS);
-
 // ht-internal
 extern void OnPAC_T_AuthResult(xPA_ClientConnection * CC, const xClientAuthResult * AR);
 extern void OnPAC_T_DeviceResult(xPA_ClientConnection * CC, const xDeviceSelectorResult & Result);
 extern void OnPAC_T_ConnectionResult(xPA_ClientConnection * CC, uint64_t RelaySideContextId);
+
+static constexpr auto HTTP_404 = "HTTP/1.1 407 Not Found\r\nConnection: close\r\n\r\n"sv;
+static constexpr auto HTTP_407 = "HTTP/1.1 407 Proxy Authentication Required\r\nProxy-Authenticate: Basic realm=Restricted\r\nConnection: close\r\n\r\n"sv;
+static constexpr auto HTTP_500 = "HTTP/1.1 500 Internal server error\r\nConnection: close\r\n\r\n"sv;
+static constexpr auto HTTP_502 = "HTTP/1.1 502 Target Unreached\r\nConnection: close\r\n\r\n"sv;
+static constexpr auto HTTP_200 = "HTTP/1.1 200 Connection established\r\nProxy-agent: proxy / 1.0\r\n\r\n"sv;

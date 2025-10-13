@@ -176,27 +176,12 @@ size_t OnPAC_S5_TargetAddress(xPA_ClientConnection * Client, ubyte * DataPtr, si
 }
 
 size_t OnPAC_S5_UploadData(xPA_ClientConnection * CC, ubyte * DP, size_t DS) {
-    auto Consumed = size_t();
-    while (DS) {
-        auto MaxPushSize = std::min(DS, xPR_PushData::MAX_PAYLOAD_SIZE);
-        if (!MaxPushSize) {
-            break;
-        }
-        auto P               = xPR_PushData();
-        P.ProxySideContextId = CC->ConnectionId;
-        P.RelaySideContextId = CC->RelaySideContextId;
-        P.PayloadView        = std::string_view((const char *)DP, MaxPushSize);
-        if (!PostRelayMessage(CC->DeviceRelayServerRuntimeId, Cmd_PA_RL_PostData, 0, P)) {
-            DEBUG_LOG("failed to post PushData message to relay");
-            return InvalidDataSize;
-        }
-
-        DP       += MaxPushSize;
-        DS       -= MaxPushSize;
-        Consumed += MaxPushSize;
+    if (!RequestRelayPostConnectionData(CC->ConnectionId, CC->DeviceRelayServerRuntimeId, CC->RelaySideContextId, DP, DS)) {
+        DEBUG_LOG("failed to post PushData message to relay");
+        return InvalidDataSize;
     }
     KeepAlive(CC);
-    return Consumed;
+    return DS;
 }
 
 /////////////////// Passive event ///////////////////
