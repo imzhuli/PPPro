@@ -216,6 +216,54 @@ auto xSL_InternalServerListManager::GetAuditAccountServerInfo(uint64_t ServerId)
     return &(*It);
 }
 
+bool xSL_InternalServerListManager::AddAuditTargetServerInfo(uint64_t ServerId, xNetAddress ServerAddress) {
+
+    if (AuditTargetServerInfoList.size() >= MAX_AUDIT_TARGET_SERVER_COUNT) {
+        return false;
+    }
+
+    auto It    = std::lower_bound(AuditTargetServerInfoList.begin(), AuditTargetServerInfoList.end(), ServerId, [](const auto & R, uint64_t Id) { return R.ServerId < Id; });
+    auto Found = (It != AuditTargetServerInfoList.end()) && (It->ServerId == ServerId);
+    if (Found) {
+        return false;
+    }
+    AuditTargetServerInfoList.emplace(
+        It,
+        xSL_AuditTargetServerInfo{
+            .ServerId      = ServerId,
+            .ServerAddress = ServerAddress,
+        }
+    );
+    AuditTargetServerInfoListVersionTimestampMS = Ticker();
+    AuditTargetServerInfoListDirty              = true;
+    return true;
+}
+
+void xSL_InternalServerListManager::RemoveAuditTargetServerInfo(uint64_t ServerId) {
+    auto It = std::lower_bound(AuditTargetServerInfoList.begin(), AuditTargetServerInfoList.end(), ServerId, [](const auto & R, uint64_t Id) { return R.ServerId < Id; });
+    if (It == AuditTargetServerInfoList.end()) {
+        return;
+    }
+    if (It->ServerId != ServerId) {
+        return;
+    }
+    AuditTargetServerInfoList.erase(It);
+    AuditTargetServerInfoListDirty = true;
+}
+
+auto xSL_InternalServerListManager::GetAuditTargetServerInfo(uint64_t ServerId) -> const xSL_AuditTargetServerInfo * {
+    auto It = std::lower_bound(AuditTargetServerInfoList.begin(), AuditTargetServerInfoList.end(), ServerId, [](const auto & R, uint64_t Id) { return R.ServerId < Id; });
+    if (It == AuditTargetServerInfoList.end()) {
+        return nullptr;
+    }
+    if (It->ServerId != ServerId) {
+        return nullptr;
+    }
+    return &(*It);
+}
+
+///////////////
+
 bool xSL_InternalServerListManager::AddDeviceStateRelayServerInfo(uint64_t ServerId, xNetAddress ServerAddress, xNetAddress ObserverAddress) {
     if (AuditAccountServerInfoList.size() >= MAX_DEVICE_STATE_RELAY_SERVER_COUNT) {
         return false;

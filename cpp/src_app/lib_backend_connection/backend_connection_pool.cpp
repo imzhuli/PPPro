@@ -101,7 +101,7 @@ void xBackendConnectionPool::OnServerCloseCallback(xClientConnection & CC) {
     auto   Sid = CC.GetConnectionId();
     auto   Idx = Sid.GetIndex();
     auto & Ctx = ContextList[Idx];
-    Reset(Ctx);
+    Reset(Ctx.IsChallengeReady);
 }
 
 bool xBackendConnectionPool::OnCmdBackendChallengeResp(xClientConnection & CC, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) {
@@ -110,17 +110,14 @@ bool xBackendConnectionPool::OnCmdBackendChallengeResp(xClientConnection & CC, x
     auto & Ctx = ContextList[Idx];
 
     if (Ctx.IsChallengeReady) {
-        // X_DEBUG_PRINTF("invalid challenge state");
         return false;
     }
 
     auto R = xBackendChallengeResp();
-    if (!R.Deserialize(PayloadPtr, PayloadSize)) {
-        // X_DEBUG_PRINTF("failed server challenge");
+    if (!R.Deserialize(PayloadPtr, PayloadSize) || R.ErrorCode) {
         return false;
     }
 
-    // X_DEBUG_PRINTF("server challenge ready");
     Ctx.IsChallengeReady = true;
     OnBackendConnectedCallback(CC.GetTargetAddress());
     return true;

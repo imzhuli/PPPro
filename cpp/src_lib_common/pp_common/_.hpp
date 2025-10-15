@@ -147,6 +147,7 @@ static constexpr const uint32_t MAX_AUTH_CACHE_SERVER_COUNT          = 75;
 static constexpr const uint32_t MAX_DEVICE_STATE_RELAY_SERVER_COUNT  = 75;
 static constexpr const uint32_t MAX_AUDIT_DEVICE_SERVER_COUNT        = 75;
 static constexpr const uint32_t MAX_AUDIT_ACCOUNT_SERVER_COUNT       = 75;
+static constexpr const uint32_t MAX_AUDIT_TARGET_SERVER_COUNT        = 75;
 static constexpr const uint32_t MAX_DEVICE_SELECTOR_COUNT            = 1000;
 static constexpr const uint32_t MAX_DEVICE_SELECTOR_DISPATCHER_COUNT = 75;
 static constexpr const uint32_t MAX_BACKEND_SERVER_COUNT             = 75;
@@ -167,6 +168,7 @@ enum struct eServerType : uint32_t {
     AUTH_CACHE                 = 0x0A,  // AC
     AUDIT_DEVICE_CACHE         = 0x0B,  // ADC
     AUDIT_ACCOUNT_CACHE        = 0x0C,  // AAC
+    AUDIT_TARGET_CACHE         = 0x0D,  // ATC
 
 };
 

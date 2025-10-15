@@ -74,6 +74,7 @@ static constexpr const xPacketCommandId Cmd_RegisterDeviceStateRelayServer      
 static constexpr const xPacketCommandId Cmd_RegisterRelayInfoDispatcherServer              = Cmd_ServerManagementBase + 0x205;
 static constexpr const xPacketCommandId Cmd_RegisterDeviceSelectorDispatcherServer         = Cmd_ServerManagementBase + 0x206;
 static constexpr const xPacketCommandId Cmd_RegisterDeviceSelector                         = Cmd_ServerManagementBase + 0x207;
+static constexpr const xPacketCommandId Cmd_RegisterAuditTargetServer                      = Cmd_ServerManagementBase + 0x208;
 static constexpr const xPacketCommandId Cmd_RegisterServerResp                             = Cmd_ServerManagementBase + 0x2FF;
 static constexpr const xPacketCommandId Cmd_DownloadAuthCacheServerList                    = Cmd_ServerManagementBase + 0x301;
 static constexpr const xPacketCommandId Cmd_DownloadAuthCacheServerListResp                = Cmd_ServerManagementBase + 0x302;
@@ -89,6 +90,8 @@ static constexpr const xPacketCommandId Cmd_DownloadRelayInfoDispatcherServer   
 static constexpr const xPacketCommandId Cmd_DownloadRelayInfoDispatcherServerResp          = Cmd_ServerManagementBase + 0x30C;
 static constexpr const xPacketCommandId Cmd_DownloadDeviceSelectorDispatcherServerList     = Cmd_ServerManagementBase + 0x30D;
 static constexpr const xPacketCommandId Cmd_DownloadDeviceSelectorDispatcherServerListResp = Cmd_ServerManagementBase + 0x30E;
+static constexpr const xPacketCommandId Cmd_DownloadAuditTargetServerList                  = Cmd_ServerManagementBase + 0x30F;
+static constexpr const xPacketCommandId Cmd_DownloadAuditTargetServerListResp              = Cmd_ServerManagementBase + 0x310;
 
 static constexpr const xPacketCommandId Cmd_RelayServerHeartBeat      = Cmd_ServerManagementBase + 0x401;
 static constexpr const xPacketCommandId Cmd_RegisterRelayInfoObserver = Cmd_ServerManagementBase + 0x402;

@@ -14,13 +14,17 @@ static uint64_t AuthCacheServerListVersion = 0;
 static ubyte    AuthCacheServerListResponse[MaxPacketSize];
 static size_t   AuthCacheServerListResponseSize = {};
 
+static uint64_t AuditAccountServerListVersion = 0;
+static ubyte    AuditAccountServerListResponse[MaxPacketSize];
+static size_t   AuditAccountServerListResponseSize = {};
+
 static uint64_t AuditDeviceServerListVersion = 0;
 static ubyte    AuditDeviceServerListResponse[MaxPacketSize];
 static size_t   AuditDeviceServerListResponseSize = {};
 
-static uint64_t AuditAccountServerListVersion = 0;
-static ubyte    AuditAccountServerListResponse[MaxPacketSize];
-static size_t   AuditAccountServerListResponseSize = {};
+static uint64_t AuditTargetServerListVersion = 0;
+static ubyte    AuditTargetServerListResponse[MaxPacketSize];
+static size_t   AuditTargetServerListResponseSize = {};
 
 static uint64_t DeviceStateRelayServerListVersion = 0;
 static ubyte    DeviceStateRelayServerListResponse[MaxPacketSize];
@@ -61,6 +65,10 @@ void OnRegisterClientClose(const xTcpServiceClientConnectionHandle & Handle) {
             Logger->I("RemoveAuditAccountServerInfo: ServerId=%" PRIi64 "", ServerId);
             ServerListManager.RemoveAuditAccountServerInfo(ServerId);
             break;
+        case eServerType::AUDIT_TARGET_CACHE:
+            Logger->I("RemoveAuditTargetServerInfo: ServerId=%" PRIi64 "", ServerId);
+            ServerListManager.RemoveAuditTargetServerInfo(ServerId);
+            break;
         case eServerType::DEVICE_STATE_RELAY:
             Logger->I("RemoveDeviceStateRelayServerInfo: ServerId=%" PRIi64 "", ServerId);
             ServerListManager.RemoveDeviceStateRelayServerInfo(ServerId);
@@ -90,6 +98,8 @@ bool OnRegisterClientPacket(const xTcpServiceClientConnectionHandle & Handle, xP
             return OnRegisterAuditDeviceServer(Handle, PayloadPtr, PayloadSize);
         case Cmd_RegisterAuditAccountServer:
             return OnRegisterAuditAccountServer(Handle, PayloadPtr, PayloadSize);
+        case Cmd_RegisterAuditTargetServer:
+            return OnRegisterAuditTargetServer(Handle, PayloadPtr, PayloadSize);
         case Cmd_RegisterDeviceStateRelayServer:
             return OnRegisterDeviceStateRelayServer(Handle, PayloadPtr, PayloadSize);
         case Cmd_RegisterRelayInfoDispatcherServer:
@@ -168,6 +178,30 @@ bool OnRegisterAuditDeviceServer(const xTcpServiceClientConnectionHandle & Handl
     TypeRef     = (uint32_t)eServerType::AUDIT_DEVICE_CACHE;
     ServerIdRef = R.ServerId;
     Logger->I("OnRegisterAuditDeviceServer: ServerId=%" PRIi64 "", R.ServerId);
+    return true;
+}
+
+bool OnRegisterAuditTargetServer(const xTcpServiceClientConnectionHandle & Handle, ubyte * PayloadPtr, size_t PayloadSize) {
+
+    auto & TypeRef     = Handle->UserContext.U32;
+    auto & ServerIdRef = Handle->UserContextEx.U64;
+    if (TypeRef) {
+        assert(ServerIdRef);
+        DEBUG_LOG("duplicated register server");
+        return false;
+    }
+    auto R = xPP_RegisterAuditTargetServer();
+    if (!R.Deserialize(PayloadPtr, PayloadSize) || !R.ServerId || !R.Address) {
+        Logger->E("invalid request");
+        return false;
+    }
+    if (!ServerListManager.AddAuditTargetServerInfo(R.ServerId, R.Address)) {
+        Logger->E("failed to allocate server info");
+        return false;
+    }
+    TypeRef     = (uint32_t)eServerType::AUDIT_TARGET_CACHE;
+    ServerIdRef = R.ServerId;
+    Logger->I("OnRegisterAuditTargetServer: ServerId=%" PRIi64 "", R.ServerId);
     return true;
 }
 
@@ -253,6 +287,8 @@ bool OnDownloadClientPacket(const xTcpServiceClientConnectionHandle & Handle, xP
             return OnDownloadAuditDeviceServerList(Handle, PayloadPtr, PayloadSize);
         case Cmd_DownloadAuditAccountServerList:
             return OnDownloadAuditAccountServerList(Handle, PayloadPtr, PayloadSize);
+        case Cmd_DownloadAuditTargetServerList:
+            return OnDownloadAuditTargetServerList(Handle, PayloadPtr, PayloadSize);
         case Cmd_DownloadDeviceStateRelayServerList:
             return OnDownloadDeviceStateRelayServerList(Handle, PayloadPtr, PayloadSize);
         case Cmd_DownloadBackendServerList:
@@ -363,6 +399,39 @@ bool OnDownloadAuditAccountServerList(const xTcpServiceClientConnectionHandle & 
     Handle.PostData(AuditAccountServerListResponse, AuditAccountServerListResponseSize);
     return true;
 }
+
+bool OnDownloadAuditTargetServerList(const xTcpServiceClientConnectionHandle & Handle, ubyte * PayloadPtr, size_t PayloadSize) {
+    auto R = xPP_DownloadAuditTargetServerList();
+    if (!R.Deserialize(PayloadPtr, PayloadSize)) {
+        return false;
+    }
+    auto & M       = ServerListManager;
+    auto   Version = M.GetAuditTargetServerInfoListVersion();
+
+    if (R.Version == Version) {
+        auto Resp    = xPP_DownloadAuditTargetServerListResp();
+        Resp.Version = Version;
+        Handle.PostMessage(Cmd_DownloadAuditTargetServerListResp, 0, Resp);
+        return true;
+    }
+
+    if (Version != AuditTargetServerListVersion) {
+        auto List    = M.GetAuditTargetServerInfoList();
+        auto Resp    = xPP_DownloadAuditTargetServerListResp();
+        Resp.Version = Version;
+        for (auto & S : List) {
+            Resp.ServerInfoList.push_back({
+                .ServerId = S.ServerId,
+                .Address  = S.ServerAddress,
+            });
+        }
+        AuditTargetServerListResponseSize = WriteMessage(AuditTargetServerListResponse, Cmd_DownloadAuditTargetServerListResp, 0, Resp);
+        AuditTargetServerListVersion      = Version;
+    }
+    Handle.PostData(AuditTargetServerListResponse, AuditTargetServerListResponseSize);
+    return true;
+}
+
 bool OnDownloadDeviceStateRelayServerList(const xTcpServiceClientConnectionHandle & Handle, ubyte * PayloadPtr, size_t PayloadSize) {
     auto R = xPP_DownloadDeviceStateRelayServerList();
     if (!R.Deserialize(PayloadPtr, PayloadSize)) {

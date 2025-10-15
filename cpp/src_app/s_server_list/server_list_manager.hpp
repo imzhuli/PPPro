@@ -10,6 +10,7 @@ struct xSL_InternalServerInfo {
 using xSL_AuthCacheServerInfo    = xSL_InternalServerInfo;
 using xSL_AuditDeviceServerInfo  = xSL_InternalServerInfo;
 using xSL_AuditAccountServerInfo = xSL_InternalServerInfo;
+using xSL_AuditTargetServerInfo  = xSL_InternalServerInfo;
 
 struct xSL_DeviceStateRelayServerInfo : xSL_InternalServerInfo {
     xNetAddress ObserverAddress;
@@ -79,6 +80,13 @@ public:
     auto GetAuditAccountServerInfoListVersion() const { return AuditAccountServerInfoListVersion; }
     auto GetAuditAccountServerInfoListVersionTimestampMS() const { return AuditAccountServerInfoListVersionTimestampMS; }
 
+    bool AddAuditTargetServerInfo(uint64_t ServerId, xNetAddress ServerAddress);
+    void RemoveAuditTargetServerInfo(uint64_t ServerId);
+    auto GetAuditTargetServerInfo(uint64_t ServerId) -> const xSL_AuditTargetServerInfo *;
+    auto GetAuditTargetServerInfoList() const -> const std::vector<xSL_AuditTargetServerInfo> & { return VersionedAuditTargetServerInfoList; }
+    auto GetAuditTargetServerInfoListVersion() const { return AuditTargetServerInfoListVersion; }
+    auto GetAuditTargetServerInfoListVersionTimestampMS() const { return AuditTargetServerInfoListVersionTimestampMS; }
+
     // DSR
     bool AddDeviceStateRelayServerInfo(uint64_t ServerId, xNetAddress ServerAddress, xNetAddress ObserverAddress);
     void RemoveDeviceStateRelayServerInfo(uint64_t ServerId);
@@ -129,6 +137,12 @@ private:
     uint64_t                                AuditAccountServerInfoListVersionTimestampMS = {};
     std::vector<xSL_AuditAccountServerInfo> AuditAccountServerInfoList;
     std::vector<xSL_AuditAccountServerInfo> VersionedAuditAccountServerInfoList;
+
+    uint32_t                               AuditTargetServerInfoListVersion            = 0;
+    bool                                   AuditTargetServerInfoListDirty              = false;
+    uint64_t                               AuditTargetServerInfoListVersionTimestampMS = {};
+    std::vector<xSL_AuditTargetServerInfo> AuditTargetServerInfoList;
+    std::vector<xSL_AuditTargetServerInfo> VersionedAuditTargetServerInfoList;
 
     uint32_t                                    DeviceStateRelayServerInfoListVersion            = 0;
     bool                                        DeviceStateRelayServerInfoListDirty              = false;

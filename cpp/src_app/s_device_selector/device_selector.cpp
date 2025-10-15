@@ -83,7 +83,7 @@ bool xDS_DeviceSelectorServiceProvider::OnSelectDevice(const xMessageChannel & S
         DEBUG_LOG("by CountryId");
         PD = DeviceContextManager.SelectDeviceByCountryId(Req.CountryId);
     } else {
-        DEBUG_LOG("no device select condition");
+        PD = DeviceContextManager.SelectDeviceGlobal();
     }
 
     auto Resp = xPP_AcquireDeviceResp();

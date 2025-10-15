@@ -96,6 +96,12 @@ struct xPP_DownloadAuditAccountServerList : xBinaryMessage {
     uint32_t Version;
 };
 
+struct xPP_DownloadAuditTargetServerList : xBinaryMessage {
+    void     SerializeMembers() override { W(Version); }
+    void     DeserializeMembers() override { R(Version); }
+    uint32_t Version;
+};
+
 struct xPP_DownloadAuditAccountServerListResp : xBinaryMessage {
 
     void SerializeMembers() override {
@@ -130,6 +136,39 @@ struct xPP_DownloadAuditAccountServerListResp : xBinaryMessage {
     //
 };
 
+struct xPP_DownloadAuditTargetServerListResp : xBinaryMessage {
+
+    void SerializeMembers() override {
+        W(Version);
+        uint32_t Count = ServerInfoList.size();
+        W(Count);
+        for (auto & I : ServerInfoList) {
+            W(I.ServerId);
+            W(I.Address);
+        }
+    }
+
+    void DeserializeMembers() override {
+        R(Version);
+
+        uint32_t Count = 0;
+        R(Count);
+
+        if (Count >= MAX_AUDIT_TARGET_SERVER_COUNT) {
+            GetReader()->SetError();
+            return;
+        }
+        ServerInfoList.resize(Count);
+        for (auto & I : ServerInfoList) {
+            R(I.ServerId);
+            R(I.Address);
+        }
+    }
+
+    uint32_t                 Version;
+    std::vector<xServerInfo> ServerInfoList;
+    //
+};
 //// 3
 
 struct xPP_DownloadDeviceStateRelayServerList : xBinaryMessage {

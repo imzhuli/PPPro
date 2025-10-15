@@ -12,9 +12,13 @@ static constexpr const size_t DEVICE_INFO_RESIST_COUNTER = 2;  // normally devic
 struct xDR_TimeoutNode : xListNode {
     uint64_t TimestampMS;
 };
+
+struct xDR_GlobalNode : xListNode {};
 struct xDR_CountryNode : xListNode {};
 struct xDR_StateNode : xListNode {};
 struct xDR_CityNode : xListNode {};
+
+using xDR_GlobalList = xList<xDR_GlobalNode>;
 using xDR_CoutryList = xList<xDR_CountryNode>;
 using xDR_StateList  = xList<xDR_StateNode>;
 using xDR_CityList   = xList<xDR_CityNode>;
@@ -31,6 +35,7 @@ struct xDR_DeviceInfoBase {
 
 struct xDS_DeviceContext
     : xDR_TimeoutNode
+    , xDR_GlobalNode
     , xDR_CountryNode
     , xDR_StateNode
     , xDR_CityNode {
@@ -48,6 +53,7 @@ public:
     void RemoveDevice(xDS_DeviceContext * Device);
     void RemoveDeviceById(const std::string & DeviceId);
 
+    const xDS_DeviceContext * SelectDeviceGlobal();
     const xDS_DeviceContext * SelectDeviceByCountryId(xCountryId Id);
     const xDS_DeviceContext * SelectDeviceByStateId(xStateId Id);
     const xDS_DeviceContext * SelectDeviceByCityId(xCityId Id);
@@ -58,6 +64,7 @@ protected:
 private:
     xTicker                                              Ticker;
     xList<xDR_TimeoutNode>                               TimeoutDeviceList;
+    xDR_GlobalList                                       GlobalDeviceList;
     std::unordered_map<uint32_t, xDR_CoutryList>         CountryDeviceList;
     std::unordered_map<uint32_t, xDR_StateList>          StateDeviceList;
     std::unordered_map<uint32_t, xDR_CityList>           CityDeviceList;

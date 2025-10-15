@@ -54,6 +54,23 @@ struct xPP_RegisterAuditAccountServer : xBinaryMessage {
     //
 };
 
+struct xPP_RegisterAuditTargetServer : xBinaryMessage {
+
+    void SerializeMembers() override {
+        W(ServerId);
+        W(Address);
+    }
+
+    void DeserializeMembers() override {
+        R(ServerId);
+        R(Address);
+    }
+
+    uint64_t    ServerId;
+    xNetAddress Address;
+    //
+};
+
 struct xPP_RegisterDeviceStateRelayServer : xBinaryMessage {
 
     void SerializeMembers() override {

@@ -51,6 +51,7 @@ void xDS_DeviceContextManager::UpdateDevice(const xDR_DeviceInfoBase & InfoBase)
     PD->InfoBase                 = InfoBase;
     DeviceMap[InfoBase.DeviceId] = PD;
 
+    GlobalDeviceList.AddTail(*PD);
     CountryDeviceList[InfoBase.CountryId].AddTail(*PD);
     StateDeviceList[InfoBase.StateId].AddTail(*PD);
     CityDeviceList[InfoBase.CityId].AddTail(*PD);
@@ -85,6 +86,14 @@ void xDS_DeviceContextManager::RemoveDeviceById(const std::string & DeviceId) {
 void xDS_DeviceContextManager::KeepAlive(xDS_DeviceContext * Device) {
     Device->TimestampMS = Ticker();
     TimeoutDeviceList.GrabTail(*Device);
+}
+
+const xDS_DeviceContext * xDS_DeviceContextManager::SelectDeviceGlobal() {
+    auto PD = static_cast<xDS_DeviceContext *>(GlobalDeviceList.PopHead());
+    if (PD) {
+        GlobalDeviceList.AddTail(*PD);
+    }
+    return PD;
 }
 
 const xDS_DeviceContext * xDS_DeviceContextManager::SelectDeviceByCountryId(xCountryId Id) {
