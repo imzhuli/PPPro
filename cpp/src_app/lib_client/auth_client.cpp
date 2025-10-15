@@ -1,6 +1,5 @@
 #include "./auth_client.hpp"
 
-#include <pp_protocol/_backend/auth_by_user_pass.hpp>
 #include <pp_protocol/command.hpp>
 
 static constexpr const uint64_t RequestTimeoutMS = 2'000;
@@ -11,7 +10,7 @@ bool xAuthClient::Init(xIoContext * ICP, const xel::xNetAddress & ServerListAddr
     if (!ACD.Init(ICP, ServerListAddress)) {
         return false;
     }
-    if (!ACC.Init(ICP)) {
+    if (!CPW.Init(ICP)) {
         ACD.Clean();
         return false;
     }
@@ -22,20 +21,20 @@ bool xAuthClient::Init(xIoContext * ICP, const xel::xNetAddress & ServerListAddr
             AL.push_back(S.Address);
         }
         std::sort(AL.begin(), AL.end());
-        ACC.UpdateServerList(AL);
+        CPW.UpdateServerList(AL);
     };
 
-    ACC.OnConnectedCallback = [this](auto &) {
-        if (!ACCConnections++) {
+    CPW.OnConnectedCallback = [this](auto &) {
+        if (!CPWConnections++) {
             OnEnabled();
         }
     };
-    ACC.OnDisonnectedCallback = [this](auto &) {
-        if (!--ACCConnections) {
+    CPW.OnDisonnectedCallback = [this](auto &) {
+        if (!--CPWConnections) {
             OnDisabled();
         }
     };
-    ACC.OnPacketCallback = [this](const xMessageChannel & Source, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) {
+    CPW.OnPacketCallback = [this](const xMessageChannel & Source, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) {
         DEBUG_LOG("CommondId=%" PRIx32 ", RequestId:%" PRIx64 " Data=\n%s", CommandId, RequestId, HexShow(PayloadPtr, PayloadSize).c_str());
         if (CommandId != Cmd_AuthService_QueryAuthCacheResp) {
             DEBUG_LOG("Invalid server response command");
@@ -62,7 +61,7 @@ bool xAuthClient::Init(xIoContext * ICP, const xel::xNetAddress & ServerListAddr
 void xAuthClient::Tick(uint64_t NowMS) {
     T.Update(NowMS);
     ACD.Tick(NowMS);
-    ACC.Tick(NowMS);
+    CPW.Tick(NowMS);
 
     auto KillCond = [KT = NowMS - RequestTimeoutMS](const xRequestContext & C) { return C.StartTimestampMS <= KT; };
     while (auto P = static_cast<xRequestContext *>(RequestQueue.PopHead(KillCond))) {
@@ -73,14 +72,14 @@ void xAuthClient::Tick(uint64_t NowMS) {
 }
 
 void xAuthClient::Clean() {
-    Reset(ACCConnections);
-    ACC.Clean();
+    Reset(CPWConnections);
+    CPW.Clean();
     ACD.Clean();
     RequestPool.Clean();
 }
 
 bool xAuthClient::Request(uint64_t SourceRequestId, const std::string_view & UserPassword) {
-    if (!ACCConnections) {
+    if (!CPWConnections) {
         return false;
     }
     auto RID = RequestPool.Acquire();
@@ -97,6 +96,6 @@ bool xAuthClient::Request(uint64_t SourceRequestId, const std::string_view & Use
     T.UserPass = UserPassword;
     auto H     = HashString(UserPassword);
 
-    ACC.PostMessageByHash(H, Cmd_AuthService_QueryAuthCache, RID, T);
+    CPW.PostMessageByHash(H, Cmd_AuthService_QueryAuthCache, RID, T);
     return true;
 }

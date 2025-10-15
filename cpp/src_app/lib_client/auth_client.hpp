@@ -18,7 +18,7 @@ public:
     void Tick(uint64_t NowMS);
     void Clean();
 
-    bool HasValidBackend() { return ACCConnections; }
+    bool HasValidBackend() { return CPWConnections; }
     bool Request(uint64_t SourceRequestId, const std::string_view & UserPassword);
 
     // callback types
@@ -33,9 +33,9 @@ public:
 private:
     xTicker                          T;
     xAuthCacheServerListDownloader   ACD;
-    xClientPoolWrapper               ACC;
+    xClientPoolWrapper               CPW;
     xIndexedStorage<xRequestContext> RequestPool;
     xList<xRequestContext>           RequestQueue;
 
-    size_t ACCConnections = 0;
+    size_t CPWConnections = 0;
 };
