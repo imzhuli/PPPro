@@ -69,7 +69,9 @@ set(target_list
 	s_relay_info_dispatcher
 	s_device_relay
 
-	# s_audit_account
+	# s_audit_account	
+	s_audit_target
+
 	s_auth_cache
 
 	s_pa

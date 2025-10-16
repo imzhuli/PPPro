@@ -5,7 +5,7 @@
 
 int main(int argc, char ** argv) {
 
-    X_INSTANCE xRuntimeEnvGuard(argc, argv, false);
+    X_VAR xRuntimeEnvGuard(argc, argv, false);
 
     auto BC = xBackendConnectionPool();
     X_GUARD(BC, ServiceIoContext, 100);

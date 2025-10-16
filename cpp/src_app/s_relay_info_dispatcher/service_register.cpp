@@ -21,7 +21,7 @@ bool xRID_RegisterServerService::Init() {
         DumpLocalServerId(RuntimeEnv.DefaultLocalServerIdFilePath, NewServerId);
         RegisterClient.SetLocalServerId(NewServerId);
     };
-    RegisterClient.SetServerIdPoster(&RID_RegisterServer);
+    RegisterClient.ServerRegister = &RID_RegisterServer;
     return true;
 }
 

@@ -10,11 +10,11 @@ int main(int argc, char ** argv) {
     CL.Require(ConfigExportUdpServerAddress, "ExportUdpServerAddress");
     CL.Require(ConfigServerListDownloadAddress, "ServerListDownloadAddress");
 
-    auto X_VAR = xel::xScopeGuard(InitClientManager, CleanClietManager);
-    auto X_VAR = xel::xScopeGuard(InitAuditAccountService, CleanAuditAccountService);
-    auto X_VAR = xel::xScopeGuard(InitAuthCacheLocalServer, CleanAuthCacheLocalServer);
-    auto X_VAR = xel::xScopeGuard(InitDeviceSelector, CleanDeviceSelector);
-    auto X_VAR = xel::xScopeGuard(InitRelayConnectionManager, CleanRelayConnectionManager);
+    X_SCOPE(InitClientManager, CleanClietManager);
+    X_SCOPE(InitAuditAccountService, CleanAuditAccountService);
+    X_SCOPE(InitAuthCacheLocalServer, CleanAuthCacheLocalServer);
+    X_SCOPE(InitDeviceSelector, CleanDeviceSelector);
+    X_SCOPE(InitRelayConnectionManager, CleanRelayConnectionManager);
 
     auto AATicker  = xTickRunner(TickAuditAccountService);
     auto CMTicker  = xTickRunner(TickClientManager);

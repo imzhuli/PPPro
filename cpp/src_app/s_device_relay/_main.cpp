@@ -49,9 +49,9 @@ int main(int argc, char ** argv) {
     X_GUARD(RIReporter, ServiceIoContext);
     X_GUARD(DeviceReporter, ServiceIoContext);
 
-    X_WRAP_SCOPE(InitProxyService, CleanProxyService);
-    X_WRAP_SCOPE(InitDeviceContextManager, CleanDeviceContextManager);
-    X_WRAP_SCOPE(InitRelayContextPool, CleanRelayContextPool);
+    X_SCOPE(InitProxyService, CleanProxyService);
+    X_SCOPE(InitDeviceContextManager, CleanDeviceContextManager);
+    X_SCOPE(InitRelayContextPool, CleanRelayContextPool);
 
     X_COND_GUARD(Enable4, DeviceService4, ServiceIoContext, DeviceAddress4, MaxDeviceCount);
     X_COND_GUARD(Enable6, DeviceService6, ServiceIoContext, DeviceAddress6, MaxDeviceCount);

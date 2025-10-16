@@ -19,7 +19,7 @@ public:
     void Clean();
 
     bool HasValidBackend() { return CPWConnections; }
-    bool Request(uint64_t AuditId, const std::string_view & Target, uint64_t Count);
+    bool Request(uint64_t AuditId, const std::string_view & TargetView, uint64_t Count);
 
     // callback types
     using xOnEnabled  = std::function<void()>;

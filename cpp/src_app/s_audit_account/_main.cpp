@@ -81,7 +81,7 @@ private:
         switch (CommandId) {
             case Cmd_AuditAccountUsage:
                 return OnAuditAccountUsage(PayloadPtr, PayloadSize);
-            case Cmd_AuditAccountTarget:
+            case Cmd_AuditTarget:
                 return OnAuditAccountTarget(PayloadPtr, PayloadSize);
             default:
                 break;

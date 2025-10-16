@@ -1,9 +1,10 @@
 #include "./audit_target.hpp"
 
+#include <functional>
 #include <pp_protocol/command.hpp>
+#include <pp_protocol/internal/audit_target.hpp>
 
-static constexpr const uint64_t RequestTimeoutMS = 2'000;
-static constexpr const size_t   MaxRequestCount  = 10'0000;
+static constexpr const size_t MaxRequestCount = 10'0000;
 
 bool xAuditTargetClient::Init(xIoContext * ICP, const xel::xNetAddress & ServerListAddress) {
     if (!ATSD.Init(ICP, ServerListAddress)) {
@@ -49,7 +50,15 @@ void xAuditTargetClient::Clean() {
     ATSD.Clean();
 }
 
-bool xAuditTargetClient::Request(uint64_t AuditId, const std::string_view & Target, uint64_t Count) {
-    Todo("Report ");
+bool xAuditTargetClient::Request(uint64_t AuditId, const std::string_view & TargetView, uint64_t Count) {
+
+    auto R       = xPP_AuditTarget();
+    R.AuditId    = AuditId;
+    R.TargetView = TargetView;
+    R.HitCount   = Count;
+
+    auto H = (uint64_t)std::hash<std::string_view>()(TargetView) + AuditId;
+    CPW.PostMessageByHash(H, Cmd_AuditTarget, 0, R);
+
     return true;
 }

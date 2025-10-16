@@ -85,7 +85,7 @@ int main(int argc, char ** argv) {
         RegisterServerClient.SetLocalServerId(ServerId);
     };
 
-    RegisterServerClient.SetServerIdPoster(&DSR_RegisterServer);
+    RegisterServerClient.ServerRegister = &DSR_RegisterServer;
 
     X_GUARD(OS, ServiceIoContext, BindObserverAddress, DEFAULT_MAX_SERVER_CONNECTIONS);
     X_GUARD(PS, ServiceIoContext, BindProducerAddress, DEFAULT_MAX_SERVER_CONNECTIONS);

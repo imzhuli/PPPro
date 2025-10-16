@@ -98,8 +98,8 @@ static constexpr const xPacketCommandId Cmd_RegisterRelayInfoObserver = Cmd_Serv
 static constexpr const xPacketCommandId Cmd_BroadcastRelayInfo        = Cmd_ServerManagementBase + 0x403;
 static constexpr const xPacketCommandId Cmd_BroadcastRelayOffline     = Cmd_ServerManagementBase + 0x404;
 
-static constexpr const xPacketCommandId Cmd_AuditAccountUsage  = Cmd_ServerManagementBase + 0x501;
-static constexpr const xPacketCommandId Cmd_AuditAccountTarget = Cmd_ServerManagementBase + 0x502;
+static constexpr const xPacketCommandId Cmd_AuditAccountUsage = Cmd_ServerManagementBase + 0x501;
+static constexpr const xPacketCommandId Cmd_AuditTarget       = Cmd_ServerManagementBase + 0x502;
 
 // pa-relay:
 static constexpr const xPacketCommandId Cmd_PA_RL_Base                  = 0x06'000;

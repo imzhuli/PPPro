@@ -51,7 +51,7 @@ int main(int argc, char ** argv) {
         AuthService.UpdateBackendServerList(AL, RL);
     };
 
-    RegisterServerClient.SetServerIdPoster(&AC_RegisterServer);
+    RegisterServerClient.ServerRegister = &AC_RegisterServer;
 
     ServerIdClient.OnServerIdUpdateCallback = [](uint64_t LocalServerId) {
         DumpLocalServerId(RuntimeEnv.DefaultLocalServerIdFilePath, LocalServerId);

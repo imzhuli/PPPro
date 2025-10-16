@@ -4,11 +4,11 @@
 static auto DSC = xDeviceSelectorClient();
 
 int main(int argc, char ** argv) {
-    X_INSTANCE xRuntimeEnvGuard(argc, argv, false);
-    auto       CL = xCommandLine{
+    X_VAR xRuntimeEnvGuard(argc, argv, false);
+    auto  CL = xCommandLine{
         argc,
         argv,
-              {
+         {
             { 's', nullptr, "server_list_server", true },
         },
     };

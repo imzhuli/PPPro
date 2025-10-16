@@ -41,7 +41,7 @@ int main(int argc, char ** argv) {
         DumpLocalServerId(RuntimeEnv.DefaultLocalServerIdFilePath, ServerId);
         RegisterServerClient.SetLocalServerId(ServerId);
     };
-    RegisterServerClient.SetServerIdPoster(DSD_RegisterServer);
+    RegisterServerClient.ServerRegister = DSD_RegisterServer;
 
     while (ServiceRunState) {
         ServiceUpdateOnce(ClientSideService, ServerSideService, ServerIdClient, RegisterServerClient, RequestContextPool);
