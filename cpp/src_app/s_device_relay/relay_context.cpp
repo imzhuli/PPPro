@@ -11,7 +11,7 @@
 static xel::xIndexedStorage<xRL_RelayContext> RelayContextPool;
 static xRL_RelayContextTimeoutList            RelayContextIdleList;
 
-static_assert(xPP_PostConnectionData::MAX_PAYLOAD_SIZE == xPR_PushData::MAX_PAYLOAD_SIZE);
+static_assert(xPP_PostConnectionData::MAX_PAYLOAD_SIZE == xPR_PushTcpData::MAX_PAYLOAD_SIZE);
 
 void InitRelayContextPool() {
     RuntimeAssert(RelayContextPool.Init(MaxRelayContextCount));

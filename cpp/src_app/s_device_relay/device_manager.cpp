@@ -141,7 +141,7 @@ static bool OnDevicePostConnectionData(xDR_DeviceContext * PDC, ubyte * PayloadP
     }
 
     DEBUG_LOG("\n%s", HexShow(PP.PayloadView).c_str());
-    auto RPush               = xPR_PushData();
+    auto RPush               = xPR_PushTcpData();
     RPush.ProxySideContextId = PRC->ProxySideContextId;
     RPush.RelaySideContextId = PRC->RelaySideContextId;
     RPush.PayloadView        = PP.PayloadView;

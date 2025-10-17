@@ -1,5 +1,6 @@
 #pragma once
 #include "../lib_client/device_selector_client.hpp"
+#include "./client_udp_channel_manager.hpp"
 
 #include <pp_common/_.hpp>
 
@@ -16,6 +17,8 @@ enum xPA_ClientState {
     CS_S5_WAIT_FOR_TARGET_ADDRESS,       //
     CS_S5_WAIT_FOR_CONECTION_ESTABLISH,  //
     CS_S5_READY,                         //
+    CS_S5_WAIT_FOR_UDP_BINDING,          //
+    CS_S5_UDP_READY,                     //
 
     CS_H_CHALLENGE,                     // http proxy
     CS_H_WAIT_FOR_AUTH_RESULT,          //
@@ -65,6 +68,7 @@ struct xPA_ClientConnection
     uint64_t DeviceRelayServerRuntimeId = 0;
     uint64_t DeviceRelaySideId          = 0;
     uint64_t RelaySideContextId         = 0;
+    uint64_t UdpChannelId               = 0;
 
     struct {
         std::string RequestHeader;
@@ -100,11 +104,12 @@ extern size_t OnPAC_Challenge(xPA_ClientConnection * CC, ubyte * DP, size_t DS);
 extern size_t OnPAC_S5_Challenge(xPA_ClientConnection * CC, ubyte * DP, size_t DS);
 extern size_t OnPAC_S5_AuthInfo(xPA_ClientConnection * CC, ubyte * DP, size_t DS);
 extern size_t OnPAC_S5_TargetAddress(xPA_ClientConnection * CC, ubyte * DP, size_t DS);
-extern size_t OnPAC_S5_UploadData(xPA_ClientConnection * CC, ubyte * DP, size_t DS);
+extern size_t OnPAC_S5_UploadTcpData(xPA_ClientConnection * CC, ubyte * DP, size_t DS);
 // s5-internal
 extern void OnPAC_S5_AuthResult(xPA_ClientConnection * CC, const xClientAuthResult * AR);
 extern void OnPAC_S5_DeviceResult(xPA_ClientConnection * CC, const xDeviceSelectorResult & Result);
 extern void OnPAC_S5_ConnectionResult(xPA_ClientConnection * CC, uint64_t RelaySideContextId);
+extern void ONPAC_S5_UploadUdpData(xPA_ClientConnection * CC, const xNetAddress TargetAddress, ubyte * DP, size_t DS);
 
 // hn-client
 extern size_t OnPAC_H_Challenge(xPA_ClientConnection * CC, ubyte * DP, size_t DS);

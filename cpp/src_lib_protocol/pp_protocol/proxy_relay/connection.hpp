@@ -43,16 +43,61 @@ public:
     uint64_t TotalBytesFromClient = 0;
 };
 
-class xPR_PushData : public xBinaryMessage {
+class xPR_PushTcpData : public xBinaryMessage {
 public:
     void SerializeMembers() override { W(ProxySideContextId, RelaySideContextId, PayloadView); }
     void DeserializeMembers() override { R(ProxySideContextId, RelaySideContextId, PayloadView); }
 
-public:
     uint64_t         ProxySideContextId;
     uint64_t         RelaySideContextId;
     std::string_view PayloadView;
 
     static constexpr const size_t MAX_PAYLOAD_SIZE = 4096;
     static_assert(MAX_PAYLOAD_SIZE <= MaxPacketPayloadSize - 32);
+};
+
+struct xPR_CreateUdpBinding : xBinaryMessage {
+
+    void SerializeMembers() override { W(RelayServerSideDeviceId, ProxySideContextId); }
+    void DeserializeMembers() override { R(RelayServerSideDeviceId, ProxySideContextId); }
+
+    uint64_t RelayServerSideDeviceId;
+    uint64_t ProxySideContextId;
+
+    //
+};
+
+struct xPR_KeepAliveUdpBinding : xBinaryMessage {
+
+    void SerializeMembers() override { W(ProxySideContextId, RelaySideContextId); }
+    void DeserializeMembers() override { R(ProxySideContextId, RelaySideContextId); }
+
+    uint64_t ProxySideContextId;
+    uint64_t RelaySideContextId;
+
+    //
+};
+
+struct xPR_DestroyUdpBinding : xBinaryMessage {
+
+    void SerializeMembers() override { W(ProxySideContextId, RelaySideContextId); }
+    void DeserializeMembers() override { R(ProxySideContextId, RelaySideContextId); }
+
+    uint64_t ProxySideContextId;
+    uint64_t RelaySideContextId;
+};
+
+struct xPR_PushUdpData : xBinaryMessage {
+
+public:
+    void SerializeMembers() override { W(ProxySideContextId, RelaySideContextId, TargetAddress, PayloadView); }
+    void DeserializeMembers() override { R(ProxySideContextId, RelaySideContextId, TargetAddress, PayloadView); }
+
+    uint64_t         ProxySideContextId;
+    uint64_t         RelaySideContextId;
+    xNetAddress      TargetAddress;
+    std::string_view PayloadView;
+
+    static constexpr const size_t MAX_PAYLOAD_SIZE = 4096;
+    static_assert(MAX_PAYLOAD_SIZE <= MaxPacketPayloadSize - 128);
 };

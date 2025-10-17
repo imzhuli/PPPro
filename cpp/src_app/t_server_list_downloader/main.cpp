@@ -1,4 +1,5 @@
 #include "../lib_server_list/audit_account_server_list_downloader.hpp"
+#include "../lib_server_list/audit_target_server_list_downloader.hpp"
 #include "../lib_server_list/auth_cache_server_list_downloader.hpp"
 #include "../lib_server_list/backend_server_list_downloader.hpp"
 #include "../lib_server_list/device_selector_dispatcher_list_downloader.hpp"
@@ -11,6 +12,7 @@
 static auto ServerListDownloadAddress = xNetAddress();
 static auto AADownloader              = xAuditAccountServerListDownloader();
 static auto ACDownloader              = xAuthCacheServerListDownloader();
+static auto ATDownlolader             = xAuditTargetServerListDownloader();
 static auto DSRDownloader             = xDeviceStateRelayServerListDownloader();
 static auto DSDDownloader             = xDeviceSelectorDispatcherServerListDownloader();
 static auto BSDownloader              = xBackendServerListDownloader();
@@ -44,6 +46,17 @@ int main(int argc, char ** argv) {
     ACDownloader.OnUpdateAuthCacheServerListCallback = [](uint32_t Version, const std::vector<xServerInfo> & ServerList) {
         auto OS = std::ostringstream();
         OS << "updated auth cache server list: version=" << Version << endl;
+        for (auto S : ServerList) {
+            OS << "ServerId: " << S.ServerId << endl;
+            OS << "ServerAddress: " << S.Address.ToString() << endl;
+        }
+        Logger->D("%s", OS.str().c_str());
+    };
+
+    X_GUARD(ATDownlolader, ServiceIoContext, ServerListDownloadAddress);
+    ATDownlolader.OnUpdateAuditTargetServerListCallback = [](uint32_t Version, const std::vector<xServerInfo> & ServerList) {
+        auto OS = std::ostringstream();
+        OS << "updated audit target server list: version=" << Version << endl;
         for (auto S : ServerList) {
             OS << "ServerId: " << S.ServerId << endl;
             OS << "ServerAddress: " << S.Address.ToString() << endl;
@@ -88,6 +101,7 @@ int main(int argc, char ** argv) {
         ServiceUpdateOnce(
             AADownloader,   //
             ACDownloader,   //
+            ATDownlolader,  //
             DSRDownloader,  //
             RIO,            //
             DSDDownloader,  //

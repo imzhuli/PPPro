@@ -37,6 +37,16 @@ void xSL_InternalServerListManager::Tick(uint64_t NowMS) {
         Reset(AuditAccountServerInfoListDirty);
     }
 
+    if (AuditTargetServerInfoListDirty && (NowMS - AuditTargetServerInfoListVersionTimestampMS) > UPGRADE_VERSION_TIMEOUT_MS) {
+        Logger->I("Update VersionedAuditTargetServerInfoList");
+        if (!++AuditTargetServerInfoListVersion) {
+            ++AuditTargetServerInfoListVersion;
+        }
+        VersionedAuditTargetServerInfoList          = AuditTargetServerInfoList;
+        AuditTargetServerInfoListVersionTimestampMS = NowMS;
+        Reset(AuditTargetServerInfoListDirty);
+    }
+
     if (DeviceStateRelayServerInfoListDirty && (NowMS - DeviceStateRelayServerInfoListVersionTimestampMS) > UPGRADE_VERSION_TIMEOUT_MS) {
         Logger->I("Update VersionedDeviceStateRelayServerInfoListVersion");
         if (!++DeviceStateRelayServerInfoListVersion) {

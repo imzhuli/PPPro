@@ -5,13 +5,13 @@
 #include "./audit_account_server.hpp"
 #include "./auth_cache_server.hpp"
 #include "./client_manager.hpp"
+#include "./client_udp_channel_manager.hpp"
 #include "./device_selector_manager.hpp"
 #include "./relay_connection_manager.hpp"
 
 #include <pp_common/_.hpp>
 
 extern xNetAddress ConfigTcpBindAddress;
-extern xNetAddress ConfigUdpBindAddress;
 extern xNetAddress ConfigExportUdpServerAddress;
-
 extern xNetAddress ConfigServerListDownloadAddress;
+extern std::string ConfigUdpMapping;

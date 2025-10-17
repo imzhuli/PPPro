@@ -69,7 +69,7 @@ static bool OnProxyDestroyConnection(const xTcpServiceClientConnectionHandle & C
 }
 
 static bool OnProxyPushData(const xTcpServiceClientConnectionHandle & CC, ubyte * PayloadPtr, size_t PayloadSize) {
-    auto Request = xPR_PushData();
+    auto Request = xPR_PushTcpData();
     if (!Request.Deserialize(PayloadPtr, PayloadSize)) {
         Logger->E("invalid protocol");
         return false;

@@ -71,7 +71,7 @@ static bool OnConnectionStateChange(ubyte * PayloadPtr, size_t PayloadSize) {
 }
 
 static bool OnRelayPushConnectionData(ubyte * PayloadPtr, size_t PayloadSize) {
-    auto Push = xPR_PushData();
+    auto Push = xPR_PushTcpData();
     if (!Push.Deserialize(PayloadPtr, PayloadSize)) {
         DEBUG_LOG("invalid protocol");
         return false;
@@ -187,11 +187,11 @@ bool RequestRelayPostConnectionData(uint64_t ProxyConnectionId, uint64_t RelaySe
     auto DP       = (const ubyte *)DP_Input;
     auto Consumed = size_t();
     while (DS) {
-        auto MaxPushSize = std::min(DS, xPR_PushData::MAX_PAYLOAD_SIZE);
+        auto MaxPushSize = std::min(DS, xPR_PushTcpData::MAX_PAYLOAD_SIZE);
         if (!MaxPushSize) {
             break;
         }
-        auto P               = xPR_PushData();
+        auto P               = xPR_PushTcpData();
         P.ProxySideContextId = ProxyConnectionId;
         P.RelaySideContextId = RelaySideContextId;
         P.PayloadView        = std::string_view((const char *)DP, MaxPushSize);
@@ -205,4 +205,36 @@ bool RequestRelayPostConnectionData(uint64_t ProxyConnectionId, uint64_t RelaySe
         Consumed += MaxPushSize;
     }
     return true;
+}
+
+/////////// UDP
+
+bool RequestRelayUdpBinding(uint64_t ProxyConnectionId, uint64_t RelayServerId, uint64_t DeviceRelaySideId) {
+
+    auto Request                    = xPR_CreateUdpBinding();
+    Request.RelayServerSideDeviceId = DeviceRelaySideId;
+    Request.ProxySideContextId      = ProxyConnectionId;
+
+    return PostRelayMessage(RelayServerId, Cmd_PA_RL_CreateUdpBinding, 0, Request);
+}
+
+void RequestRelayKeepAliveUdpBinding(uint64_t ProxyConnectionId, uint64_t RelayServerId, uint64_t RelaySideContextId) {
+
+    auto Request               = xPR_KeepAliveUdpBinding();
+    Request.ProxySideContextId = ProxyConnectionId;
+    Request.RelaySideContextId = RelaySideContextId;
+
+    PostRelayMessage(RelayServerId, Cmd_PA_RL_KeepAliveUdpBinding, 0, Request);
+}
+
+void RequestRelayPostUdpData(uint64_t ProxyConnectionId, uint64_t RelayServerId, uint64_t RelaySideContextId, const xNetAddress TargetAddress, const void * DP, size_t DS) {
+    if (DS >= xPR_PushUdpData::MAX_PAYLOAD_SIZE) {
+        return;
+    }
+    auto P               = xPR_PushUdpData();
+    P.ProxySideContextId = ProxyConnectionId;
+    P.RelaySideContextId = RelaySideContextId;
+    P.TargetAddress      = TargetAddress;
+    P.PayloadView        = std::string_view((const char *)DP, DS);
+    PostRelayMessage(RelayServerId, Cmd_PA_RL_PostUdpData, 0, P);
 }

@@ -6,15 +6,16 @@ int main(int argc, char ** argv) {
     auto CL  = xConfigLoader(RuntimeEnv.DefaultConfigFilePath);
 
     CL.Require(ConfigTcpBindAddress, "TcpBindAddress");
-    CL.Require(ConfigUdpBindAddress, "UdpBindAddress");
     CL.Require(ConfigExportUdpServerAddress, "ExportUdpServerAddress");
     CL.Require(ConfigServerListDownloadAddress, "ServerListDownloadAddress");
+    CL.Optional(ConfigUdpMapping, "UdpMapping");
 
     X_SCOPE(InitClientManager, CleanClietManager);
     X_SCOPE(InitAuditAccountService, CleanAuditAccountService);
     X_SCOPE(InitAuthCacheLocalServer, CleanAuthCacheLocalServer);
     X_SCOPE(InitDeviceSelector, CleanDeviceSelector);
     X_SCOPE(InitRelayConnectionManager, CleanRelayConnectionManager);
+    X_SCOPE(InitUdpChannelManager, CleanUdpChanneManager);
 
     auto AATicker  = xTickRunner(TickAuditAccountService);
     auto CMTicker  = xTickRunner(TickClientManager);

@@ -170,7 +170,7 @@ size_t OnPAClientConnectionData(xPA_ClientConnection * CC, ubyte * DP, size_t DS
         case CS_S5_WAIT_FOR_TARGET_ADDRESS:
             return OnPAC_S5_TargetAddress(CC, DP, DS);
         case CS_S5_READY:
-            return OnPAC_S5_UploadData(CC, DP, DS);
+            return OnPAC_S5_UploadTcpData(CC, DP, DS);
 
         case CS_H_CHALLENGE:
             return OnPAC_H_Challenge(CC, DP, DS);

@@ -201,7 +201,7 @@ bool OnRegisterAuditTargetServer(const xTcpServiceClientConnectionHandle & Handl
     }
     TypeRef     = (uint32_t)eServerType::AUDIT_TARGET_CACHE;
     ServerIdRef = R.ServerId;
-    Logger->I("OnRegisterAuditTargetServer: ServerId=%" PRIi64 "", R.ServerId);
+    Logger->I("OnRegisterAuditTargetServer: ServerId=%" PRIi64 ", Address=%s", R.ServerId, R.Address.ToString().c_str());
     return true;
 }
 

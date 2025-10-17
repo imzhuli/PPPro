@@ -163,25 +163,31 @@ size_t OnPAC_S5_TargetAddress(xPA_ClientConnection * Client, ubyte * DataPtr, si
         return 0;
     }
 
-    DEBUG_LOG("TargetAddress: NA:%s, Host:%s", Address.ToString().c_str(), DomainName);
-    DEBUG_LOG("Selected device: %" PRIx64 "", Client->DeviceRelaySideId);
-
-    if (Address) {
-        RequestRelayTargetConnection(Client->ConnectionId, Client->DeviceRelayServerRuntimeId, Client->DeviceRelaySideId, Address);
-    } else {
-        RequestRelayTargetConnection(Client->ConnectionId, Client->DeviceRelayServerRuntimeId, Client->DeviceRelaySideId, DomainName, Address.Port);
+    if (Operation == 0x01) {  // tcp
+        DEBUG_LOG("TcpTargetAddress: NA:%s, Host:%s", Address.ToString().c_str(), DomainName);
+        DEBUG_LOG("Selected device: %" PRIx64 "", Client->DeviceRelaySideId);
+        if (Address) {
+            RequestRelayTargetConnection(Client->ConnectionId, Client->DeviceRelayServerRuntimeId, Client->DeviceRelaySideId, Address);
+        } else {
+            RequestRelayTargetConnection(Client->ConnectionId, Client->DeviceRelayServerRuntimeId, Client->DeviceRelaySideId, DomainName, Address.Port);
+        }
+        Client->State = CS_S5_WAIT_FOR_CONECTION_ESTABLISH;
+    } else if (Operation == 0x03) {  // udp
     }
-    Client->State = CS_S5_WAIT_FOR_CONECTION_ESTABLISH;
     return R.Offset();
 }
 
-size_t OnPAC_S5_UploadData(xPA_ClientConnection * CC, ubyte * DP, size_t DS) {
+size_t OnPAC_S5_UploadTcpData(xPA_ClientConnection * CC, ubyte * DP, size_t DS) {
     if (!RequestRelayPostConnectionData(CC->ConnectionId, CC->DeviceRelayServerRuntimeId, CC->RelaySideContextId, DP, DS)) {
         DEBUG_LOG("failed to post PushData message to relay");
         return InvalidDataSize;
     }
     KeepAlive(CC);
     return DS;
+}
+
+void ONPAC_S5_UploadUdpData(xPA_ClientConnection * CC, const xNetAddress TargetAddress, ubyte * DP, size_t DS) {
+    RequestRelayPostUdpData(CC->ConnectionId, CC->DeviceRelayServerRuntimeId, CC->RelaySideContextId, TargetAddress, DP, DS);
 }
 
 /////////////////// Passive event ///////////////////
