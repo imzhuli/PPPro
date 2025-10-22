@@ -4,7 +4,7 @@
 #include <pp_protocol/proxy_relay/connection.hpp>
 
 size_t OnPAC_S5_Challenge(xPA_ClientConnection * Client, ubyte * DP, size_t DataSize) {
-    assert(Client->State == CS_S5_CHALLENGE);
+    assert(Client->State == CS_S_CHALLENGE);
     if (DataSize < 3) {
         return 0;
     }
@@ -38,10 +38,10 @@ size_t OnPAC_S5_Challenge(xPA_ClientConnection * Client, ubyte * DP, size_t Data
         DEBUG_LOG("user pass requried");
         ubyte Socks5Auth[2] = { 0x05, 0x02 };
         Client->PostData(Socks5Auth, sizeof(Socks5Auth));
-        Client->State = CS_S5_WAIT_FOR_AUTH_INFO;
+        Client->State = CS_S_WAIT_FOR_AUTH_INFO;
     } else if (NoAuthSupport) {
         DEBUG_LOG("no auth s5");
-        Client->State = CS_S5_WAIT_FOR_AUTH_INFO;
+        Client->State = CS_S_WAIT_FOR_AUTH_INFO;
         // ubyte Socks5NoAuthAccepted[2] = { 0x05, 0x00 };
         // Client->PostData(Socks5Auth, sizeof(Socks5NoAuthAccepted));
     } else {
@@ -96,7 +96,7 @@ size_t OnPAC_S5_AuthInfo(xPA_ClientConnection * Client, ubyte * DataPtr, size_t 
         Client->PostData("\x01\x01", 2);
         SchedulePassiveKillClientConnection(Client);
     } else {
-        Client->State = CS_S5_WAIT_FOR_AUTH_RESULT;
+        Client->State = CS_S_WAIT_FOR_AUTH_RESULT;
     }
     return R.Offset();
 }
@@ -171,8 +171,11 @@ size_t OnPAC_S5_TargetAddress(xPA_ClientConnection * Client, ubyte * DataPtr, si
         } else {
             RequestRelayTargetConnection(Client->ConnectionId, Client->DeviceRelayServerRuntimeId, Client->DeviceRelaySideId, DomainName, Address.Port);
         }
-        Client->State = CS_S5_WAIT_FOR_CONECTION_ESTABLISH;
+        Client->State = CS_S_WAIT_FOR_CONECTION_ESTABLISH;
     } else if (Operation == 0x03) {  // udp
+        DEBUG_LOG("UdpBinding: ");
+        RequestRelayUdpBinding(Client->ConnectionId, Client->DeviceRelayServerRuntimeId, Client->DeviceRelaySideId);
+        Client->State = CS_S_WAIT_FOR_UDP_BINDING;
     }
     return R.Offset();
 }
@@ -224,7 +227,7 @@ void OnPAC_S5_AuthResult(xPA_ClientConnection * CC, const xClientAuthResult * AR
         SchedulePassiveKillClientConnection(CC);
         return;
     }
-    CC->State = CS_S5_WAIT_FOR_DEVICE_RESULT;
+    CC->State = CS_S_WAIT_FOR_DEVICE_RESULT;
 }
 
 void OnPAC_S5_DeviceResult(xPA_ClientConnection * CC, const xDeviceSelectorResult & Result) {
@@ -236,7 +239,7 @@ void OnPAC_S5_DeviceResult(xPA_ClientConnection * CC, const xDeviceSelectorResul
 
     CC->DeviceRelayServerRuntimeId = Result.DeviceRelayServerRuntimeId;
     CC->DeviceRelaySideId          = Result.DeviceRelaySideId;
-    CC->State                      = CS_S5_WAIT_FOR_TARGET_ADDRESS;
+    CC->State                      = CS_S_WAIT_FOR_TARGET_ADDRESS;
 
     CC->PostData("\x01\x00", 2);
 }
@@ -264,6 +267,6 @@ void OnPAC_S5_ConnectionResult(xPA_ClientConnection * CC, uint64_t RelaySideCont
     };
     CC->PostData(ReadyReply, sizeof(ReadyReply));
     CC->RelaySideContextId = RelaySideContextId;
-    CC->State              = CS_S5_READY;
+    CC->State              = CS_S_READY;
     KeepAlive(CC);
 }

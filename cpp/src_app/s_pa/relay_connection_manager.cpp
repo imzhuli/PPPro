@@ -50,7 +50,7 @@ static bool OnConnectionStateChange(ubyte * PayloadPtr, size_t PayloadSize) {
 
     switch (CC->State) {
 
-        case CS_S5_WAIT_FOR_CONECTION_ESTABLISH:
+        case CS_S_WAIT_FOR_CONECTION_ESTABLISH:
             OnPAC_S5_ConnectionResult(CC, Notify.RelaySideContextId);
             break;
 

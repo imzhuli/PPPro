@@ -1,6 +1,5 @@
 #pragma once
 #include "../lib_client/device_selector_client.hpp"
-#include "./client_udp_channel_manager.hpp"
 
 #include <pp_common/_.hpp>
 
@@ -10,15 +9,15 @@ enum xPA_ClientState {
     CS_CHALLENGE,  // challenge, protocol unknown
     CS_KILL_ON_FLUSH,
 
-    CS_S5_CHALLENGE,                     // s5 challenge
-    CS_S5_WAIT_FOR_AUTH_INFO,            // wait for auth info
-    CS_S5_WAIT_FOR_AUTH_RESULT,          //
-    CS_S5_WAIT_FOR_DEVICE_RESULT,        //
-    CS_S5_WAIT_FOR_TARGET_ADDRESS,       //
-    CS_S5_WAIT_FOR_CONECTION_ESTABLISH,  //
-    CS_S5_READY,                         //
-    CS_S5_WAIT_FOR_UDP_BINDING,          //
-    CS_S5_UDP_READY,                     //
+    CS_S_CHALLENGE,                     // s5 challenge
+    CS_S_WAIT_FOR_AUTH_INFO,            // wait for auth info
+    CS_S_WAIT_FOR_AUTH_RESULT,          //
+    CS_S_WAIT_FOR_DEVICE_RESULT,        //
+    CS_S_WAIT_FOR_TARGET_ADDRESS,       //
+    CS_S_WAIT_FOR_CONECTION_ESTABLISH,  //
+    CS_S_READY,                         //
+    CS_S_WAIT_FOR_UDP_BINDING,          //
+    CS_S_UDP_READY,                     //
 
     CS_H_CHALLENGE,                     // http proxy
     CS_H_WAIT_FOR_AUTH_RESULT,          //

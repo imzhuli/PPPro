@@ -139,9 +139,9 @@ void OnPAClientConnectionAccepted(xPA_ClientConnection * CC) {
 
 void OnPAClientConnectionPeerClose(xPA_ClientConnection * CC) {
     switch (CC->State) {
-        case CS_S5_READY:  // pass-through
-        case CS_H_READY:   // pass-through
-        case CS_T_READY:   // pass-through
+        case CS_S_READY:  // pass-through
+        case CS_H_READY:  // pass-through
+        case CS_T_READY:  // pass-through
             RequestRelayCloseConnection(CC->ConnectionId, CC->DeviceRelayServerRuntimeId, CC->RelaySideContextId);
             break;
 
@@ -163,13 +163,13 @@ size_t OnPAClientConnectionData(xPA_ClientConnection * CC, ubyte * DP, size_t DS
     switch (CC->State) {
         case CS_CHALLENGE:
             return OnPAC_Challenge(CC, DP, DS);
-        case CS_S5_CHALLENGE:
+        case CS_S_CHALLENGE:
             return OnPAC_S5_Challenge(CC, DP, DS);
-        case CS_S5_WAIT_FOR_AUTH_INFO:
+        case CS_S_WAIT_FOR_AUTH_INFO:
             return OnPAC_S5_AuthInfo(CC, DP, DS);
-        case CS_S5_WAIT_FOR_TARGET_ADDRESS:
+        case CS_S_WAIT_FOR_TARGET_ADDRESS:
             return OnPAC_S5_TargetAddress(CC, DP, DS);
-        case CS_S5_READY:
+        case CS_S_READY:
             return OnPAC_S5_UploadTcpData(CC, DP, DS);
 
         case CS_H_CHALLENGE:
@@ -191,7 +191,7 @@ size_t OnPAClientConnectionData(xPA_ClientConnection * CC, ubyte * DP, size_t DS
 
 size_t OnPAC_Challenge(xPA_ClientConnection * CC, ubyte * DP, size_t DS) {
     if (DP[0] == '\x05') {
-        CC->State = CS_S5_CHALLENGE;
+        CC->State = CS_S_CHALLENGE;
         return OnPAC_S5_Challenge(CC, DP, DS);
     }
     if (DP[0] == 'C') {
@@ -210,22 +210,8 @@ void OnPAC_AuthResult(uint64_t ConnectionId, const xClientAuthResult * AR) {
         return;
     }
 
-    do {
-        auto OS = std::ostringstream();
-        OS << "AuditId: " << AR->AuditId << " ";
-        OS << "CountryId: " << AR->CountryId << " ";
-        OS << "StateId: " << AR->StateId << " ";
-        OS << "RequireIpv6: " << AR->RequireIpv6 << " ";
-        OS << "RequireUdp: " << AR->RequireUdp << " ";
-        OS << "AlwaysChangeIp: " << AR->AlwaysChangeIp << " ";
-        OS << "PersistentDeviceBinding: " << AR->PersistentDeviceBinding << " ";
-        OS << "PAToken: " << AR->PAToken << " ";
-        OS << "ThirdRedirect: " << AR->ThirdRedirect << " ";
-        DEBUG_LOG("%s", OS.str().c_str());
-    } while (false);
-
     switch (CC->State) {
-        case CS_S5_WAIT_FOR_AUTH_RESULT:
+        case CS_S_WAIT_FOR_AUTH_RESULT:
             OnPAC_S5_AuthResult(CC, AR);
             break;
         case CS_H_WAIT_FOR_AUTH_RESULT:
@@ -250,7 +236,7 @@ void OnPAC_DeviceSelectResult(uint64_t ConnectionId, const xDeviceSelectorResult
     }
 
     switch (CC->State) {
-        case CS_S5_WAIT_FOR_DEVICE_RESULT:
+        case CS_S_WAIT_FOR_DEVICE_RESULT:
             OnPAC_S5_DeviceResult(CC, Result);
             break;
         case CS_H_WAIT_FOR_DEVICE_RESULT:
