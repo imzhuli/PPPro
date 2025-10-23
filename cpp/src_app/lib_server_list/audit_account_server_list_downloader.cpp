@@ -34,8 +34,6 @@ bool xAuditAccountServerListDownloader::OnServerPacket(xPacketCommandId CommandI
 
 bool xAuditAccountServerListDownloader::OnAuditAccountServerList(xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) {
 
-    // DEBUG_LOG("%s", HexShow(PayloadPtr, PayloadSize).c_str());
-
     auto R = xPP_DownloadAuditAccountServerListResp();
     if (!R.Deserialize(PayloadPtr, PayloadSize)) {
         return false;

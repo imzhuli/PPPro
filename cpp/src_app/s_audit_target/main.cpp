@@ -11,7 +11,7 @@ static auto ExportAddress4 = xNetAddress();
 static auto ServerIdCenterAddress     = xNetAddress();
 static auto ServerListRegisterAddress = xNetAddress();
 
-static void AA_RegisterServer(const xMessageChannel & Poster, uint64_t LocalServerId) {
+static void AT_RegisterServer(const xMessageChannel & Poster, uint64_t LocalServerId) {
     auto Req     = xPP_RegisterAuditTargetServer();
     Req.ServerId = LocalServerId;
     Req.Address  = ExportAddress4;
@@ -19,7 +19,7 @@ static void AA_RegisterServer(const xMessageChannel & Poster, uint64_t LocalServ
     Poster.PostMessage(Cmd_RegisterAuditTargetServer, 0, Req);
 }
 
-static auto AAService = xTcpService();
+static auto ATService = xTcpService();
 
 int main(int argc, char ** argv) {
     X_VAR xRuntimeEnvGuard(argc, argv);
@@ -33,7 +33,7 @@ int main(int argc, char ** argv) {
     X_GUARD(ServerIdClient, ServiceIoContext, ServerIdCenterAddress, RuntimeEnv.DefaultLocalServerIdFilePath);
     X_GUARD(RegisterServerClient, ServiceIoContext, ServerListRegisterAddress);
 
-    RegisterServerClient.ServerRegister     = AA_RegisterServer;
+    RegisterServerClient.ServerRegister     = AT_RegisterServer;
     ServerIdClient.OnServerIdUpdateCallback = [](auto ServerId) {
         DumpLocalServerId(RuntimeEnv.DefaultLocalServerIdFilePath, ServerId);
         RegisterServerClient.SetLocalServerId(ServerId);

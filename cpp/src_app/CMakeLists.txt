@@ -69,7 +69,7 @@ set(target_list
 	s_relay_info_dispatcher
 	s_device_relay
 
-	# s_audit_account	
+	s_audit_account
 	s_audit_target
 
 	s_auth_cache
@@ -98,8 +98,8 @@ foreach(item IN LISTS target_list)
 endforeach()
 
 set(LIBRDKAFKA_LIBRARIES librdkafka++.a librdkafka-static.a libssl.a libcrypto.a)
+target_link_libraries(s_audit_account PRIVATE ${LIBRDKAFKA_LIBRARIES})
 target_link_libraries(r_device_audit_to_backend PRIVATE ${LIBRDKAFKA_LIBRARIES})
-# target_link_libraries(s_audit_account PRIVATE ${LIBRDKAFKA_LIBRARIES})
 
 install(TARGETS
 	${target_list}

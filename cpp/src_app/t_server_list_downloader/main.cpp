@@ -10,14 +10,24 @@
 #include "./file_dump.hpp"
 
 static auto ServerListDownloadAddress = xNetAddress();
-static auto AADownloader              = xAuditAccountServerListDownloader();
-static auto ACDownloader              = xAuthCacheServerListDownloader();
-static auto ATDownlolader             = xAuditTargetServerListDownloader();
-static auto DSRDownloader             = xDeviceStateRelayServerListDownloader();
-static auto DSDDownloader             = xDeviceSelectorDispatcherServerListDownloader();
-static auto BSDownloader              = xBackendServerListDownloader();
 
-static auto RIO = xRelayInfoObserver();
+static auto AADownloader = xAuditAccountServerListDownloader();
+static auto AAReady      = false;
+
+static auto ACDownloader = xAuthCacheServerListDownloader();
+static auto ACReady      = false;
+
+static auto ATDownlolader = xAuditTargetServerListDownloader();
+static auto ATReady       = false;
+
+static auto DSRDownloader = xDeviceStateRelayServerListDownloader();
+static auto DSRReady      = false;
+
+static auto DSDDownloader = xDeviceSelectorDispatcherServerListDownloader();
+static auto DSDReady      = false;
+
+static auto BSDownloader = xBackendServerListDownloader();
+static auto BSDReady     = false;
 
 int main(int argc, char ** argv) {
 
@@ -25,88 +35,109 @@ int main(int argc, char ** argv) {
     auto CL  = xConfigLoader(RuntimeEnv.DefaultConfigFilePath);
 
     CL.Require(ServerListDownloadAddress, "ServerListDownloadAddress");
-    Logger->D("DownloadAddress: %s", ServerListDownloadAddress.ToString().c_str());
-
-    X_GUARD(RIO, ServiceIoContext, ServerListDownloadAddress);
-    RIO.OnNewDeviceRelayInfoCallback    = [](const xRIO_RelayServerInfoContext & Info) { Logger->D("new device relay: %s", Info.ToString().c_str()); };
-    RIO.OnRemoveDeviceRelayInfoCallback = [](const xRIO_RelayServerInfoContext & Info) { Logger->D("remove device relay: %s", Info.ToString().c_str()); };
+    printf("DownloadAddress: %s", ServerListDownloadAddress.ToString().c_str());
 
     X_GUARD(AADownloader, ServiceIoContext, ServerListDownloadAddress);
     AADownloader.OnUpdateAuditAccountServerListCallback = [](uint32_t Version, const std::vector<xServerInfo> & ServerList) {
+        if (Steal(AAReady, true)) {
+            return;
+        }
         auto OS = std::ostringstream();
         OS << "updated audit account server list: version=" << Version << endl;
         for (auto S : ServerList) {
             OS << "ServerId: " << S.ServerId << endl;
             OS << "ServerAddress: " << S.Address.ToString() << endl;
         }
-        Logger->D("%s", OS.str().c_str());
+        cout << OS.str() << endl;
     };
 
     X_GUARD(ACDownloader, ServiceIoContext, ServerListDownloadAddress);
     ACDownloader.OnUpdateAuthCacheServerListCallback = [](uint32_t Version, const std::vector<xServerInfo> & ServerList) {
+        if (Steal(ACReady, true)) {
+            return;
+        }
         auto OS = std::ostringstream();
         OS << "updated auth cache server list: version=" << Version << endl;
         for (auto S : ServerList) {
             OS << "ServerId: " << S.ServerId << endl;
             OS << "ServerAddress: " << S.Address.ToString() << endl;
         }
-        Logger->D("%s", OS.str().c_str());
+        cout << OS.str() << endl;
     };
 
     X_GUARD(ATDownlolader, ServiceIoContext, ServerListDownloadAddress);
     ATDownlolader.OnUpdateAuditTargetServerListCallback = [](uint32_t Version, const std::vector<xServerInfo> & ServerList) {
+        if (Steal(ATReady, true)) {
+            return;
+        }
         auto OS = std::ostringstream();
         OS << "updated audit target server list: version=" << Version << endl;
         for (auto S : ServerList) {
             OS << "ServerId: " << S.ServerId << endl;
             OS << "ServerAddress: " << S.Address.ToString() << endl;
         }
-        Logger->D("%s", OS.str().c_str());
+        cout << OS.str() << endl;
     };
 
     X_GUARD(DSRDownloader, ServiceIoContext, ServerListDownloadAddress);
     DSRDownloader.OnUpdateDeviceStateRelayServerListCallback = [](uint32_t Version, const std::vector<xDeviceStateRelayServerInfo> & ServerList) {
+        if (Steal(DSRReady, true)) {
+            return;
+        }
         auto OS = std::ostringstream();
         OS << "updated device state relay server list: version=" << Version << endl;
         for (auto S : ServerList) {
             OS << "ServerId: " << S.ServerId << endl;
             OS << "ServerAddress: P:" << S.ProducerAddress.ToString() << ", O: " << S.ObserverAddress.ToString() << endl;
         }
-        Logger->D("%s", OS.str().c_str());
+        cout << OS.str() << endl;
     };
 
     X_GUARD(DSDDownloader, ServiceIoContext, ServerListDownloadAddress);
     DSDDownloader.OnUpdateDeviceSelectorDispatcherServerListCallback = [](uint32_t Version, const std::vector<xDeviceSelectorDispatcherInfo> & SL) {
+        if (Steal(DSDReady, true)) {
+            return;
+        }
         auto OS = std::ostringstream();
         OS << "updated device selector dispatcher server: version=" << Version << endl;
         for (auto & S : SL) {
             OS << "ServerId: " << S.ServerId << endl;
             OS << "ServerAddress: P:" << S.ExportAddressForClient.ToString() << ", O: " << S.ExportAddressForServiceProvider.ToString() << endl;
         }
-        Logger->D("%s", OS.str().c_str());
+        cout << OS.str() << endl;
     };
 
     X_GUARD(BSDownloader, ServiceIoContext, ServerListDownloadAddress);
     BSDownloader.OnUpdateCallback = [](uint32_t Version, const std::vector<xNetAddress> & FullList, const std::vector<xNetAddress> & Added,
                                        const std::vector<xNetAddress> & Removed) {
+        if (Steal(BSDReady, true)) {
+            return;
+        }
         auto OS = std::ostringstream();
         OS << "updated backend server list, version=" << Version << endl;
         for (auto & S : FullList) {
             OS << "Address: " << S.ToString() << endl;
         }
-        Logger->D("%s", OS.str().c_str());
+        cout << OS.str() << endl;
     };
 
-    while (ServiceRunState) {
+    auto Timeout = xTimer();
+    while (Timeout.Elapsed() < 5s && ServiceRunState && !(AAReady && ACReady && ATReady && DSRReady && DSDReady && BSDReady)) {
         ServiceUpdateOnce(
             AADownloader,   //
             ACDownloader,   //
             ATDownlolader,  //
             DSRDownloader,  //
-            RIO,            //
             DSDDownloader,  //
             BSDownloader,   //
             DeadTicker
         );
     }
+
+    cout << "AAReady = " << YN(AAReady) << endl;
+    cout << "ACReady = " << YN(ACReady) << endl;
+    cout << "ATReady = " << YN(ATReady) << endl;
+    cout << "DSRReady = " << YN(DSRReady) << endl;
+    cout << "DSDReady = " << YN(DSDReady) << endl;
+    cout << "BSDReady = " << YN(BSDReady) << endl;
 }

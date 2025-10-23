@@ -87,6 +87,13 @@ bool OnProxyPacket(const xTcpServiceClientConnectionHandle & CC, xPacketCommandI
             return OnProxyPushData(CC, PayloadPtr, PayloadSize);
         case Cmd_PA_RL_DestroyConnection:
             return OnProxyDestroyConnection(CC, PayloadPtr, PayloadSize);
+        case Cmd_PA_RL_CreateUdpBinding:
+        case Cmd_PA_RL_DestroyUdpBinding:
+        case Cmd_DV_RL_KeepAliveUdpChannel:
+        case Cmd_DV_RL_PostUdpChannelData:
+            Todo("");
+            break;
+
         default:
             break;
     }

@@ -315,11 +315,15 @@ struct xClientAuthResult {
 };
 
 struct xAuditAccountInfo {
-    uint64_t AuditId           = {};
-    uint64_t TotalUploadSize   = {};
-    uint64_t TotalDownloadSize = {};
-    uint64_t TotalTcpCount     = {};
-    uint64_t TotalUdpCount     = {};
+    uint64_t AuditId = {};
+
+    uint64_t TotalTcpCount        = {};
+    uint64_t TotalTcpUploadSize   = {};
+    uint64_t TotalTcpDownloadSize = {};
+
+    uint64_t TotalUdpCount        = {};
+    uint64_t TotalUdpUploadSize   = {};
+    uint64_t TotalUdpDownloadSize = {};
 };
 
 struct xMessageChannel {
