@@ -189,14 +189,14 @@ size_t OnPAC_S5_UploadTcpData(xPA_ClientConnection * CC, ubyte * DP, size_t DS) 
     return DS;
 }
 
-void ONPAC_S5_UploadUdpData(xPA_ClientConnection * CC, const xNetAddress TargetAddress, ubyte * DP, size_t DS) {
+void OnPAC_S5_UploadUdpData(xPA_ClientConnection * CC, const xNetAddress TargetAddress, ubyte * DP, size_t DS) {
     RequestRelayPostUdpData(CC->ConnectionId, CC->DeviceRelayServerRuntimeId, CC->RelaySideContextId, TargetAddress, DP, DS);
 }
 
 /////////////////// Passive event ///////////////////
 
 void OnPAC_S5_AuthResult(xPA_ClientConnection * CC, const xClientAuthResult * AR) {
-    if (!AR) {
+    if (!AR || !AR->AuditId) {
         CC->PostData("\x01\x01", 2);
         SchedulePassiveKillClientConnection(CC);
         return;

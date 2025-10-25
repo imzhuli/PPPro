@@ -339,11 +339,27 @@ constexpr const struct final {
 } DeadTicker;
 
 namespace __pp_common_detail__ {
+
+    template <typename T>
+    inline std::enable_if_t<std::is_function_v<T>> __TickOne__(uint64_t NowMS, T * F) {
+        (*F)(NowMS);
+    }
+
+    template <typename T>
+    inline std::enable_if_t<std::is_function_v<T>> __TickOne__(uint64_t NowMS, T & F) {
+        F(NowMS);
+    }
+
+    template <typename T>
+    inline std::enable_if_t<std::is_object_v<T>> __TickOne__(uint64_t NowMS, T & FO) {
+        FO.Tick(NowMS);
+    }
+
     inline void __TickAll__(uint64_t) {  // iteration finishes here
     }
     template <typename T, typename... TOthers>
     inline void __TickAll__(uint64_t NowMS, T && First, TOthers &&... Others) {
-        std::forward<T>(First).Tick(NowMS);
+        __TickOne__(NowMS, std::forward<T>(First));
         __TickAll__(NowMS, std::forward<TOthers>(Others)...);
     }
 
@@ -353,24 +369,6 @@ template <typename... T>
 inline void TickAll(uint64_t NowMS, T &&... All) {
     __pp_common_detail__::__TickAll__(NowMS, std::forward<T>(All)...);
 }
-
-template <typename T>
-class xSingleton {
-    static std::atomic<xSingleton *> InstnacePtr;
-
-protected:
-    inline xSingleton() {
-        xSingleton * Expected = nullptr;
-        RuntimeAssert(InstnacePtr.compare_exchange_strong(Expected, this), "mutiple instance of singlton type");
-    }
-    inline ~xSingleton() {
-        xSingleton * Expected = this;
-        RuntimeAssert(InstnacePtr.compare_exchange_strong(Expected, nullptr), "mutiple instance destroyed of singlton type");
-    }
-    inline xSingleton(xSingleton &&) = delete;
-};
-template <typename T>
-std::atomic<xSingleton<T> *> xSingleton<T>::InstnacePtr = nullptr;
 
 // clang-format off
 

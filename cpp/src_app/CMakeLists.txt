@@ -75,6 +75,7 @@ set(target_list
 	s_auth_cache
 
 	s_pa
+	s_pa_sub
 	s_config_center
 
 	s_device_selector
