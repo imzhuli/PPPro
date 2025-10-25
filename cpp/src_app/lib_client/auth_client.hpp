@@ -20,6 +20,7 @@ public:
 
     bool HasValidBackend() { return CPWConnections; }
     bool Request(uint64_t SourceRequestId, const std::string_view & UserPassword);
+    bool Request(uint64_t SourceRequestId, const std::string_view & UserPassword, const std::string_view & ClientIp);
 
     // callback types
     using xOnEnabled                 = std::function<void()>;

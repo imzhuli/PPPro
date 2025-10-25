@@ -19,7 +19,7 @@ static void ParseIpAuthConfig() {
         Logger->E("Invalid ExportTcpBindAddress");
         QuickExit();
     }
-    ConfigExportTcpBindAddress = TA.ToString();  // normalization
+    ConfigExportTcpBindAddress = "P_" + TA.ToString() + "\x03";  // normalization
 }
 
 static void ParseUdpMappingConfig() {

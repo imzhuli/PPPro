@@ -16,8 +16,16 @@ bool xAC_AuthService::Init(xIoContext * ICP, const xNetAddress & BindAddress) {
     CacheManager.AsyncQueryProcedure = [this](uint64_t CacheNodeId, const std::string & Key) {
         DEBUG_LOG("Request: %s", Key.c_str());
 
-        auto T     = xPPB_BackendAuthByUserPass();
-        T.UserPass = Key;
+        auto T    = xPPB_BackendAuthByUserPass();
+        auto Segs = Split(Key, "\x03");
+        if (Segs.size() == 2) {
+            T.UserPass = Segs[0];
+            T.ClientIp = xNetAddress::Parse(Segs[1]);
+            DEBUG_LOG("Query: %s client-ip=%s", Segs[0].c_str(), T.ClientIp.ToString().c_str());
+        } else {
+            T.UserPass = Key;
+            DEBUG_LOG("Query: %s", Key.c_str());
+        }
         BackendPool.PostMessage(Cmd_BackendAuthByUserPass, CacheNodeId, T);
         return true;
     };
@@ -81,8 +89,6 @@ void xAC_AuthService::Tick(uint64_t NowMS) {
 bool xAC_AuthService::OnClientPacket(
     const xTcpServiceClientConnectionHandle & Handle, xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize
 ) {
-    DEBUG_LOG("%" PRIx64 ":%" PRIx64 ", \n%s", CommandId, RequestId, HexShow(PayloadPtr, PayloadSize).c_str());
-
     if (CommandId != Cmd_AuthService_QueryAuthCache) {
         DEBUG_LOG("Invalid command id");
         return true;
@@ -117,9 +123,6 @@ void xAC_AuthService::OnBackendPacket(xPacketCommandId CommandId, xPacketRequest
 }
 
 void xAC_AuthService::OnCmdAuthByUserPassResp(xPacketCommandId CommandId, xPacketRequestId RequestId, ubyte * PayloadPtr, size_t PayloadSize) {
-
-    DEBUG_LOG("%s", HexShow(PayloadPtr, PayloadSize).c_str());
-
     auto P = xPPB_BackendAuthByUserPassResp();
     if (!P.Deserialize(PayloadPtr, PayloadSize)) {
         DEBUG_LOG("invalid protocol");

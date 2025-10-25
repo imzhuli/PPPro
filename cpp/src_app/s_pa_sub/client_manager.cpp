@@ -134,8 +134,9 @@ std::string BuildIpAuthInfo(xPA_ClientConnection * ClientConnection) {
     if (!ClientAddress) {
         return {};
     }
-    auto IpAuthString = "P_" + ConfigExportTcpBindAddress + "_" + ClientAddress.IpToString();
-    DEBUG_LOG("IpAuthString=%s", IpAuthString.c_str());
+    auto ClientIpString = ClientAddress.IpToString();
+    auto IpAuthString   = ConfigExportTcpBindAddress + ClientIpString;
+    DEBUG_LOG("IpAuthString ClientIp=%s", ClientIpString.c_str());
     return IpAuthString;
 }
 

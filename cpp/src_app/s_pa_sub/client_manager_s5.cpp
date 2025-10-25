@@ -227,8 +227,10 @@ static void PostS5AuthFailed(xPA_ClientConnection * CC) {
 }
 
 void OnPAC_S_AuthResult(xPA_ClientConnection * CC, const xClientAuthResult * AR) {
+
     RuntimeAssert(CC->State.S == ePA_ClientSubState::WAIT_FOR_AUTH_RESULT);
     if (!AR) {
+        DEBUG_LOG("ConnectionId=%" PRIx64 ", No AR Found", CC->ConnectionId);
         PostS5AuthFailed(CC);
         return;
     }

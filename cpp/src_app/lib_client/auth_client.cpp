@@ -99,3 +99,25 @@ bool xAuthClient::Request(uint64_t SourceRequestId, const std::string_view & Use
     CPW.PostMessageByHash(H, Cmd_AuthService_QueryAuthCache, RID, T);
     return true;
 }
+
+bool xAuthClient::Request(uint64_t SourceRequestId, const std::string_view & UserPassword, const std::string_view & ClientIp) {
+    if (!CPWConnections) {
+        return false;
+    }
+    auto RID = RequestPool.Acquire();
+    if (!RID) {
+        return false;
+    }
+    auto & R           = RequestPool[RID];
+    R.RequestId        = RID;
+    R.StartTimestampMS = T();
+    R.SourceRequestId  = SourceRequestId;
+    RequestQueue.AddTail(R);
+
+    auto T     = xPP_QueryAuthCache();
+    T.UserPass = UserPassword;
+    auto H     = HashString(UserPassword);
+
+    CPW.PostMessageByHash(H, Cmd_AuthService_QueryAuthCache, RID, T);
+    return true;
+}
